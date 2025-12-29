@@ -34,6 +34,21 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  hooks_riverpod: ^3.0.3
+  flutter_hooks: ^0.21.3+1
+  riverpod_annotation: ^4.0.0
+  hive_ce: ^2.16.0
+  hive_ce_flutter: ^2.3.3
+  freezed_annotation: ^3.1.0
+  path_provider: ^2.1.5
+  json_annotation: ^4.9.0
+  dio: ^5.9.0
+  flutter_riverpod: ^3.0.3
+  retrofit: ^4.9.1
+  logger: ^2.6.2
+  go_router: ^17.0.1
+  flutter_html: ^3.0.0
+  html: ^0.15.6
 
 dev_dependencies:
   flutter_test:
@@ -45,13 +60,21 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  riverpod_generator: ^4.0.0+1
+  build_runner: ^2.10.4
+  freezed: ^3.2.3
+  hive_ce_generator: ^1.10.0
+  json_serializable: ^6.11.2
+  retrofit_generator: ^10.2.1
+  swagger_parser: ^1.37.0
+  custom_lint: ^0.8.1
+  riverpod_lint: ^3.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

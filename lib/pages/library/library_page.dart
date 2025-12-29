@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+import 'package:laya/riverpod/api.dart';
+import 'package:laya/riverpod/router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+class LibraryPage extends ConsumerWidget {
+  const LibraryPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final libs = ref.watch(librariesProvider);
+
+    return libs.when(
+      data: (libraries) => ListView.builder(
+        itemCount: libraries.length,
+        itemBuilder: (context, index) {
+          final lib = libraries[index];
+          return ListTile(
+            title: Text(lib.name ?? 'missing name'),
+            subtitle: Text(lib.id.toString()),
+            onTap: () => context.go(Routes.series(libraryId: lib.id)),
+          );
+        },
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+}

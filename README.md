@@ -1,16 +1,32 @@
-# laya
+# Laya
 
-A new Flutter project.
+An unofficial cross-platform Kavita frontend.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Building from Source
 
-A few resources to get you started if this is your first Flutter project:
+This project makes heavy use of code generation for APIs and model objects. The generated code is also not committed to the repository, so building from source requires a few extra steps:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- First off, install dependencies with
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+  ```bash
+  flutter pub get
+  ```
+
+- then generate api clients and dtos
+
+  ```bash
+  dart run swagger_parser
+  ```
+
+- and then run build_runner to generate all annotated code
+
+  ```bash
+  dart run build_runner build --delete-conflicting-outputs
+  ```
+
+- finally the project can be build as usual with `flutter build` or run in debug mode with `flutter run`
+
+Note: remember to regenerate code when modifying annotated classes or run with `dart run build_runner watch
+--deleteAlso-conflicting-outputs` during development to watch for changes.
