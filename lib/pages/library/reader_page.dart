@@ -69,8 +69,11 @@ class ReaderPage extends HookConsumerWidget {
                       </style>
                       </head>
 """;
-                      return HtmlWidget(
-                        styles + book.currentPageContent,
+                      return Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: HtmlWidget(
+                          styles + book.currentPageContent,
+                        ),
                       );
                     },
                   ),
