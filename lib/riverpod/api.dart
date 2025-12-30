@@ -182,7 +182,6 @@ Future<String> bookPage(Ref ref, {required int chapterId, int? page}) async {
         img.attributes['src'] = 'data:$mimeType;base64,$base64img';
       }
     }
-    log.d(img.outerHtml);
   }
 
   final imageElements = doc.getElementsByTagName('image');
@@ -193,61 +192,42 @@ Future<String> bookPage(Ref ref, {required int chapterId, int? page}) async {
     }).first;
 
     final src = 'https:${attr.value}';
-    if (src != null && src.isNotEmpty) {
-      final res = await dio.get(
-        src,
-        options: Options(
-          responseType: .bytes,
-          headers: {
-            'Accept': 'image/*',
-          },
-        ),
-      );
-      if (res.data != null && res.statusCode == 200) {
-        final base64img = base64Encode(res.data).replaceAll(RegExp(r'\s+'), '');
-        final mimeType = res.headers.value('content-type') ?? 'image/png';
-        log.d(mimeType);
+    final res = await dio.get(
+      src,
+      options: Options(
+        responseType: .bytes,
+        headers: {
+          'Accept': 'image/*',
+        },
+      ),
+    );
+    if (res.data != null && res.statusCode == 200) {
+      final base64img = base64Encode(res.data).replaceAll(RegExp(r'\s+'), '');
+      final mimeType = res.headers.value('content-type') ?? 'image/png';
 
-        img.attributes.removeWhere((key, value) {
-          return key is AttributeName && key.name == 'href';
-        });
-        img.attributes['src'] = 'data:$mimeType;base64,$base64img';
+      // Replace <svg><image></image></svg> with <img> with embedded base64
+      final imgTag = doc.createElement('img');
+      imgTag.attributes['src'] = 'data:$mimeType;base64,$base64img';
+
+      // Copy over width/height if present
+      if (img.attributes['width'] != null) {
+        imgTag.attributes['width'] = img.attributes['width']!;
+      }
+      if (img.attributes['height'] != null) {
+        imgTag.attributes['height'] = img.attributes['height']!;
+      }
+
+      final svgParent = img.parent;
+      if (svgParent != null && svgParent.localName == 'svg') {
+        svgParent.replaceWith(imgTag);
+      } else {
+        img.replaceWith(imgTag);
       }
     }
-    log.d(img.outerHtml);
   }
 
   return doc.outerHtml;
 }
-
-// // fetch all images from <img src="..."> tags and <image xpath:href="..."> in the html and replace the tags with the
-// // downloaded image
-//   Future<String> processHtml(String html) async {
-//     final client = ref.watch(authenticatedDioProvider);
-//     final doc = parse(html);
-//
-//     final imgElements = doc.getElementsByTagName('img');
-//
-//     for (final img in imgElements) {
-//       final src = img.attributes['src'];
-//       log.d(src);
-//       if (src != null && src.isNotEmpty) {
-//         final res = await client.get(
-//           src,
-//           options: Options(responseType: .bytes),
-//         );
-//         log.d(res.data);
-//         if (res.data != null) {
-//           final base64img = base64Encode(res.data);
-//           log.d(base64img);
-//           final mimeType = res.headers.value('content-type') ?? 'image/jpg';
-//           img.attributes['src'] = 'data:$mimeType:base64,$base64img';
-//         }
-//       }
-//     }
-//
-//     return doc.outerHtml;
-//   }
 
 @riverpod
 Future<String> page(Ref ref, {required int seriesId}) async {

@@ -1,13 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html_svg/flutter_html_svg.dart';
-import 'package:laya/riverpod/api.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:laya/riverpod/book.dart';
-import 'package:laya/riverpod/settings.dart';
-import 'package:laya/utils/logging.dart';
 import 'package:laya/widgets/async_value.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -48,40 +42,35 @@ class ReaderPage extends HookConsumerWidget {
                 child: SingleChildScrollView(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      return Html(
-                        data: book.currentPageContent,
-                        style: {
-                          ".kavita-scale-width": Style(
-                            width: Width(constraints.maxWidth, .px),
-                          ),
+                      final styles =
+                          """
+                      <head>
+                      <style>
+.kavita-scale-width-container {
+  width: auto;
+  max-height: ${constraints.maxHeight} !important;
+  max-width: ${constraints.maxWidth} !important;
+  position: var(--book-reader-content-position) !important;
+  top: var(--book-reader-content-top) !important;
+  left: var(--book-reader-content-left) !important;
+  transform: var(--book-reader-content-transform) !important;
+}
 
-                          ".kavita-scale-width-container": Style(
-                            width: Width(constraints.maxWidth, .px),
-                          ),
-                        },
-                        extensions: [
-                          // TagExtension(
-                          //   tagsToExtend: {"img"},
-                          //   builder: (extensionContext) {
-                          //     final src = extensionContext.attributes['src'] ?? "";
-                          //
-                          //     if (src.contains("base64,")) {
-                          //       final base64String = src
-                          //           .split("base64,")
-                          //           .last
-                          //           .trim();
-                          //       try {
-                          //         return Image.memory(base64Decode(base64String));
-                          //       } catch (e) {
-                          //         return const Text("Failed to decode image");
-                          //       }
-                          //     }
-                          //     // Fallback for non-base64 images
-                          //     return Placeholder();
-                          //   },
-                          // ),
-                          SvgHtmlExtension(),
-                        ],
+// This is applied to images in the backend
+.kavita-scale-width {
+  max-height: ${constraints.maxHeight} !important;
+  max-width: ${constraints.maxWidth} !important;
+  object-fit: contain;
+  object-position: top center;
+  break-inside: avoid;
+  break-before: column;
+  max-height: 100vh;
+}
+                      </style>
+                      </head>
+""";
+                      return HtmlWidget(
+                        styles + book.currentPageContent,
                       );
                     },
                   ),
