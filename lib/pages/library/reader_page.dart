@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:laya/riverpod/book.dart';
+import 'package:laya/utils/layout_constants.dart';
 import 'package:laya/widgets/async_value.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -42,37 +43,10 @@ class ReaderPage extends HookConsumerWidget {
                 child: SingleChildScrollView(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final styles =
-                          """
-                      <head>
-                      <style>
-.kavita-scale-width-container {
-  width: auto;
-  max-height: ${constraints.maxHeight} !important;
-  max-width: ${constraints.maxWidth} !important;
-  position: var(--book-reader-content-position) !important;
-  top: var(--book-reader-content-top) !important;
-  left: var(--book-reader-content-left) !important;
-  transform: var(--book-reader-content-transform) !important;
-}
-
-// This is applied to images in the backend
-.kavita-scale-width {
-  max-height: ${constraints.maxHeight} !important;
-  max-width: ${constraints.maxWidth} !important;
-  object-fit: contain;
-  object-position: top center;
-  break-inside: avoid;
-  break-before: column;
-  max-height: 100vh;
-}
-                      </style>
-                      </head>
-""";
                       return Padding(
-                        padding: const EdgeInsets.all(32.0),
+                        padding: LayoutConstants.largeEdgeInsets,
                         child: HtmlWidget(
-                          styles + book.currentPageContent,
+                          book.currentPageContent,
                         ),
                       );
                     },
