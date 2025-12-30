@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 import 'package:laya/api/export.dart';
 import 'package:laya/riverpod/settings.dart';
+import 'package:laya/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'api.g.dart';
@@ -34,13 +39,13 @@ Dio authenticatedDio(Ref ref) {
     dio.options.baseUrl = settings!.url!;
   }
 
-  dio.interceptors.add(
-    LogInterceptor(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-    ),
-  );
+  // dio.interceptors.add(
+  //   LogInterceptor(
+  //     requestHeader: true,
+  //     requestBody: true,
+  //     responseBody: true,
+  //   ),
+  // );
 
   dio.interceptors.add(
     InterceptorsWrapper(
@@ -147,12 +152,102 @@ Future<ProgressDto> bookProgress(Ref ref, {required int chapterId}) async {
 
 @riverpod
 Future<String> bookPage(Ref ref, {required int chapterId, int? page}) async {
+  final dio = ref.watch(authenticatedDioProvider);
   final client = ref.watch(restClientProvider).book;
-  return await client.getApiBookChapterIdBookPage(
+  final html = await client.getApiBookChapterIdBookPage(
     chapterId: chapterId,
     page: page,
   );
+
+  final doc = parse(html);
+
+  final imgElements = doc.getElementsByTagName('img');
+  for (final img in imgElements) {
+    final src = 'https:${img.attributes['src']}';
+    if (src != null && src.isNotEmpty) {
+      final res = await dio.get(
+        src,
+        options: Options(
+          responseType: .bytes,
+          headers: {
+            'Accept': 'image/*',
+          },
+        ),
+      );
+      if (res.data != null) {
+        final base64img = base64Encode(res.data);
+        final mimeType = res.headers.value('content-type') ?? 'image/png';
+        log.d(mimeType);
+
+        img.attributes['src'] = 'data:$mimeType;base64,$base64img';
+      }
+    }
+    log.d(img.outerHtml);
+  }
+
+  final imageElements = doc.getElementsByTagName('image');
+  for (final img in imageElements) {
+    final attr = img.attributes.entries.where((entry) {
+      final key = entry.key;
+      return key is AttributeName && key.name == 'href';
+    }).first;
+
+    final src = 'https:${attr.value}';
+    if (src != null && src.isNotEmpty) {
+      final res = await dio.get(
+        src,
+        options: Options(
+          responseType: .bytes,
+          headers: {
+            'Accept': 'image/*',
+          },
+        ),
+      );
+      if (res.data != null && res.statusCode == 200) {
+        final base64img = base64Encode(res.data).replaceAll(RegExp(r'\s+'), '');
+        final mimeType = res.headers.value('content-type') ?? 'image/png';
+        log.d(mimeType);
+
+        img.attributes.removeWhere((key, value) {
+          return key is AttributeName && key.name == 'href';
+        });
+        img.attributes['src'] = 'data:$mimeType;base64,$base64img';
+      }
+    }
+    log.d(img.outerHtml);
+  }
+
+  return doc.outerHtml;
 }
+
+// // fetch all images from <img src="..."> tags and <image xpath:href="..."> in the html and replace the tags with the
+// // downloaded image
+//   Future<String> processHtml(String html) async {
+//     final client = ref.watch(authenticatedDioProvider);
+//     final doc = parse(html);
+//
+//     final imgElements = doc.getElementsByTagName('img');
+//
+//     for (final img in imgElements) {
+//       final src = img.attributes['src'];
+//       log.d(src);
+//       if (src != null && src.isNotEmpty) {
+//         final res = await client.get(
+//           src,
+//           options: Options(responseType: .bytes),
+//         );
+//         log.d(res.data);
+//         if (res.data != null) {
+//           final base64img = base64Encode(res.data);
+//           log.d(base64img);
+//           final mimeType = res.headers.value('content-type') ?? 'image/jpg';
+//           img.attributes['src'] = 'data:$mimeType:base64,$base64img';
+//         }
+//       }
+//     }
+//
+//     return doc.outerHtml;
+//   }
 
 @riverpod
 Future<String> page(Ref ref, {required int seriesId}) async {

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 import 'package:laya/api/models/progress_dto.dart';
 import 'package:laya/riverpod/api.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:laya/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'book.freezed.dart';
@@ -108,13 +112,5 @@ class Book extends _$Book {
     state = AsyncValue.data(
       current.copyWith(currentPage: page, pages: pages),
     );
-  }
-
-  // fetch all images from <img src="..."> tags and <image xpath:href="..."> in the html and replace the tags with the
-  // downloaded image
-  String processHtml(String html) {
-    final doc = parse(html);
-    // doc.replaceWith
-    return html;
   }
 }

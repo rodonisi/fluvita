@@ -49,6 +49,8 @@ dependencies:
   go_router: ^17.0.1
   flutter_html: ^3.0.0
   html: ^0.15.6
+  flutter_html_svg: ^3.0.0
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
