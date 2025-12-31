@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laya/pages/dashboard/dashboard_page.dart';
 import 'package:laya/pages/library/chapters_page.dart';
 import 'package:laya/pages/library/library_page.dart';
 import 'package:laya/pages/library/reader_page.dart';
@@ -12,6 +13,7 @@ part 'router.g.dart';
 
 sealed class Routes {
   static const String dashboard = '/';
+  static const String library = '/library';
   static const String settings = '/settings';
   static const String seriesPath = '/series/:libraryId';
   static String series({required int libraryId}) => '/series/$libraryId';
@@ -34,6 +36,14 @@ GoRouter router(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.dashboard,
+                builder: (context, state) => DashboardPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.library,
                 builder: (context, state) => LibraryPage(),
                 routes: [
                   GoRoute(
