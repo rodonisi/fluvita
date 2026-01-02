@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:laya/pages/dashboard/dashboard_page.dart';
+import 'package:laya/pages/dashboard/home_page.dart';
 import 'package:laya/pages/library/chapters_page.dart';
 import 'package:laya/pages/library/library_page.dart';
 import 'package:laya/pages/library/reader_page.dart';
@@ -12,7 +12,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'router.g.dart';
 
 sealed class Routes {
-  static const String dashboard = '/';
+  static const String home = '/';
   static const String library = '/library';
   static const String settings = '/settings';
   static const String seriesPath = '/series/:libraryId';
@@ -28,15 +28,15 @@ sealed class Routes {
 @riverpod
 GoRouter router(Ref ref) {
   return GoRouter(
-    initialLocation: Routes.dashboard,
+    initialLocation: Routes.home,
     routes: [
       StatefulShellRoute.indexedStack(
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.dashboard,
-                builder: (context, state) => DashboardPage(),
+                path: Routes.home,
+                builder: (context, state) => HomePage(),
               ),
             ],
           ),

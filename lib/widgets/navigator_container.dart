@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:laya/utils/layout_constants.dart';
 
@@ -11,7 +12,7 @@ class NavigatorContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: SafeArea(child: navigationShell),
+      body: navigationShell,
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           left: LayoutConstants.mediumPadding,
@@ -31,15 +32,15 @@ class NavigatorContainer extends StatelessWidget {
               ),
               destinations: const [
                 NavigationDestination(
-                  icon: Icon(Icons.dashboard),
-                  label: 'Dashboard',
+                  icon: Icon(FontAwesomeIcons.solidHouse),
+                  label: 'Home',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.library_books),
+                  icon: Icon(FontAwesomeIcons.book),
                   label: 'Libraries',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.settings),
+                  icon: Icon(FontAwesomeIcons.gear),
                   label: 'Settings',
                 ),
               ],

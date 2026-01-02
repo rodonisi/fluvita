@@ -1,36 +1,11 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
-import 'package:html/parser.dart';
 import 'package:laya/api/models/progress_dto.dart';
-import 'package:laya/riverpod/api.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/utils/logging.dart';
+import 'package:laya/models/book_model.dart';
+import 'package:laya/riverpod/api/book.dart';
+import 'package:laya/riverpod/api/client.dart';
+import 'package:laya/riverpod/api/reader.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'book.freezed.dart';
 part 'book.g.dart';
-
-@freezed
-sealed class BookModel with _$BookModel {
-  const BookModel._();
-
-  const factory BookModel({
-    required int libraryId,
-    required int seriesId,
-    required int volumeId,
-    required int chapterId,
-    required String title,
-    required int totalPages,
-    required int currentPage,
-    required Map<int, String> pages,
-  }) = _BookModel;
-
-  factory BookModel.fromJson(Map<String, Object?> json) =>
-      _$BookModelFromJson(json);
-
-  String get currentPageContent => pages[currentPage]!;
-}
 
 @riverpod
 class Book extends _$Book {
