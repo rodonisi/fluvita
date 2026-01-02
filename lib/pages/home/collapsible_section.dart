@@ -1,74 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laya/models/series_model.dart';
-import 'package:laya/riverpod/api/image.dart';
-import 'package:laya/riverpod/api/series.dart';
+import 'package:laya/riverpod/router.dart';
 import 'package:laya/utils/layout_constants.dart';
-import 'package:laya/widgets/async_value.dart';
-
-class HomePage extends ConsumerWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            OnDeck(),
-            RecentlyUpdated(),
-            RecentlyAdded(),
-            // bottom padding for scrolling past the navigation bar
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height:
-                    LayoutConstants.mediumPadding +
-                    MediaQuery.of(context).padding.bottom,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class OnDeck extends ConsumerWidget {
-  const OnDeck({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final onDeck = ref.watch(onDeckProvider);
-
-    return CollapsibleSection(title: 'On Deck', series: onDeck);
-  }
-}
-
-class RecentlyUpdated extends ConsumerWidget {
-  const RecentlyUpdated({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final series = ref.watch(recentlyUpdatedProvider);
-
-    return CollapsibleSection(title: 'Recently Updated', series: series);
-  }
-}
-
-class RecentlyAdded extends ConsumerWidget {
-  const RecentlyAdded({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final series = ref.watch(recentlyAddedProvider);
-
-    return CollapsibleSection(title: 'Recently Added', series: series);
-  }
-}
+import 'package:laya/widgets/cover_image.dart';
 
 class CollapsibleSection extends HookConsumerWidget {
   final String title;
@@ -128,9 +66,13 @@ class CollapsibleSection extends HookConsumerWidget {
                               ),
                               Align(
                                 child: IconButton.filled(
-                                  iconSize: 32,
-                                  onPressed: () {},
-                                  icon: FaIcon(FontAwesomeIcons.readme),
+                                  iconSize: LayoutConstants.mediumIcon,
+                                  onPressed: () {
+                                    context.push(
+                                      Routes.reader(seriesId: series.id),
+                                    );
+                                  },
+                                  icon: FaIcon(FontAwesomeIcons.book),
                                 ),
                               ),
                             ],
@@ -141,6 +83,17 @@ class CollapsibleSection extends HookConsumerWidget {
                           child: Row(
                             mainAxisSize: .min,
                             children: [
+                              Padding(
+                                padding: LayoutConstants.smallEdgeInsets,
+                                child: Icon(
+                                  switch (series.format) {
+                                    .epub => FontAwesomeIcons.book,
+                                    .cbz => FontAwesomeIcons.fileZipper,
+                                    .unknown => FontAwesomeIcons.question,
+                                  },
+                                  size: LayoutConstants.smallIcon,
+                                ),
+                              ),
                               Expanded(
                                 child: Text(
                                   series.name,
@@ -170,27 +123,6 @@ class CollapsibleSection extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class CoverImage extends ConsumerWidget {
-  final int seriesId;
-  const CoverImage({super.key, required this.seriesId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Async(
-      asyncValue: ref.watch(coverImageProvider(seriesId: seriesId)),
-      data: (imageData) => ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Image.memory(
-          imageData,
-          fit: BoxFit.cover,
-          height: 150,
-          width: double.infinity,
-        ),
-      ),
     );
   }
 }

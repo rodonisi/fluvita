@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:laya/riverpod/book.dart';
-import 'package:laya/utils/layout_constants.dart';
+import 'package:laya/pages/reader/epub_reader.dart';
+import 'package:laya/pages/reader/image_reader.dart';
+import 'package:laya/riverpod/reader.dart';
 import 'package:laya/widgets/async_value.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ReaderPage extends HookConsumerWidget {
   final int seriesId;
+  final int? chapterId;
 
-  const ReaderPage({super.key, required this.seriesId});
+  const ReaderPage({super.key, required this.seriesId, this.chapterId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiVisible = useState(false);
 
-    final book = ref.watch(bookProvider(seriesId: seriesId));
+    final book = ref.watch(
+      readerProvider(seriesId: seriesId, chapterId: chapterId),
+    );
 
     return Async(
       asyncValue: book,
@@ -28,30 +31,30 @@ class ReaderPage extends HookConsumerWidget {
         body: GestureDetector(
           onPanEnd: (details) {
             if (details.velocity.pixelsPerSecond.dx < 0) {
-              ref.read(bookProvider(seriesId: seriesId).notifier).nextPage();
+              ref.read(readerProvider(seriesId: seriesId).notifier).nextPage();
             }
             if (details.velocity.pixelsPerSecond.dx > 0) {
               ref
-                  .read(bookProvider(seriesId: seriesId).notifier)
+                  .read(readerProvider(seriesId: seriesId).notifier)
                   .previousPage();
             }
           },
-
           child: Stack(
             children: [
               Positioned.fill(
-                child: SingleChildScrollView(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Padding(
-                        padding: LayoutConstants.largeEdgeInsets,
-                        child: HtmlWidget(
-                          book.currentPageContent,
-                        ),
-                      );
-                    },
+                child: switch (book.series.format) {
+                  .epub => EpubReader(
+                    chapterId: book.chapterId,
+                    page: book.currentPage,
                   ),
-                ),
+                  .cbz => ImageReader(
+                    chapterId: book.chapterId,
+                    page: book.currentPage,
+                  ),
+                  .unknown => const Center(
+                    child: Text('Unsupported format'),
+                  ),
+                },
               ),
               Positioned.fill(
                 child: Row(
@@ -60,7 +63,7 @@ class ReaderPage extends HookConsumerWidget {
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () => ref
-                            .read(bookProvider(seriesId: seriesId).notifier)
+                            .read(readerProvider(seriesId: seriesId).notifier)
                             .previousPage(),
                       ),
                     ),
@@ -74,7 +77,7 @@ class ReaderPage extends HookConsumerWidget {
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () => ref
-                            .read(bookProvider(seriesId: seriesId).notifier)
+                            .read(readerProvider(seriesId: seriesId).notifier)
                             .nextPage(),
                       ),
                     ),

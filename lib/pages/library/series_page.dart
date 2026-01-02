@@ -10,7 +10,7 @@ class SeriesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final series = ref.watch(seriesProvider(libraryId));
+    final series = ref.watch(allSeriesProvider(libraryId));
     return series.when(
       data: (series) => Scaffold(
         appBar: AppBar(
@@ -21,7 +21,7 @@ class SeriesPage extends ConsumerWidget {
           itemBuilder: (context, index) {
             final s = series[index];
             return ListTile(
-              title: Text(s.name ?? 'missing name'),
+              title: Text(s.name),
               subtitle: Text(s.id.toString()),
               onTap: () => context.push(Routes.chapters(seriesId: s.id)),
             );

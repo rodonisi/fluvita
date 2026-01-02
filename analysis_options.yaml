@@ -17,4 +17,7 @@ formatter:
 
 analyzer:
   plugins:
-    - custom_lint
+    - riverpod_lint
+
+plugins:
+  riverpod_lint: ^3.0.3

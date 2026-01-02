@@ -12,4 +12,10 @@ sealed class LayoutConstants {
   static const EdgeInsets mediumEdgeInsets = EdgeInsets.all(mediumPadding);
   static const EdgeInsets largeEdgeInsets = EdgeInsets.all(largePadding);
   static const EdgeInsets largerEdgeInsets = EdgeInsets.all(largerPadding);
+
+  static const double smallerIcon = 12.0;
+  static const double smallIcon = 16.0;
+  static const double mediumIcon = 24.0;
+  static const double largeIcon = 32.0;
+  static const double largerIcon = 48.0;
 }

@@ -30,7 +30,7 @@ Future<String> bookPage(Ref ref, {required int chapterId, int? page}) async {
   final imgElements = doc.getElementsByTagName('img');
   for (final img in imgElements) {
     final src = 'https:${img.attributes['src']}';
-    if (src != null && src.isNotEmpty) {
+    if (src.isNotEmpty) {
       final res = await dio.get(
         src,
         options: Options(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:laya/pages/dashboard/home_page.dart';
+import 'package:laya/pages/home/home_page.dart';
 import 'package:laya/pages/library/chapters_page.dart';
 import 'package:laya/pages/library/library_page.dart';
-import 'package:laya/pages/library/reader_page.dart';
+import 'package:laya/pages/reader/reader_page.dart';
 import 'package:laya/pages/library/series_page.dart';
 import 'package:laya/pages/login_page.dart';
 import 'package:laya/widgets/navigator_container.dart';

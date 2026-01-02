@@ -14,8 +14,9 @@ swagger_parser:
 
   include_tags:
     - Account
-    - Library
-    - Series
     - Book
-    - Reader
+    - Chapter
     - Image
+    - Library
+    - Reader
+    - Series
