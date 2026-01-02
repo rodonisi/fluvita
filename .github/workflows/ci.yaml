@@ -35,11 +35,14 @@ jobs:
           channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
           cache: true
 
-      - name: API Generation 🧬
+      - name: API Generation 📝
         run: dart run swagger_parser
 
       - name: Code Generation 🧬
         run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze 🔍
+        run: flutter analyze
 
       - name: Build 🏗️
         run: flutter build ${{ matrix.platform }}

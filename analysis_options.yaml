@@ -16,6 +16,9 @@ formatter:
   trailing_commas: preserve
 
 analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
   plugins:
     - riverpod_lint
 
