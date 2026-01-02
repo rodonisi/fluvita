@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:laya/riverpod/router.dart';
+import 'package:laya/riverpod/theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laya/riverpod/router.dart';
+import 'package:laya/widgets/async_value.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,16 +14,15 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: 'Fluvita',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
+    return Async(
+      asyncValue: ref.watch(themeProvider),
+      data: (theme) => MaterialApp.router(
+        title: 'Fluvita',
+        theme: theme.lightTheme,
+        darkTheme: theme.darkTheme,
+        themeMode: theme.mode,
+        routerConfig: ref.watch(routerProvider),
       ),
-      routerConfig: ref.watch(routerProvider),
     );
   }
 }
