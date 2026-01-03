@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -126,113 +125,10 @@ class SeriesDetailPage extends ConsumerWidget {
     return AsyncSliver(
       asyncValue: series,
       data: (data) {
-        return SliverAppBar(
-          expandedHeight: 340,
-          pinned: true,
+        return SliverAppBar.large(
           forceElevated: forceElevated,
+          title: Text(data.name),
           bottom: bottom,
-          flexibleSpace: LayoutBuilder(
-            builder: (context, constraints) {
-              final settings = context
-                  .dependOnInheritedWidgetOfExactType<
-                    FlexibleSpaceBarSettings
-                  >();
-              final deltaExtent = settings != null
-                  ? settings.maxExtent - settings.minExtent
-                  : 1.0;
-              final currentExtent = settings != null
-                  ? settings.currentExtent
-                  : constraints.maxHeight;
-              final minExtent = settings != null
-                  ? settings.minExtent
-                  : kToolbarHeight;
-              final t = (1.0 - (currentExtent - minExtent) / deltaExtent).clamp(
-                0.0,
-                1.0,
-              );
-
-              final expandedHeight = 200.0;
-              final collapsedHeight = 60.0;
-              final currentHeight = lerpDouble(
-                expandedHeight,
-                collapsedHeight,
-                t,
-              )!;
-
-              final expandedWidth = expandedHeight * (2 / 3);
-              final collapsedWidth = collapsedHeight * (2 / 3);
-              final currentWidth = lerpDouble(
-                expandedWidth,
-                collapsedWidth,
-                t,
-              )!;
-
-              final topPadding = MediaQuery.paddingOf(context).top;
-              final expandedTop = kToolbarHeight + 22.0;
-              final collapsedTop =
-                  topPadding + (kToolbarHeight - collapsedHeight) / 2;
-              final currentTop = lerpDouble(expandedTop, collapsedTop, t)!;
-
-              final maxWidth = constraints.maxWidth;
-              final expandedLeft = (maxWidth - expandedWidth) / 2;
-              final collapsedLeft = maxWidth - 16 - currentWidth;
-              final currentLeft = lerpDouble(expandedLeft, collapsedLeft, t)!;
-
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  FlexibleSpaceBar(
-                    titlePadding: const EdgeInsetsDirectional.only(
-                      start: 16,
-                      end: 16,
-                      bottom: 16 + 46,
-                    ),
-                    centerTitle: true,
-                    title: Text(
-                      data.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Async(
-                          asyncValue: cover,
-                          data: (data) => ImageFiltered(
-                            imageFilter: ImageFilter.blur(
-                              sigmaX: 10,
-                              sigmaY: 10,
-                            ),
-                            child: Image.memory(
-                              data,
-                              fit: BoxFit.cover,
-                              color: Colors.black54,
-                              colorBlendMode: BlendMode.darken,
-                            ),
-                          ),
-                          loading: () => const SizedBox(),
-                          error: (_, _) => const SizedBox(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: currentTop,
-                    left: currentLeft,
-                    width: currentWidth,
-                    height: currentHeight,
-                    child: SeriesCoverImage(
-                      seriesId: seriesId,
-                      borderRadius: BorderRadius.circular(
-                        lerpDouble(8.0, 4.0, t)!,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
         );
       },
     );
