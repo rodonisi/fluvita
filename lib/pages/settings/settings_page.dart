@@ -9,13 +9,11 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          children: [
-            CredentialsSettings(),
-            ThemeSettings(),
-          ],
-        ),
+      body: ListView(
+        children: [
+          CredentialsSettings(),
+          ThemeSettings(),
+        ],
       ),
     );
   }

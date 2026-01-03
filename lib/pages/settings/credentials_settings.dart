@@ -15,9 +15,9 @@ class CredentialsSettings extends HookConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
 
     return Card(
-      margin: LayoutConstants.largeEdgeInsets,
+      margin: LayoutConstants.mediumEdgeInsets,
       child: Padding(
-        padding: LayoutConstants.largeEdgeInsets,
+        padding: LayoutConstants.mediumEdgeInsets,
         child: Async(
           asyncValue: settings,
           data: (data) {
@@ -33,68 +33,53 @@ class CredentialsSettings extends HookConsumerWidget {
                   'Credentials',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.mediumPadding,
-                  ),
-                  child: TextField(
-                    controller: urlController,
-                    decoration: InputDecoration(labelText: 'Base URL'),
-                  ),
+                TextField(
+                  controller: urlController,
+                  decoration: InputDecoration(labelText: 'Base URL'),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.mediumPadding,
-                  ),
-                  child: TextField(
-                    controller: apiKeyController,
-                    decoration: InputDecoration(labelText: 'API Key'),
-                  ),
+                TextField(
+                  controller: apiKeyController,
+                  decoration: InputDecoration(labelText: 'API Key'),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.mediumPadding,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: .center,
-                    children: [
-                      Text(
-                        'Status:',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                Row(
+                  crossAxisAlignment: .center,
+                  children: [
+                    Text(
+                      'Status:',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    SizedBox.square(dimension: LayoutConstants.smallPadding),
+                    Async(
+                      asyncValue: currentUser,
+                      data: (data) => Icon(
+                        FontAwesomeIcons.solidCircleCheck,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      SizedBox.square(dimension: LayoutConstants.smallPadding),
-                      Async(
-                        asyncValue: currentUser,
-                        data: (data) => Icon(
-                          FontAwesomeIcons.solidCircleCheck,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        loading: () => SizedBox.square(
-                          dimension: LayoutConstants.mediumIcon,
-                          child: CircularProgressIndicator(),
-                        ),
-                        error: (_, _) => Icon(
-                          FontAwesomeIcons.solidCircleXmark,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                      loading: () => SizedBox.square(
+                        dimension: LayoutConstants.mediumIcon,
+                        child: CircularProgressIndicator(),
                       ),
-                      Spacer(),
-                      FilledButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .updateSetting(
-                                SettingsState(
-                                  url: urlController.text,
-                                  apiKey: apiKeyController.text,
-                                ),
-                              );
-                        },
-                        label: Text('Save'),
-                        icon: FaIcon(FontAwesomeIcons.solidFloppyDisk),
+                      error: (_, _) => Icon(
+                        FontAwesomeIcons.solidCircleXmark,
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                    ],
-                  ),
+                    ),
+                    Spacer(),
+                    FilledButton.icon(
+                      onPressed: () {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .updateSetting(
+                              SettingsState(
+                                url: urlController.text,
+                                apiKey: apiKeyController.text,
+                              ),
+                            );
+                      },
+                      label: Text('Save'),
+                      icon: FaIcon(FontAwesomeIcons.solidFloppyDisk),
+                    ),
+                  ],
                 ),
               ],
             );

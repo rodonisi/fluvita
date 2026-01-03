@@ -22,7 +22,7 @@ class CollapsibleSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showAll = useState(false);
 
-    final collapsedCount = 3;
+    final collapsedCount = 2;
     final total = series.value?.length ?? 0;
     final toShow = showAll.value ? total : collapsedCount;
 
@@ -51,67 +51,73 @@ class CollapsibleSection extends HookConsumerWidget {
         ),
         series.when(
           data: (data) {
-            return SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final series = data[index];
-                  return Card(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: CoverImage(seriesId: series.id),
-                              ),
-                              Align(
-                                child: IconButton.filled(
-                                  iconSize: LayoutConstants.mediumIcon,
-                                  onPressed: () {
-                                    context.push(
-                                      Routes.reader(seriesId: series.id),
-                                    );
-                                  },
-                                  icon: FaIcon(FontAwesomeIcons.book),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Row(
-                            mainAxisSize: .min,
-                            children: [
-                              Padding(
-                                padding: LayoutConstants.smallEdgeInsets,
-                                child: Icon(
-                                  switch (series.format) {
-                                    .epub => FontAwesomeIcons.book,
-                                    .cbz => FontAwesomeIcons.fileZipper,
-                                    .unknown => FontAwesomeIcons.question,
-                                  },
-                                  size: LayoutConstants.smallIcon,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  series.name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: toShow,
+            return SliverPadding(
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: LayoutConstants.mediumPadding,
               ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2 / 3,
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3 / 5,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final series = data[index];
+                    return Card(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: CoverImage(seriesId: series.id),
+                                ),
+                                Align(
+                                  child: IconButton.filled(
+                                    iconSize: LayoutConstants.mediumIcon,
+                                    onPressed: () {
+                                      context.push(
+                                        Routes.reader(seriesId: series.id),
+                                      );
+                                    },
+                                    icon: FaIcon(FontAwesomeIcons.book),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Padding(
+                              padding: LayoutConstants.smallEdgeInsets,
+                              child: Row(
+                                mainAxisSize: .min,
+                                spacing: LayoutConstants.smallPadding,
+                                children: [
+                                  Icon(
+                                    switch (series.format) {
+                                      .epub => FontAwesomeIcons.book,
+                                      .cbz => FontAwesomeIcons.fileZipper,
+                                      .unknown => FontAwesomeIcons.question,
+                                    },
+                                    size: LayoutConstants.smallIcon,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      series.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  childCount: toShow,
+                ),
               ),
             );
           },

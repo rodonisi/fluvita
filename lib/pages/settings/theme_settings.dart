@@ -13,61 +13,61 @@ class ThemeSettings extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
 
     return Card(
-      margin: LayoutConstants.largeEdgeInsets,
+      margin: LayoutConstants.mediumEdgeInsets,
       child: Padding(
-        padding: LayoutConstants.largeEdgeInsets,
+        padding: LayoutConstants.mediumEdgeInsets,
         child: Async(
           asyncValue: theme,
           data: (data) {
             return Column(
               mainAxisSize: .min,
-              crossAxisAlignment: .start,
-              spacing: LayoutConstants.mediumPadding,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Theme',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.mediumPadding,
-                  ),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const FaIcon(FontAwesomeIcons.palette),
-                    title: const Text('Theme Mode'),
-                    trailing: DropdownMenu<ThemeMode>(
-                      initialSelection: data.mode,
-                      leadingIcon: Icon(
-                        switch (data.mode) {
-                          ThemeMode.system => FontAwesomeIcons.circleHalfStroke,
-                          ThemeMode.light => FontAwesomeIcons.solidSun,
-                          ThemeMode.dark => FontAwesomeIcons.solidMoon,
-                        },
+                const SizedBox(height: LayoutConstants.mediumPadding),
+                Text(
+                  'Theme Mode',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: LayoutConstants.smallPadding),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.system,
+                        label: Text('System'),
+                        icon: Icon(
+                          FontAwesomeIcons.circleHalfStroke,
+                          size: LayoutConstants.smallIcon,
+                        ),
                       ),
-                      onSelected: (mode) {
-                        if (mode != null) {
-                          ref.read(themeProvider.notifier).setMode(mode);
-                        }
-                      },
-                      dropdownMenuEntries: const [
-                        DropdownMenuEntry(
-                          value: ThemeMode.system,
-                          label: 'System',
-                          leadingIcon: Icon(FontAwesomeIcons.circleHalfStroke),
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.light,
+                        label: Text('Light'),
+                        icon: Icon(
+                          FontAwesomeIcons.solidSun,
+                          size: LayoutConstants.smallIcon,
                         ),
-                        DropdownMenuEntry(
-                          value: ThemeMode.light,
-                          label: 'Light',
-                          leadingIcon: Icon(FontAwesomeIcons.solidSun),
+                      ),
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.dark,
+                        label: Text('Dark'),
+                        icon: Icon(
+                          FontAwesomeIcons.solidMoon,
+                          size: LayoutConstants.smallIcon,
                         ),
-                        DropdownMenuEntry(
-                          value: ThemeMode.dark,
-                          label: 'Dark',
-                          leadingIcon: Icon(FontAwesomeIcons.solidMoon),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                    selected: {data.mode},
+                    onSelectionChanged: (Set<ThemeMode> newSelection) {
+                      ref
+                          .read(themeProvider.notifier)
+                          .setMode(newSelection.first);
+                    },
                   ),
                 ),
               ],
