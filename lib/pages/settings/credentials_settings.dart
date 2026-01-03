@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laya/riverpod/api/auth.dart';
+import 'package:laya/riverpod/settings.dart';
+import 'package:laya/utils/layout_constants.dart';
+import 'package:laya/widgets/async_value.dart';
+
+class CredentialsSettings extends HookConsumerWidget {
+  const CredentialsSettings({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final currentUser = ref.watch(currentUserProvider);
+
+    return Card(
+      margin: LayoutConstants.largeEdgeInsets,
+      child: Padding(
+        padding: LayoutConstants.largeEdgeInsets,
+        child: Async(
+          asyncValue: settings,
+          data: (data) {
+            final urlController = TextEditingController(text: data.url);
+            final apiKeyController = TextEditingController(text: data.apiKey);
+
+            return Column(
+              mainAxisSize: .min,
+              crossAxisAlignment: .start,
+              spacing: LayoutConstants.mediumPadding,
+              children: [
+                Text(
+                  'Credentials',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
+                  ),
+                  child: TextField(
+                    controller: urlController,
+                    decoration: InputDecoration(labelText: 'Base URL'),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
+                  ),
+                  child: TextField(
+                    controller: apiKeyController,
+                    decoration: InputDecoration(labelText: 'API Key'),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: .center,
+                    children: [
+                      Text(
+                        'Status:',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      SizedBox.square(dimension: LayoutConstants.smallPadding),
+                      Async(
+                        asyncValue: currentUser,
+                        data: (data) => Icon(
+                          FontAwesomeIcons.solidCircleCheck,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        loading: () => SizedBox.square(
+                          dimension: LayoutConstants.mediumIcon,
+                          child: CircularProgressIndicator(),
+                        ),
+                        error: (_, _) => Icon(
+                          FontAwesomeIcons.solidCircleXmark,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      Spacer(),
+                      FilledButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .updateSetting(
+                                SettingsState(
+                                  url: urlController.text,
+                                  apiKey: apiKeyController.text,
+                                ),
+                              );
+                        },
+                        label: Text('Save'),
+                        icon: FaIcon(FontAwesomeIcons.solidFloppyDisk),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

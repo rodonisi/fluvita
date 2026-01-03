@@ -6,7 +6,12 @@ import 'package:laya/widgets/async_value.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(child: const App()));
+  runApp(
+    ProviderScope(
+      // retry: (retryCount, error) => null,
+      child: const App(),
+    ),
+  );
 }
 
 class App extends ConsumerWidget {

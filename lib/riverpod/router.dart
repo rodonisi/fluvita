@@ -4,7 +4,7 @@ import 'package:laya/pages/library/chapters_page.dart';
 import 'package:laya/pages/library/library_page.dart';
 import 'package:laya/pages/reader/reader_page.dart';
 import 'package:laya/pages/library/series_page.dart';
-import 'package:laya/pages/login_page.dart';
+import 'package:laya/pages/settings/settings_page.dart';
 import 'package:laya/widgets/navigator_container.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -73,7 +73,7 @@ GoRouter router(Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.settings,
-                builder: (context, state) => LoginPage(),
+                builder: (context, state) => SettingsPage(),
               ),
             ],
           ),

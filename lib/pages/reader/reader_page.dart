@@ -43,75 +43,77 @@ class ReaderPage extends HookConsumerWidget {
                 : ref.read(provider.notifier).nextPage();
           }
         },
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Async(
-                asyncValue: book,
-                data: (book) => switch (book.series.format) {
-                  .epub => EpubReader(
-                    chapterId: book.chapter.id,
-                    page: book.currentPage,
-                  ),
-                  .cbz => ImageReader(
-                    chapterId: book.chapter.id,
-                    page: book.currentPage,
-                    totalPages: book.totalPages,
-                  ),
-                  .unknown => const Center(
-                    child: Text('Unsupported format'),
-                  ),
-                },
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Async(
+                  asyncValue: book,
+                  data: (book) => switch (book.series.format) {
+                    .epub => EpubReader(
+                      chapterId: book.chapter.id,
+                      page: book.currentPage,
+                    ),
+                    .cbz => ImageReader(
+                      chapterId: book.chapter.id,
+                      page: book.currentPage,
+                      totalPages: book.totalPages,
+                    ),
+                    .unknown => const Center(
+                      child: Text('Unsupported format'),
+                    ),
+                  },
+                ),
               ),
-            ),
-            Positioned.fill(
-              child: Row(
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: GestureDetector(
-                      behavior: .translucent,
-                      onTap: () => readDirection == .rightToLeft
-                          ? ref.read(provider.notifier).previousPage()
-                          : ref.read(provider.notifier).nextPage(),
+              Positioned.fill(
+                child: Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: GestureDetector(
+                        behavior: .translucent,
+                        onTap: () => readDirection == .rightToLeft
+                            ? ref.read(provider.notifier).previousPage()
+                            : ref.read(provider.notifier).nextPage(),
+                      ),
                     ),
-                  ),
-                  Flexible(
-                    flex: 2,
-                    child: GestureDetector(
-                      behavior: .translucent,
-                      onTap: () => uiVisible.value = !uiVisible.value,
+                    Flexible(
+                      flex: 2,
+                      child: GestureDetector(
+                        behavior: .translucent,
+                        onTap: () => uiVisible.value = !uiVisible.value,
+                      ),
                     ),
-                  ),
-                  Flexible(
-                    flex: 1,
-                    child: GestureDetector(
-                      behavior: .translucent,
-                      onTap: () => readDirection == .rightToLeft
-                          ? ref.read(provider.notifier).nextPage()
-                          : ref.read(provider.notifier).previousPage(),
+                    Flexible(
+                      flex: 1,
+                      child: GestureDetector(
+                        behavior: .translucent,
+                        onTap: () => readDirection == .rightToLeft
+                            ? ref.read(provider.notifier).nextPage()
+                            : ref.read(provider.notifier).previousPage(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Align(
-              alignment: .topCenter,
-              child:
-                  ReaderHeader(
-                        seriesId: seriesId,
-                        chapterId: chapterId,
-                      )
-                      .animate(target: uiVisible.value ? 1.0 : 0.0)
-                      .fadeIn(duration: 100.ms),
-            ),
-            Align(
-              alignment: .bottomCenter,
-              child: ReaderControls(chapterId: chapterId, seriesId: seriesId)
-                  .animate(target: uiVisible.value ? 1.0 : 0.0)
-                  .fadeIn(duration: 100.ms),
-            ),
-          ],
+              Align(
+                alignment: .topCenter,
+                child:
+                    ReaderHeader(
+                          seriesId: seriesId,
+                          chapterId: chapterId,
+                        )
+                        .animate(target: uiVisible.value ? 1.0 : 0.0)
+                        .fadeIn(duration: 100.ms),
+              ),
+              Align(
+                alignment: .bottomCenter,
+                child: ReaderControls(chapterId: chapterId, seriesId: seriesId)
+                    .animate(target: uiVisible.value ? 1.0 : 0.0)
+                    .fadeIn(duration: 100.ms),
+              ),
+            ],
+          ),
         ),
       ),
     );
