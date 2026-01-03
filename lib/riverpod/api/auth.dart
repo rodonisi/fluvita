@@ -12,10 +12,6 @@ Future<UserDto?> currentUser(Ref ref) async {
   final settings = ref.watch(settingsProvider).value;
   final apiKey = settings?.apiKey;
 
-  if (apiKey == null || apiKey.isEmpty) {
-    return null;
-  }
-
   final dio = ref.watch(dioProvider);
   final client = RestClient(dio).account;
 
