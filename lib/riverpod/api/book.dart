@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:laya/api/models/book_info_dto.dart';
-import 'package:laya/riverpod/api/client.dart';
-import 'package:laya/utils/logging.dart';
+import 'package:fluvita/api/models/book_info_dto.dart';
+import 'package:fluvita/riverpod/api/client.dart';
+import 'package:fluvita/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'book.g.dart';

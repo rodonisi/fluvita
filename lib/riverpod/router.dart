@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:laya/pages/home/home_page.dart';
-import 'package:laya/pages/library/library_page.dart';
-import 'package:laya/pages/library/series_detail_page.dart';
-import 'package:laya/pages/library/series_page.dart';
-import 'package:laya/pages/reader/reader_page.dart';
-import 'package:laya/pages/settings/settings_page.dart';
-import 'package:laya/widgets/navigator_container.dart';
+import 'package:fluvita/pages/home/home_page.dart';
+import 'package:fluvita/pages/library/library_page.dart';
+import 'package:fluvita/pages/library/series_detail_page.dart';
+import 'package:fluvita/pages/library/series_page.dart';
+import 'package:fluvita/pages/reader/reader_page.dart';
+import 'package:fluvita/pages/settings/settings_page.dart';
+import 'package:fluvita/widgets/navigator_container.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'router.g.dart';

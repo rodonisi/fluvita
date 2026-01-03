@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/reader.dart';
-import 'package:laya/utils/layout_constants.dart';
+import 'package:fluvita/riverpod/reader.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 
 class ReaderHeader extends ConsumerWidget {
   final int seriesId;

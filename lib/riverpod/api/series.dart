@@ -1,8 +1,8 @@
-import 'package:laya/api/models/filter_statement_dto.dart';
-import 'package:laya/api/models/filter_v2_dto.dart';
-import 'package:laya/api/models/sort_options.dart';
-import 'package:laya/models/series_model.dart';
-import 'package:laya/riverpod/api/client.dart';
+import 'package:fluvita/api/models/filter_statement_dto.dart';
+import 'package:fluvita/api/models/filter_v2_dto.dart';
+import 'package:fluvita/api/models/sort_options.dart';
+import 'package:fluvita/models/series_model.dart';
+import 'package:fluvita/riverpod/api/client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'series.g.dart';

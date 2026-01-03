@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/image_reader_settings.dart';
+import 'package:fluvita/riverpod/image_reader_settings.dart';
 
 class ImageReaderControls extends ConsumerWidget {
   const ImageReaderControls({

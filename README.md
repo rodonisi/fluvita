@@ -1,4 +1,4 @@
-# Laya
+# Fluvita (working name)
 
 An unofficial cross-platform Kavita frontend.
 

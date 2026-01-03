@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:laya/riverpod/api/auth.dart';
-import 'package:laya/riverpod/api/client.dart';
+import 'package:fluvita/riverpod/api/auth.dart';
+import 'package:fluvita/riverpod/api/client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image.g.dart';

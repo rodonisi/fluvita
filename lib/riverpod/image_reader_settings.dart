@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/experimental/persist.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/models/read_direction.dart';
-import 'package:laya/riverpod/storage.dart';
+import 'package:fluvita/models/read_direction.dart';
+import 'package:fluvita/riverpod/storage.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

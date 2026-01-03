@@ -3,15 +3,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/models/chapter_model.dart';
-import 'package:laya/models/series_model.dart';
-import 'package:laya/models/volume_model.dart';
-import 'package:laya/riverpod/api/image.dart';
-import 'package:laya/riverpod/api/series.dart';
-import 'package:laya/riverpod/router.dart';
-import 'package:laya/widgets/async_value.dart';
-import 'package:laya/widgets/cover_image.dart';
-import 'package:laya/widgets/sliver_bottom_padding.dart';
+import 'package:fluvita/models/chapter_model.dart';
+import 'package:fluvita/models/series_model.dart';
+import 'package:fluvita/models/volume_model.dart';
+import 'package:fluvita/riverpod/api/image.dart';
+import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/riverpod/router.dart';
+import 'package:fluvita/widgets/async_value.dart';
+import 'package:fluvita/widgets/cover_image.dart';
+import 'package:fluvita/widgets/sliver_bottom_padding.dart';
 
 class SeriesDetailPage extends ConsumerWidget {
   final int seriesId;

@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/api/models/volume_dto.dart';
-import 'package:laya/models/chapter_model.dart';
+import 'package:fluvita/api/models/volume_dto.dart';
+import 'package:fluvita/models/chapter_model.dart';
 
 part 'volume_model.freezed.dart';
 part 'volume_model.g.dart';

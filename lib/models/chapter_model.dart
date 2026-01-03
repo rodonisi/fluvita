@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/api/export.dart';
+import 'package:fluvita/api/export.dart';
 
 part 'chapter_model.freezed.dart';
 part 'chapter_model.g.dart';

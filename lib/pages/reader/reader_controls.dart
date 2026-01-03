@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/pages/reader/epub_reader_controls.dart';
-import 'package:laya/pages/reader/image_reader_controls.dart';
-import 'package:laya/pages/reader/page_slider.dart';
-import 'package:laya/riverpod/reader.dart';
-import 'package:laya/utils/layout_constants.dart';
+import 'package:fluvita/pages/reader/epub_reader_controls.dart';
+import 'package:fluvita/pages/reader/image_reader_controls.dart';
+import 'package:fluvita/pages/reader/page_slider.dart';
+import 'package:fluvita/riverpod/reader.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;

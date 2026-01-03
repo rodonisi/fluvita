@@ -1,15 +1,15 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/api/models/progress_dto.dart';
-import 'package:laya/models/chapter_model.dart';
-import 'package:laya/models/read_direction.dart';
-import 'package:laya/models/series_model.dart';
-import 'package:laya/riverpod/api/book.dart';
-import 'package:laya/riverpod/api/chapter.dart';
-import 'package:laya/riverpod/api/client.dart';
-import 'package:laya/riverpod/api/reader.dart';
-import 'package:laya/riverpod/api/series.dart';
-import 'package:laya/riverpod/image_reader_settings.dart';
+import 'package:fluvita/api/models/progress_dto.dart';
+import 'package:fluvita/models/chapter_model.dart';
+import 'package:fluvita/models/read_direction.dart';
+import 'package:fluvita/models/series_model.dart';
+import 'package:fluvita/riverpod/api/book.dart';
+import 'package:fluvita/riverpod/api/chapter.dart';
+import 'package:fluvita/riverpod/api/client.dart';
+import 'package:fluvita/riverpod/api/reader.dart';
+import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/riverpod/image_reader_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reader.freezed.dart';

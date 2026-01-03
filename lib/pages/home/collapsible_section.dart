@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/models/series_model.dart';
-import 'package:laya/widgets/async_value.dart';
-import 'package:laya/widgets/series_sliver_grid.dart';
-import 'package:laya/utils/layout_constants.dart';
+import 'package:fluvita/models/series_model.dart';
+import 'package:fluvita/widgets/async_value.dart';
+import 'package:fluvita/widgets/series_sliver_grid.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 
 class CollapsibleSection extends HookConsumerWidget {
   final String title;

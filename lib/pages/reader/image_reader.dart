@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/api/reader.dart';
-import 'package:laya/riverpod/image_reader_settings.dart';
-import 'package:laya/widgets/async_value.dart';
+import 'package:fluvita/riverpod/api/reader.dart';
+import 'package:fluvita/riverpod/image_reader_settings.dart';
+import 'package:fluvita/widgets/async_value.dart';
 
 class ImageReader extends ConsumerWidget {
   final int chapterId;

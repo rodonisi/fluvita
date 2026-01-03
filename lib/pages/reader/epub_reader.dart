@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/api/book.dart';
-import 'package:laya/riverpod/epub_reader_settings.dart';
-import 'package:laya/widgets/async_value.dart';
+import 'package:fluvita/riverpod/api/book.dart';
+import 'package:fluvita/riverpod/epub_reader_settings.dart';
+import 'package:fluvita/widgets/async_value.dart';
 
 class EpubReader extends ConsumerWidget {
   final int chapterId;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/api/library.dart';
-import 'package:laya/riverpod/router.dart';
+import 'package:fluvita/riverpod/api/library.dart';
+import 'package:fluvita/riverpod/router.dart';
 
 class LibraryPage extends ConsumerWidget {
   const LibraryPage({super.key});

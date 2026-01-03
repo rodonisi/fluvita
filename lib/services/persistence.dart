@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:laya/services/hive_registrar.g.dart';
-import 'package:laya/utils/safe_platform.dart';
+import 'package:fluvita/services/hive_registrar.g.dart';
+import 'package:fluvita/utils/safe_platform.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/api/library.dart';
-import 'package:laya/riverpod/api/series.dart';
-import 'package:laya/widgets/async_value.dart';
-import 'package:laya/widgets/series_sliver_grid.dart';
-import 'package:laya/widgets/sliver_bottom_padding.dart';
+import 'package:fluvita/riverpod/api/library.dart';
+import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/widgets/async_value.dart';
+import 'package:fluvita/widgets/series_sliver_grid.dart';
+import 'package:fluvita/widgets/sliver_bottom_padding.dart';
 
 class SeriesPage extends ConsumerWidget {
   final int libraryId;

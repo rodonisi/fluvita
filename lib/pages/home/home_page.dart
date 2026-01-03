@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/pages/home/collapsible_section.dart';
-import 'package:laya/riverpod/api/series.dart';
-import 'package:laya/widgets/sliver_bottom_padding.dart';
+import 'package:fluvita/pages/home/collapsible_section.dart';
+import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/widgets/sliver_bottom_padding.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});

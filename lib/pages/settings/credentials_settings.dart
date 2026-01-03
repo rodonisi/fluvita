@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/api/auth.dart';
-import 'package:laya/riverpod/settings.dart';
-import 'package:laya/utils/layout_constants.dart';
-import 'package:laya/widgets/async_value.dart';
+import 'package:fluvita/riverpod/api/auth.dart';
+import 'package:fluvita/riverpod/settings.dart';
+import 'package:fluvita/utils/layout_constants.dart';
+import 'package:fluvita/widgets/async_value.dart';
 
 class CredentialsSettings extends HookConsumerWidget {
   const CredentialsSettings({super.key});

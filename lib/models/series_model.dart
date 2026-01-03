@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/api/models/recently_added_item_dto.dart';
-import 'package:laya/api/models/series_detail_dto.dart';
-import 'package:laya/api/models/series_dto.dart';
-import 'package:laya/models/chapter_model.dart';
-import 'package:laya/models/volume_model.dart';
+import 'package:fluvita/api/models/recently_added_item_dto.dart';
+import 'package:fluvita/api/models/series_detail_dto.dart';
+import 'package:fluvita/api/models/series_dto.dart';
+import 'package:fluvita/models/chapter_model.dart';
+import 'package:fluvita/models/volume_model.dart';
 
 part 'series_model.freezed.dart';
 part 'series_model.g.dart';

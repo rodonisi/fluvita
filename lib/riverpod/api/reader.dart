@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:laya/api/models/progress_dto.dart';
-import 'package:laya/models/chapter_model.dart';
-import 'package:laya/riverpod/api/auth.dart';
-import 'package:laya/riverpod/api/client.dart';
+import 'package:fluvita/api/models/progress_dto.dart';
+import 'package:fluvita/models/chapter_model.dart';
+import 'package:fluvita/riverpod/api/auth.dart';
+import 'package:fluvita/riverpod/api/client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reader.g.dart';

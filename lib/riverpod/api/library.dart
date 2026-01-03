@@ -1,5 +1,5 @@
-import 'package:laya/models/library_model.dart';
-import 'package:laya/riverpod/api/client.dart';
+import 'package:fluvita/models/library_model.dart';
+import 'package:fluvita/riverpod/api/client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'library.g.dart';

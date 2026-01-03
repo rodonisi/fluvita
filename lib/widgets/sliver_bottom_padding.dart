@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:laya/utils/layout_constants.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 
 class SliverBottomPadding extends StatelessWidget {
   const SliverBottomPadding({super.key});

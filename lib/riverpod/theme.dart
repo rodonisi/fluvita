@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:laya/riverpod/storage.dart';
-import 'package:laya/utils/theme.dart';
+import 'package:fluvita/riverpod/storage.dart';
+import 'package:fluvita/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

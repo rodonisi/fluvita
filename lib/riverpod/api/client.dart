@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:laya/api/rest_client.dart';
-import 'package:laya/riverpod/api/auth.dart';
-import 'package:laya/riverpod/settings.dart';
+import 'package:fluvita/api/rest_client.dart';
+import 'package:fluvita/riverpod/api/auth.dart';
+import 'package:fluvita/riverpod/settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'client.g.dart';

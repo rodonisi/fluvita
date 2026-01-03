@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:laya/riverpod/theme.dart';
+import 'package:fluvita/riverpod/theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:laya/riverpod/router.dart';
+import 'package:fluvita/riverpod/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

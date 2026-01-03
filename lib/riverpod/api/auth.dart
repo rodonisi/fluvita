@@ -1,8 +1,8 @@
-import 'package:laya/api/models/login_dto.dart';
-import 'package:laya/api/models/user_dto.dart';
-import 'package:laya/api/rest_client.dart';
-import 'package:laya/riverpod/api/client.dart';
-import 'package:laya/riverpod/settings.dart';
+import 'package:fluvita/api/models/login_dto.dart';
+import 'package:fluvita/api/models/user_dto.dart';
+import 'package:fluvita/api/rest_client.dart';
+import 'package:fluvita/riverpod/api/client.dart';
+import 'package:fluvita/riverpod/settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth.g.dart';

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:laya/pages/reader/epub_reader.dart';
-import 'package:laya/pages/reader/image_reader.dart';
-import 'package:laya/pages/reader/reader_controls.dart';
-import 'package:laya/pages/reader/reader_header.dart';
-import 'package:laya/riverpod/reader.dart';
-import 'package:laya/widgets/async_value.dart';
+import 'package:fluvita/pages/reader/epub_reader.dart';
+import 'package:fluvita/pages/reader/image_reader.dart';
+import 'package:fluvita/pages/reader/reader_controls.dart';
+import 'package:fluvita/pages/reader/reader_header.dart';
+import 'package:fluvita/riverpod/reader.dart';
+import 'package:fluvita/widgets/async_value.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ReaderPage extends HookConsumerWidget {

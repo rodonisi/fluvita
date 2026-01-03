@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:laya/models/series_model.dart';
-import 'package:laya/riverpod/router.dart';
-import 'package:laya/utils/layout_constants.dart';
-import 'package:laya/widgets/cover_image.dart';
+import 'package:fluvita/models/series_model.dart';
+import 'package:fluvita/riverpod/router.dart';
+import 'package:fluvita/utils/layout_constants.dart';
+import 'package:fluvita/widgets/cover_image.dart';
 
 class SeriesSliverGrid extends StatelessWidget {
   final List<SeriesModel> series;
