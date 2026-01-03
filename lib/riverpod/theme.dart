@@ -11,16 +11,9 @@ part 'theme.g.dart';
 
 final CardThemeData cardThemeData = CardThemeData();
 
-final _lightTheme =
-    MaterialTheme(
-      Typography.material2021().black,
-    ).lightHighContrast().copyWith(
-      cardTheme: cardThemeData,
-    );
-
-final _darkTheme = MaterialTheme(
-  Typography.material2021().white,
-).darkMediumContrast();
+final _theme = MaterialTheme(
+  Typography.material2021().black,
+);
 
 final _cardTheme = CardThemeData(elevation: 0);
 
@@ -34,11 +27,11 @@ sealed class ThemeModel with _$ThemeModel {
   factory ThemeModel.fromJson(Map<String, Object?> json) =>
       _$ThemeModelFromJson(json);
 
-  ThemeData get lightTheme => _lightTheme.copyWith(
+  ThemeData get lightTheme => _theme.light().copyWith(
     cardTheme: _cardTheme,
   );
 
-  ThemeData get darkTheme => _darkTheme.copyWith(
+  ThemeData get darkTheme => _theme.dark().copyWith(
     cardTheme: _cardTheme,
   );
 }
