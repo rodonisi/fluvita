@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:fluvita/api/models/recently_added_item_dto.dart';
 import 'package:fluvita/api/models/series_detail_dto.dart';
 import 'package:fluvita/api/models/series_dto.dart';
 import 'package:fluvita/models/chapter_model.dart';
