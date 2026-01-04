@@ -41,18 +41,17 @@ class SeriesSliverGrid extends StatelessWidget {
                         child: SeriesCoverImage(seriesId: series.id),
                       ),
                       Align(
-                        alignment: .topRight,
+                        alignment: .bottomCenter,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: FilledButton.icon(
-                            // iconSize: LayoutConstants.mediumIcon,
-                            label: Text('Continue'),
+                            icon: FaIcon(FontAwesomeIcons.bookOpen),
+                            label: Text('Read'),
                             onPressed: () {
                               ReaderRoute(
                                 seriesId: series.id,
                               ).push(context);
                             },
-                            icon: FaIcon(FontAwesomeIcons.play),
                           ),
                         ),
                       ),
