@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:fluvita/api/models/recently_added_item_dto.dart';
 import 'package:fluvita/api/models/series_detail_dto.dart';
 import 'package:fluvita/api/models/series_dto.dart';
 import 'package:fluvita/models/chapter_model.dart';
@@ -19,6 +18,8 @@ sealed class SeriesModel with _$SeriesModel {
     required int libraryId,
     required String name,
     required Format format,
+    required int pages,
+    required int pagesRead,
   }) = _SeriesModel;
 
   factory SeriesModel.fromJson(Map<String, Object?> json) =>
@@ -34,19 +35,8 @@ sealed class SeriesModel with _$SeriesModel {
         .value1 => Format.cbz,
         _ => Format.unknown,
       },
-    );
-  }
-
-  factory SeriesModel.fromRecentlyAddedItemDto(RecentlyAddedItemDto dto) {
-    return SeriesModel(
-      id: dto.seriesId,
-      libraryId: dto.libraryId,
-      name: dto.seriesName ?? 'Untitled',
-      format: switch (dto.format) {
-        .value3 => Format.epub,
-        .value1 => Format.cbz,
-        _ => Format.unknown,
-      },
+      pages: dto.pages,
+      pagesRead: dto.pagesRead,
     );
   }
 }
