@@ -82,8 +82,6 @@ class Reader extends _$Reader {
 
     if (page < 0 || page >= current.totalPages) return;
 
-    state = AsyncValue.loading();
-
     final readerClient = ref.read(restClientProvider).reader;
     await readerClient.postApiReaderProgress(
       body: ProgressDto(
@@ -95,8 +93,28 @@ class Reader extends _$Reader {
       ),
     );
 
+    if (page >= current.totalPages - 1) {
+      await markComplete();
+    }
+
     state = AsyncValue.data(
       current.copyWith(currentPage: page),
+    );
+  }
+
+  Future<void> markComplete() async {
+    if (state.isLoading) return;
+    final current = await future;
+
+    final readerClient = ref.read(restClientProvider).reader;
+    await readerClient.postApiReaderProgress(
+      body: ProgressDto(
+        libraryId: current.libraryId,
+        seriesId: current.series.id,
+        volumeId: current.volumeId,
+        chapterId: current.chapter.id,
+        pageNum: current.totalPages,
+      ),
     );
   }
 }

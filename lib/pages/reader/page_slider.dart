@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/riverpod/reader.dart';
 import 'package:fluvita/utils/layout_constants.dart';
@@ -8,11 +7,13 @@ import 'package:fluvita/utils/layout_constants.dart';
 class PageSlider extends HookConsumerWidget {
   final int seriesId;
   final int? chapterId;
+  final void Function(int page)? onJumpToPage;
 
   const PageSlider({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    this.onJumpToPage,
   });
 
   @override
@@ -41,26 +42,7 @@ class PageSlider extends HookConsumerWidget {
     return Row(
       mainAxisAlignment: .spaceEvenly,
       children: [
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-          ),
-          child: IconButton(
-            icon: FaIcon(FontAwesomeIcons.caretLeft),
-            onPressed: currentPage > 1
-                ? () {
-                    ref
-                        .read(
-                          readerProvider(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          ).notifier,
-                        )
-                        .previousPage();
-                  }
-                : null,
-          ),
-        ),
+        SizedBox.square(dimension: LayoutConstants.mediumPadding),
         Text('1'),
         Expanded(
           child: Slider(
@@ -73,40 +55,14 @@ class PageSlider extends HookConsumerWidget {
               sliderValue.value = value;
             },
             onChangeEnd: (value) {
-              ref
-                  .read(
-                    readerProvider(
-                      seriesId: seriesId,
-                      chapterId: chapterId,
-                    ).notifier,
-                  )
-                  .gotoPage(
-                    sliderValue.value.floor() - 1,
-                  );
+              onJumpToPage?.call(
+                sliderValue.value.floor() - 1,
+              );
             },
           ),
         ),
         Text('$totalPages'),
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-          ),
-          child: IconButton(
-            icon: FaIcon(FontAwesomeIcons.caretRight),
-            onPressed: currentPage < totalPages
-                ? () {
-                    ref
-                        .read(
-                          readerProvider(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          ).notifier,
-                        )
-                        .nextPage();
-                  }
-                : null,
-          ),
-        ),
+        SizedBox.square(dimension: LayoutConstants.mediumPadding),
       ],
     );
   }

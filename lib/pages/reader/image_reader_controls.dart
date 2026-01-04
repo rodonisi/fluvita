@@ -30,6 +30,17 @@ class ImageReaderControls extends ConsumerWidget {
         ),
         IconButton(
           icon: FaIcon(
+            settings.readerMode == .vertical
+                ? FontAwesomeIcons.upDown
+                : FontAwesomeIcons.leftRight,
+          ),
+          tooltip: 'Read Direction',
+          onPressed: () {
+            ref.read(imageReaderSettingsProvider.notifier).toggleReaderMode();
+          },
+        ),
+        IconButton(
+          icon: FaIcon(
             settings.scaleType == .fitWidth
                 ? FontAwesomeIcons.arrowsLeftRight
                 : FontAwesomeIcons.arrowsUpDown,

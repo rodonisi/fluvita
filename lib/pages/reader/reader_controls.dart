@@ -9,7 +9,13 @@ import 'package:fluvita/utils/layout_constants.dart';
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;
   final int? chapterId;
-  const ReaderControls({super.key, required this.seriesId, this.chapterId});
+  final void Function(int page)? onJumpToPage;
+  const ReaderControls({
+    super.key,
+    required this.seriesId,
+    this.chapterId,
+    this.onJumpToPage,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,6 +34,7 @@ class ReaderControls extends HookConsumerWidget {
             PageSlider(
               seriesId: seriesId,
               chapterId: chapterId,
+              onJumpToPage: onJumpToPage,
             ),
             if (format == .epub) EpubReaderControls(),
             if (format == .cbz) ImageReaderControls(),
