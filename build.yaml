@@ -1,0 +1,14 @@
+global_options:
+  freezed:
+    runs_before:
+      - json_serializable
+  json_serializable:
+    runs_before:
+      - retrofit_generator
+
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          include_if_null: false
