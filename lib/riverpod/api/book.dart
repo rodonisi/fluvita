@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluvita/api/models/book_info_dto.dart';
 import 'package:fluvita/riverpod/api/client.dart';
-import 'package:fluvita/utils/logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -45,17 +44,8 @@ Future<Document> bookPage(Ref ref, {required int chapterId, int? page}) async {
       if (res.data != null) {
         final base64img = base64Encode(res.data);
         final mimeType = res.headers.value('content-type') ?? 'image/png';
-        log.d(mimeType);
 
         img.attributes['src'] = 'data:$mimeType;base64,$base64img';
-
-        // Ensure images have defined sizes for proper rendering
-        if (!img.attributes.containsKey('width')) {
-          img.attributes['width'] = '100%';
-        }
-        if (!img.attributes.containsKey('height')) {
-          img.attributes['height'] = 'auto';
-        }
       }
     }
   }

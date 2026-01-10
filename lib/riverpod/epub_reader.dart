@@ -86,11 +86,7 @@ sealed class EpubReaderState with _$EpubReaderState {
 
     final (:start, :end) = when(
       measuring: (data) {
-        // Clamp currentIndex to valid range for sublist
-        final endIndex = data.currentIndex.clamp(
-          0,
-          pageElements.elements.length,
-        );
+        final endIndex = data.currentIndex;
         return (start: pageStart, end: endIndex);
       },
       display: (data) {
@@ -185,9 +181,9 @@ class EpubReader extends _$EpubReader {
         }
 
         // Check if we've already incremented past all elements and confirmed no overflow
-        if (measuring.currentIndex > measuring.pageElements.elements.length) {
+        if (measuring.currentIndex >= measuring.pageElements.elements.length) {
           log.d('all elements measured and fit on current page');
-          finishMeasuring(overflow: false);
+          finishMeasuring();
           return;
         }
 
@@ -200,7 +196,7 @@ class EpubReader extends _$EpubReader {
     );
   }
 
-  Future<void> finishMeasuring({bool overflow = true}) async {
+  Future<void> finishMeasuring() async {
     final current = await future;
     current.whenOrNull(
       measuring: (measuring) {
@@ -210,7 +206,7 @@ class EpubReader extends _$EpubReader {
         // If overflow is false, all remaining elements fit on the current page
         final pageBreaks = <int>[
           ...measuring.pageBreaks,
-          if (overflow) measuring.currentIndex - 1,
+          measuring.currentIndex - 1,
         ];
 
         if ((measuring.fromLast &&
