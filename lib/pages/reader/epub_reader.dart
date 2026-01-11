@@ -78,6 +78,7 @@ class MeasureContent extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await WidgetsBinding.instance.endOfFrame;
           final renderBox =
               key.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox == null) {
