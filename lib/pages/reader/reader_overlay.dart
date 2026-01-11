@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluvita/pages/reader/reader_controls.dart';
 import 'package:fluvita/pages/reader/reader_header.dart';
+import 'package:fluvita/riverpod/reader.dart';
 
 class ReaderOverlay extends HookWidget {
   final void Function()? onNextPage;
@@ -27,7 +29,19 @@ class ReaderOverlay extends HookWidget {
     final uiVisible = useState(false);
     return Stack(
       children: [
-        Positioned.fill(child: child),
+        Positioned.fill(
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              Expanded(child: child),
+              ReaderProgress(seriesId: seriesId, chapterId: chapterId)
+                  .animate(
+                    target: uiVisible.value ? 0.0 : 1.0,
+                  )
+                  .fadeIn(duration: 200.ms),
+            ],
+          ),
+        ),
         Positioned.fill(
           child: Row(
             children: [
@@ -82,7 +96,39 @@ class ReaderOverlay extends HookWidget {
                     .fadeIn(duration: 100.ms),
           ),
         ),
+        // if (uiVisible.value == false)
+        //   Align(
+        //     alignment: .bottomCenter,
+        //     child: ReaderProgress(chapterId: chapterId, seriesId: seriesId),
+        //   ),
       ],
+    );
+  }
+}
+
+class ReaderProgress extends ConsumerWidget {
+  final int seriesId;
+  final int? chapterId;
+
+  const ReaderProgress({
+    super.key,
+    required this.seriesId,
+    this.chapterId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reader = ref.watch(
+      readerProvider(seriesId: seriesId, chapterId: chapterId),
+    );
+    return reader.maybeWhen(
+      data: (data) {
+        final progress = data.currentPage / data.totalPages;
+        return LinearProgressIndicator(
+          value: progress,
+        );
+      },
+      orElse: () => SizedBox.shrink(),
     );
   }
 }
