@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluvita/api/models/book_info_dto.dart';
 import 'package:fluvita/riverpod/api/client.dart';
+import 'package:fluvita/utils/logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -121,20 +122,24 @@ Future<BookPageElementsResult> bookPageElements(
     throw Exception('No body found in HTML');
   }
 
-  final paragraphs = body.getElementsByTagName('p');
+  // Kavita wraps pages into one div with the scoped styles in it. Finding the styles thus should generally puts us at a
+  // sibling of the content. Assuming the content of one page is usually wrapped into a single <section> or <div>, we
+  // can assume its only one other element, and the content to be its children.
+  final styles = body.getElementsByTagName('style').first;
 
-  if (paragraphs.isEmpty) {
+  final container = styles.parent?.children.last;
+
+  if (container != null && container.children.isNotEmpty) {
     // For pages without paragraphs (image-only, etc.),
     // return as single element to preserve structure and prevent rendering issues
-    return BookPageElementsResult(wrapper: body, elements: []);
+    return BookPageElementsResult(
+      wrapper: container,
+      elements: container.children,
+    );
   }
 
-  final contentParent = paragraphs.first.parent;
-
-  final elements = contentParent?.children.toList();
-
   return BookPageElementsResult(
-    wrapper: contentParent ?? body,
-    elements: elements ?? [body],
+    wrapper: body,
+    elements: [],
   );
 }
