@@ -98,6 +98,7 @@ Future<Document> bookPage(Ref ref, {required int chapterId, int? page}) async {
 sealed class BookPageElementsResult with _$BookPageElementsResult {
   const factory BookPageElementsResult({
     required Element wrapper,
+    required Map<String, Map<String, String>> styles,
     required List<Element> elements,
   }) = _BookPageElementsResult;
 }
@@ -121,20 +122,72 @@ Future<BookPageElementsResult> bookPageElements(
     throw Exception('No body found in HTML');
   }
 
-  final paragraphs = body.getElementsByTagName('p');
+  final styles = body.getElementsByTagName('style').first;
+  final stylesMap = _parseStyles(styles.innerHtml);
 
-  if (paragraphs.isEmpty) {
-    // For pages without paragraphs (image-only, etc.),
-    // return as single element to preserve structure and prevent rendering issues
-    return BookPageElementsResult(wrapper: body, elements: []);
+  // For pages with sections, return section children as elements as it is most probably the page container
+  final section = body.getElementsByTagName('section').firstOrNull;
+  if (section != null) {
+    return BookPageElementsResult(
+      wrapper: section,
+      styles: stylesMap,
+      elements: section.children,
+    );
   }
 
-  final contentParent = paragraphs.first.parent;
+  // Kavita wraps pages into one div with the scoped styles in it. Finding the styles thus should generally puts us at a
+  // sibling of the content
+  final parent = styles.parent;
+  final contentSiblings =
+      parent?.children.where((e) => e != styles).toList() ?? [];
 
-  final elements = contentParent?.children.toList();
+  // Having the siblings, if we have multiople, we assume there is no further wrapper
+  if (parent != null && contentSiblings.length > 1) {
+    return BookPageElementsResult(
+      wrapper: body,
+      styles: stylesMap,
+      elements: parent.children.where((e) => e != styles).toList(),
+    );
+  }
 
+  final container = contentSiblings.firstOrNull;
+
+  // If there is only one tag, that is probably a container similar to a section.
+  if (container != null && container.children.isNotEmpty) {
+    // For pages without paragraphs (image-only, etc.),
+    // return as single element to preserve structure and prevent rendering issues
+    return BookPageElementsResult(
+      wrapper: container,
+      styles: stylesMap,
+      elements: container.children,
+    );
+  }
+
+  // Fall back returning body with no elements causing the reader to render as is
   return BookPageElementsResult(
-    wrapper: contentParent ?? body,
-    elements: elements ?? [body],
+    wrapper: body,
+    styles: stylesMap,
+    elements: [],
   );
+}
+
+Map<String, Map<String, String>> _parseStyles(String css) {
+  final Map<String, Map<String, String>> stylesMap = {};
+  final RegExp ruleRegExp = RegExp(r'([^{]+)\{([^}]+)\}');
+  final RegExp propRegExp = RegExp(r'([^:]+):([^;]+);?');
+
+  for (final ruleMatch in ruleRegExp.allMatches(css)) {
+    final selector = ruleMatch.group(1)!.trim();
+    final properties = ruleMatch.group(2)!;
+    final Map<String, String> propsMap = {};
+
+    for (final propMatch in propRegExp.allMatches(properties)) {
+      final prop = propMatch.group(1)!.trim();
+      final value = propMatch.group(2)!.trim();
+      propsMap[prop] = value;
+    }
+
+    stylesMap[selector] = propsMap;
+  }
+  return stylesMap;
 }

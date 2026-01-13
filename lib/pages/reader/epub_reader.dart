@@ -47,7 +47,10 @@ class EpubReader extends HookConsumerWidget {
               );
             },
             display: (data) => SingleChildScrollView(
-              child: RenderContent(html: data.currentPage),
+              child: RenderContent(
+                styles: data.pageElements.styles,
+                html: data.currentPage,
+              ),
             ),
           );
         },
@@ -101,6 +104,7 @@ class MeasureContent extends ConsumerWidget {
                   children: [
                     RenderContent(
                       key: key,
+                      styles: state.pageElements.styles,
                       html: state.currentPage,
                     ),
                   ],
@@ -120,12 +124,14 @@ class MeasureContent extends ConsumerWidget {
 
 class RenderContent extends ConsumerWidget {
   final String html;
+  final Map<String, Map<String, String>> styles;
 
-  const RenderContent({super.key, required this.html});
+  const RenderContent({super.key, required this.html, required this.styles});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final epubSettings = ref.watch(epubReaderSettingsProvider);
+
     return Align(
       alignment: Alignment.topCenter,
       child: SafeArea(
@@ -133,6 +139,22 @@ class RenderContent extends ConsumerWidget {
           padding: EdgeInsets.all(epubSettings.marginSize),
           child: HtmlWidget(
             html,
+            customStylesBuilder: (element) {
+              final s = element.classes
+                  .map((className) {
+                    return styles.keys
+                        .where((selector) => selector.contains('.$className'))
+                        .map((e) => styles[e]);
+                  })
+                  .expand((e) => e)
+                  .where((e) => e != null)
+                  .fold<Map<String, String>>({}, (acc, map) {
+                    acc.addAll(map!);
+                    return acc;
+                  });
+
+              return s;
+            },
             enableCaching: true,
             textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontSize: epubSettings.fontSize,
