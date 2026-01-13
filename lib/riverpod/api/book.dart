@@ -123,26 +123,51 @@ Future<BookPageElementsResult> bookPageElements(
     throw Exception('No body found in HTML');
   }
 
-  // Kavita wraps pages into one div with the scoped styles in it. Finding the styles thus should generally puts us at a
-  // sibling of the content. Assuming the content of one page is usually wrapped into a single <section> or <div>, we
-  // can assume its only one other element, and the content to be its children.
   final styles = body.getElementsByTagName('style').first;
+  final stylesMap = _parseStyles(styles.innerHtml);
 
-  final container = styles.parent?.children.last;
+  // For pages with sections, return section children as elements as it is most probably the page container
+  final section = body.getElementsByTagName('section').firstOrNull;
+  if (section != null) {
+    return BookPageElementsResult(
+      wrapper: section,
+      styles: stylesMap,
+      elements: section.children,
+    );
+  }
 
+  // Kavita wraps pages into one div with the scoped styles in it. Finding the styles thus should generally puts us at a
+  // sibling of the content
+  final parent = styles.parent;
+  final contentSiblings =
+      parent?.children.where((e) => e != styles).toList() ?? [];
+
+  // Having the siblings, if we have multiople, we assume there is no further wrapper
+  if (parent != null && contentSiblings.length > 1) {
+    return BookPageElementsResult(
+      wrapper: body,
+      styles: stylesMap,
+      elements: parent.children.where((e) => e != styles).toList(),
+    );
+  }
+
+  final container = contentSiblings.firstOrNull;
+
+  // If there is only one tag, that is probably a container similar to a section.
   if (container != null && container.children.isNotEmpty) {
     // For pages without paragraphs (image-only, etc.),
     // return as single element to preserve structure and prevent rendering issues
     return BookPageElementsResult(
       wrapper: container,
-      styles: _parseStyles(styles.innerHtml),
+      styles: stylesMap,
       elements: container.children,
     );
   }
 
+  // Fall back returning body with no elements causing the reader to render as is
   return BookPageElementsResult(
     wrapper: body,
-    styles: {},
+    styles: stylesMap,
     elements: [],
   );
 }
