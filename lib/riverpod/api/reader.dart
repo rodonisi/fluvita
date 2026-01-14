@@ -54,3 +54,37 @@ Future<Uint8List> readerImage(
 
   return res.data;
 }
+
+@riverpod
+Future<int?> prevChapter(
+  Ref ref, {
+  int? seriesId,
+  int? volumeId,
+  int? chapterId,
+}) async {
+  final client = ref.watch(restClientProvider).reader;
+  final chapter = await client.getApiReaderPrevChapter(
+    seriesId: seriesId,
+    volumeId: volumeId,
+    currentChapterId: chapterId,
+  );
+
+  return chapter >= 0 ? chapter : null;
+}
+
+@riverpod
+Future<int?> nextChapter(
+  Ref ref, {
+  int? seriesId,
+  int? volumeId,
+  int? chapterId,
+}) async {
+  final client = ref.watch(restClientProvider).reader;
+  final chapter = await client.getApiReaderNextChapter(
+    seriesId: seriesId,
+    volumeId: volumeId,
+    currentChapterId: chapterId,
+  );
+
+  return chapter >= 0 ? chapter : null;
+}
