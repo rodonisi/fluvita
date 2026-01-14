@@ -4,7 +4,6 @@ import 'package:fluvita/api/models/progress_dto.dart';
 import 'package:fluvita/models/chapter_model.dart';
 import 'package:fluvita/riverpod/api/auth.dart';
 import 'package:fluvita/riverpod/api/client.dart';
-import 'package:fluvita/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reader.g.dart';
