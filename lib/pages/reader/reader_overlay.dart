@@ -151,7 +151,7 @@ class ReaderOverlay extends HookConsumerWidget {
                   .show(duration: 10.ms, maintain: false)
                   .fade(duration: 100.ms)
                   .animate(target: uiVisible.value ? 1.0 : 0.0)
-                  .moveY(end: -110.0, duration: 100.ms),
+                  .moveY(end: -(120.0), duration: 100.ms),
         ),
         Align(
           alignment: .bottomCenter,
@@ -172,7 +172,7 @@ class ReaderOverlay extends HookConsumerWidget {
                   .show(duration: 10.ms, maintain: false)
                   .fade(duration: 100.ms)
                   .animate(target: uiVisible.value ? 1.0 : 0.0)
-                  .moveY(end: -110.0, duration: 100.ms),
+                  .moveY(end: -(120.0), duration: 100.ms),
         ),
         Align(
           alignment: .bottomCenter,
