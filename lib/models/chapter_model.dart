@@ -10,6 +10,8 @@ sealed class ChapterModel with _$ChapterModel {
     required int id,
     required int volumeId,
     required String title,
+    required int pages,
+    required int pagesRead,
   }) = _ChapterModel;
 
   factory ChapterModel.fromJson(Map<String, Object?> json) =>
@@ -20,6 +22,8 @@ sealed class ChapterModel with _$ChapterModel {
       id: dto.id!,
       volumeId: dto.volumeId!,
       title: dto.titleName ?? 'Untitled',
+      pages: dto.pages!,
+      pagesRead: dto.pagesRead!,
     );
   }
 }
