@@ -8448,7 +8448,7 @@
     },
     "/api/Plugin/authkey-expires": {
       "get": {
-        "tags": ["Plugin"],
+        "tags": ["exclude"],
         "summary": "Returns the expiration (UTC) of the authenticated Auth key (or null if none set)",
         "description": "Will always return null if the Auth Key does not belong to this account",
         "parameters": [
