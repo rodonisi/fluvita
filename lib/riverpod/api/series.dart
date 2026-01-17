@@ -16,7 +16,7 @@ Future<SeriesModel> series(Ref ref, {required int seriesId}) async {
 }
 
 @riverpod
-Future<List<SeriesModel>> allSeries(Ref ref, int libraryId) async {
+Future<List<SeriesModel>> allSeries(Ref ref, {int? libraryId}) async {
   final client = ref.watch(restClientProvider).series;
   final res = await client.postApiSeriesV2(
     body: FilterV2Dto(
@@ -25,11 +25,12 @@ Future<List<SeriesModel>> allSeries(Ref ref, int libraryId) async {
       sortOptions: SortOptions(sortField: .value1, isAscending: false),
       limitTo: 0,
       statements: [
-        FilterStatementDto(
-          comparison: .value0,
-          field: .value19,
-          value: libraryId.toString(),
-        ),
+        if (libraryId != null)
+          FilterStatementDto(
+            comparison: .value0,
+            field: .value19,
+            value: libraryId.toString(),
+          ),
       ],
     ),
   );
@@ -43,6 +44,17 @@ Future<SeriesDetailModel> seriesDetail(Ref ref, {required int seriesId}) async {
   final res = await client.getApiSeriesSeriesDetail(seriesId: seriesId);
 
   return SeriesDetailModel.fromSeriesDetailDto(res);
+}
+
+@riverpod
+Future<SeriesMetadataModel> seriesMetadata(
+  Ref ref, {
+  required int seriesId,
+}) async {
+  final client = ref.watch(restClientProvider).series;
+  final res = await client.getApiSeriesMetadata(seriesId: seriesId);
+
+  return SeriesMetadataModel.fromSeriesMetadataDto(res);
 }
 
 @riverpod
@@ -74,3 +86,11 @@ Future<List<SeriesModel>> recentlyAdded(Ref ref) async {
 
   return res.map(SeriesModel.fromSeriesDto).toList();
 }
+
+// @riverpod
+// Future<List<SeriesModel>> allSeries(Ref ref) async {
+//   final client = ref.watch(restClientProvider).series;
+//   final res = await client.postApiSeriesAllV2();
+//
+//   return res.map(SeriesModel.fromSeriesDto).toList();
+// }

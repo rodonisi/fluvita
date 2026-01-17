@@ -54,7 +54,6 @@ class VolumeCoverImage extends ConsumerWidget {
     return Async(
       asyncValue: ref.watch(volumeCoverProvider(volumeId: volumeId)),
       data: (imageData) => ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(8.0),
         child: Image.memory(
           imageData,
           fit: fit,
@@ -87,7 +86,6 @@ class ChapterCoverImage extends ConsumerWidget {
     return Async(
       asyncValue: ref.watch(chapterCoverProvider(chapterId: chapterId)),
       data: (imageData) => ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(8.0),
         child: Image.memory(
           imageData,
           fit: fit,

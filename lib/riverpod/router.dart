@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluvita/pages/home/home_page.dart';
-import 'package:fluvita/pages/library/library_page.dart';
-import 'package:fluvita/pages/library/series_detail_page.dart';
+import 'package:fluvita/pages/library/libraries_page/libraries_page.dart';
+import 'package:fluvita/pages/library/series_detail_page/series_detail_page.dart';
 import 'package:fluvita/pages/library/series_page.dart';
 import 'package:fluvita/pages/reader/reader_page.dart';
 import 'package:fluvita/pages/settings/settings_page.dart';
@@ -31,12 +31,13 @@ GoRouter router(Ref ref) {
         TypedGoRoute<LibraryRoute>(
           path: '/library',
           routes: [
+            TypedGoRoute<AllSeriesRoute>(
+              path: 'all-series',
+            ),
             TypedGoRoute<SeriesRoute>(
               path: ':libraryId/series',
-              routes: [
-                TypedGoRoute<SeriesDetailRoute>(path: ':seriesId'),
-              ],
             ),
+            TypedGoRoute<SeriesDetailRoute>(path: ':seriesId'),
           ],
         ),
       ],
@@ -88,6 +89,13 @@ class LibraryRoute extends GoRouteData with $LibraryRoute {
       const LibraryPage();
 }
 
+class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
+  const AllSeriesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => AllSeriesPage();
+}
+
 class SeriesRoute extends GoRouteData with $SeriesRoute {
   final int libraryId;
 
@@ -95,7 +103,7 @@ class SeriesRoute extends GoRouteData with $SeriesRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      SeriesPage(libraryId: libraryId);
+      LibrarySeriesPage(libraryId: libraryId);
 }
 
 class SeriesDetailRoute extends GoRouteData with $SeriesDetailRoute {

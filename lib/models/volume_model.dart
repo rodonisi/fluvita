@@ -14,6 +14,8 @@ sealed class VolumeModel with _$VolumeModel {
     required String name,
     required int seriesId,
     required List<ChapterModel> chapters,
+    required int pages,
+    required int pagesRead,
   }) = _VolumeModel;
 
   factory VolumeModel.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +27,13 @@ sealed class VolumeModel with _$VolumeModel {
       seriesId: dto.seriesId!,
       name: dto.name ?? 'Unnamed Volume',
       chapters: dto.chapters?.map(ChapterModel.fromChapterDto).toList() ?? [],
+      pages: dto.pages!,
+      pagesRead: dto.pagesRead!,
     );
+  }
+
+  double get progress {
+    if (pages == 0) return 0.0;
+    return pagesRead / pages;
   }
 }

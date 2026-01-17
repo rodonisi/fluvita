@@ -13,6 +13,7 @@ class CredentialsSettings extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final currentUser = ref.watch(currentUserProvider);
+    final loginStatus = ref.watch(loginStatusProvider);
 
     return Card(
       margin: LayoutConstants.mediumEdgeInsets,
@@ -34,27 +35,40 @@ class CredentialsSettings extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 TextField(
+                  enabled: loginStatus != .loading,
                   controller: urlController,
                   decoration: InputDecoration(labelText: 'Base URL'),
                 ),
                 TextField(
+                  enabled: loginStatus != .loading,
                   controller: apiKeyController,
                   decoration: InputDecoration(labelText: 'API Key'),
                 ),
                 Row(
-                  crossAxisAlignment: .center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: .spaceBetween,
                   children: [
-                    Text(
-                      'Status:',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    SizedBox.square(dimension: LayoutConstants.smallPadding),
                     Async(
                       asyncValue: currentUser,
-                      data: (_) => Icon(
-                        FontAwesomeIcons.solidCircleCheck,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      data: (user) {
+                        final name = user.username;
+                        final initials = name.isNotEmpty
+                            ? name[0].toUpperCase()
+                            : '?';
+
+                        return Row(
+                          children: [
+                            CircleAvatar(child: Text(initials)),
+                            const SizedBox(width: LayoutConstants.smallPadding),
+                            Text(
+                              name,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium,
+                            ),
+                          ],
+                        );
+                      },
                       loading: () => SizedBox.square(
                         dimension: LayoutConstants.mediumIcon,
                         child: CircularProgressIndicator(),
@@ -64,7 +78,6 @@ class CredentialsSettings extends HookConsumerWidget {
                         color: Theme.of(context).colorScheme.error,
                       ),
                     ),
-                    Spacer(),
                     FilledButton.icon(
                       onPressed: () {
                         ref
@@ -76,8 +89,8 @@ class CredentialsSettings extends HookConsumerWidget {
                               ),
                             );
                       },
-                      label: Text('Save'),
-                      icon: FaIcon(FontAwesomeIcons.solidFloppyDisk),
+                      label: const Text('Save'),
+                      icon: const FaIcon(FontAwesomeIcons.solidFloppyDisk),
                     ),
                   ],
                 ),
