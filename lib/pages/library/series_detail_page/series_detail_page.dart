@@ -28,26 +28,26 @@ class SeriesDetailPage extends HookConsumerWidget {
           final views = <Widget>[];
 
           if (detailsData.storyline.isNotEmpty) {
-            tabs.add(const Tab(text: 'Storyline'));
+            tabs.add(Tab(text: 'Storyline (${detailsData.storyline.length})'));
             views.add(
               _ChapterGrid(seriesId: seriesId, chapters: detailsData.storyline),
             );
           }
 
           if (detailsData.volumes.isNotEmpty) {
-            tabs.add(const Tab(text: 'Volumes'));
+            tabs.add(Tab(text: 'Volumes (${detailsData.volumes.length})'));
             views.add(_VolumeGrid(volumes: detailsData.volumes));
           }
 
           if (detailsData.chapters.isNotEmpty) {
-            tabs.add(const Tab(text: 'Chapters'));
+            tabs.add(Tab(text: 'Chapters (${detailsData.chapters.length})'));
             views.add(
               _ChapterGrid(seriesId: seriesId, chapters: detailsData.chapters),
             );
           }
 
           if (detailsData.specials.isNotEmpty) {
-            tabs.add(const Tab(text: 'Specials'));
+            tabs.add(Tab(text: 'Specials (${detailsData.specials.length})'));
             views.add(
               _ChapterGrid(seriesId: seriesId, chapters: detailsData.specials),
             );
