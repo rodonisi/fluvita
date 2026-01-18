@@ -62,7 +62,7 @@ class ChapterCard extends StatelessWidget {
                         padding: LayoutConstants.smallEdgeInsets,
                         child: FilledButton.icon(
                           icon: actionIcon,
-                          label: Text(actionLabel),
+                          label: FittedBox(child: Text(actionLabel)),
                           onPressed: onRead,
                         ),
                       ),
