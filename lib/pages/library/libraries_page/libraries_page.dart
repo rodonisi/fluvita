@@ -14,21 +14,26 @@ class LibraryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return LoginGuard(
-      child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: LayoutConstants.mediumEdgeInsets,
-            sliver: SliverToBoxAdapter(
-              child: AppListTile(
-                title: 'All Series',
-                icon: FaIcon(FontAwesomeIcons.solidRectangleList),
-                onTap: () => AllSeriesRoute().push(context),
+      child: SafeArea(
+        child: Scaffold(
+          extendBody: true,
+          body: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: LayoutConstants.mediumEdgeInsets,
+                sliver: SliverToBoxAdapter(
+                  child: AppListTile(
+                    title: 'All Series',
+                    icon: FaIcon(FontAwesomeIcons.solidRectangleList),
+                    onTap: () => AllSeriesRoute().push(context),
+                  ),
+                ),
               ),
-            ),
+              SliverSection(title: 'Libraries'),
+              SliverLibraries(),
+            ],
           ),
-          SliverSection(title: 'Libraries'),
-          SliverLibraries(),
-        ],
+        ),
       ),
     );
   }
