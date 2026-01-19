@@ -8,7 +8,14 @@ global_options:
 
 targets:
   $default:
+    sources:
+      - lib/**
+      - swaggers/**
     builders:
-      json_serializable:
+      # json_serializable:
+      #   options:
+      #     include_if_null: false
+      swagger_dart_code_generator:
         options:
-          include_if_null: false
+          input_folder: "swaggers"
+          output_folder: "lib/api"
