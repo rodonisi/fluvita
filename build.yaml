@@ -2,9 +2,6 @@ global_options:
   freezed:
     runs_before:
       - json_serializable
-  json_serializable:
-    runs_before:
-      - retrofit_generator
 
 targets:
   $default:
@@ -12,10 +9,9 @@ targets:
       - lib/**
       - swaggers/**
     builders:
-      # json_serializable:
-      #   options:
-      #     include_if_null: false
       swagger_dart_code_generator:
         options:
-          input_folder: "swaggers"
+          input_folder: swaggers/
+          input_urls:
+            - url: "https://raw.githubusercontent.com/Kareadita/Kavita/refs/tags/v0.8.9/openapi.json"
           output_folder: "lib/api"
