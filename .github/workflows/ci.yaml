@@ -35,9 +35,6 @@ jobs:
           channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
           cache: true
 
-      - name: API Generation 📝
-        run: dart run swagger_parser
-
       - name: Code Generation 🧬
         run: dart run build_runner build --delete-conflicting-outputs
 
