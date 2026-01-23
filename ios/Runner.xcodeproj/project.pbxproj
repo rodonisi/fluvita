@@ -100,7 +100,6 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
-				57B6AE052F23953A0084A9D1 /* Fluvita.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -124,6 +123,7 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				57B6AE052F23953A0084A9D1 /* Fluvita.icon */,
 			);
 			path = Runner;
 			sourceTree = "<group>";

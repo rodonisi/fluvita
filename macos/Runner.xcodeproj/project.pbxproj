@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -130,7 +130,6 @@
 				331C80D6294CF71000263BE5 /* RunnerTests */,
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
-				57B6AE032F2393730084A9D1 /* Fluvita.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -175,6 +174,7 @@
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
+				57B6AE032F2393730084A9D1 /* Fluvita.icon */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
