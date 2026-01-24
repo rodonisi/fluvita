@@ -10,7 +10,7 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
   const factory ReaderNavigationState({
     required int currentPage,
     required int totalPages,
-    required bool fromUserInteraction,
+    required bool fromObserver,
   }) = _ReaderNavigationState;
 }
 
@@ -31,14 +31,14 @@ class ReaderNavigation extends _$ReaderNavigation {
     return ReaderNavigationState(
       currentPage: readerState.value?.initialPage ?? 0,
       totalPages: readerState.value?.totalPages ?? 0,
-      fromUserInteraction: false,
+      fromObserver: true,
     );
   }
 
-  void jumpToPage(int page, {bool fromUserInteraction = true}) {
+  void jumpToPage(int page, {bool fromObserver = false}) {
     state = state.copyWith(
       currentPage: page.clamp(0, state.totalPages - 1),
-      fromUserInteraction: fromUserInteraction,
+      fromObserver: fromObserver,
     );
   }
 

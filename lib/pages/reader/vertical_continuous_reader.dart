@@ -38,14 +38,36 @@ class _VerticalContinuousReaderState
     _initializeState();
   }
 
+  /// Emit last-page progress when scrolled to bottom edge.
+  void _handleScrollEnd() {
+    final pos = _scrollController.position;
+    if (pos.atEdge &&
+        pos.pixels >= pos.maxScrollExtent &&
+        _totalPages != null) {
+      final lastIndex = _totalPages! - 1;
+      final navProvider = readerNavigationProvider(
+        seriesId: widget.seriesId,
+        chapterId: widget.chapterId,
+      );
+      if (ref.read(navProvider).currentPage != lastIndex) {
+        log.d('Scrolled to bottom edge, ensuring last page $lastIndex');
+        ref
+            .read(navProvider.notifier)
+            .jumpToPage(lastIndex, fromObserver: true);
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_handleScrollEnd);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _initializeState() {
     _scrollController = ScrollController();
+    _scrollController.addListener(_handleScrollEnd);
 
     // Get initial page from navigation state
     final initialPage = ref
@@ -69,9 +91,6 @@ class _VerticalContinuousReaderState
   void _handleObserve(ObserveModel model) {
     if (model is! ListViewObserveModel) return;
 
-    log.d(
-      'visible items: ${model.displayingChildIndexList.toString()}',
-    );
     final firstVisibleIndex = model.firstChild?.index;
     if (firstVisibleIndex == null) return;
     log.d('First visible index: $firstVisibleIndex');
@@ -85,7 +104,7 @@ class _VerticalContinuousReaderState
     if (firstVisibleIndex != currentPage) {
       ref
           .read(navProvider.notifier)
-          .jumpToPage(firstVisibleIndex, fromUserInteraction: false);
+          .jumpToPage(firstVisibleIndex, fromObserver: true);
     }
   }
 
@@ -166,7 +185,7 @@ class _VerticalContinuousReaderState
 
         // If the new page matches what we just observed from scrolling, ignore it
         // This prevents the circular feedback loop
-        if (!next.fromUserInteraction) {
+        if (next.fromObserver) {
           log.d('Ignoring observer update');
           return;
         }
@@ -193,7 +212,6 @@ class _VerticalContinuousReaderState
       controller: _observerController,
       sliverContexts: () => [if (_sliverContext != null) _sliverContext!],
       onObserve: _handleObserve,
-      toNextOverPercent: 0.5,
       child: CustomScrollView(
         controller: _scrollController,
         cacheExtent: MediaQuery.of(context).size.height * 5,
