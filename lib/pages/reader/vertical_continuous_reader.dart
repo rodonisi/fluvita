@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fluvita/riverpod/image_reader_settings.dart';
 import 'package:fluvita/riverpod/reader_navigation.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -141,7 +142,7 @@ class _VerticalContinuousReaderState
 
   @override
   Widget build(BuildContext context) {
-    log.d('Building VerticalContinuousReader');
+    final settings = ref.watch(imageReaderSettingsProvider);
 
     ref.listen(
       readerNavigationProvider(
@@ -175,44 +176,28 @@ class _VerticalContinuousReaderState
             duration: 200.ms,
             curve: Curves.easeInOut,
           );
-          log.d('Animation to page $next completed');
         } else {
           log.d('Jumping to page $next');
           await _observerController.jumpTo(index: next.currentPage);
-          log.d('Jump to page $next completed');
         }
       },
     );
 
-    return NotificationListener<ObserverScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ObserverScrollStartNotification) {
-          log.d('Observer: Scroll task started');
-        } else if (notification is ObserverScrollDecisionNotification) {
-          log.d('Observer: Target index found');
-        } else if (notification is ObserverScrollEndNotification) {
-          log.d('Observer: Scroll completed successfully');
-        } else if (notification is ObserverScrollInterruptionNotification) {
-          log.d('Observer: Scroll interrupted/failed');
-        }
-        return false;
-      },
-      child: SliverViewObserver(
-        controller: _observerController,
-        sliverContexts: () => [if (_sliverContext != null) _sliverContext!],
-        onObserve: _handleObserve,
-        child: CustomScrollView(
-          controller: _scrollController,
-          cacheExtent: MediaQuery.of(context).size.height * 100,
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                _buildItem,
-                childCount: _totalPages,
-              ),
-            ),
-          ],
-        ),
+    return SliverViewObserver(
+      controller: _observerController,
+      sliverContexts: () => [if (_sliverContext != null) _sliverContext!],
+      onObserve: _handleObserve,
+      child: CustomScrollView(
+        controller: _scrollController,
+        cacheExtent: MediaQuery.of(context).size.height * 100,
+        slivers: [
+          SliverList.separated(
+            itemCount: _totalPages,
+            itemBuilder: _buildItem,
+            separatorBuilder: (context, index) =>
+                SizedBox(height: settings.verticalImageGap),
+          ),
+        ],
       ),
     );
   }

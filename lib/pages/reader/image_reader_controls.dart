@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/riverpod/image_reader_settings.dart';
@@ -39,29 +40,41 @@ class ImageReaderControls extends ConsumerWidget {
             ref.read(imageReaderSettingsProvider.notifier).toggleReaderMode();
           },
         ),
-        // In vertical mode: gap control, in horizontal mode: fit control
         if (settings.readerMode == .vertical)
           Row(
             mainAxisSize: .min,
             children: [
               IconButton(
-                icon: FaIcon(FontAwesomeIcons.minus, size: 16),
+                icon: FaIcon(
+                  FontAwesomeIcons.minus,
+                  size: LayoutConstants.smallIcon,
+                ),
                 tooltip: 'Decrease gap',
-                onPressed: settings.verticalImageGap > 0
+                onPressed: settings.verticalImageGap > 0.0
                     ? () {
-                        ref.read(imageReaderSettingsProvider.notifier).setVerticalImageGap(
-                              (settings.verticalImageGap - 4).clamp(0.0, 32.0),
+                        ref
+                            .read(imageReaderSettingsProvider.notifier)
+                            .setVerticalImageGap(
+                              (settings.verticalImageGap - 4).clamp(0.0, 64.0),
                             );
                       }
                     : null,
               ),
+              FaIcon(
+                FontAwesomeIcons.gripLines,
+              ),
               IconButton(
-                icon: FaIcon(FontAwesomeIcons.plus, size: 16),
+                icon: FaIcon(
+                  FontAwesomeIcons.plus,
+                  size: LayoutConstants.smallIcon,
+                ),
                 tooltip: 'Increase gap',
-                onPressed: settings.verticalImageGap < 32
+                onPressed: settings.verticalImageGap < 64.0
                     ? () {
-                        ref.read(imageReaderSettingsProvider.notifier).setVerticalImageGap(
-                              (settings.verticalImageGap + 4).clamp(0.0, 32.0),
+                        ref
+                            .read(imageReaderSettingsProvider.notifier)
+                            .setVerticalImageGap(
+                              (settings.verticalImageGap + 4).clamp(0.0, 64.0),
                             );
                       }
                     : null,

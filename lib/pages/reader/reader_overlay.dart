@@ -24,7 +24,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final void Function()? onPreviousPage;
   final void Function(int page)? onJumpToPage;
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
   final Widget child;
 
   const ReaderOverlay({
@@ -32,7 +32,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.onNextPage,
     this.onPreviousPage,
     this.onJumpToPage,
-    this.chapterId,
+    required this.chapterId,
     required this.seriesId,
     required this.child,
   });
@@ -67,12 +67,14 @@ class ReaderOverlay extends HookConsumerWidget {
     );
 
     ref.listen(
-      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
+      readerNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+      ).select((state) => state.currentPage),
       (previous, next) {
-        final currentPage = next.currentPage;
-        if (currentPage <= 0 && prevChapter.asData?.value != null) {
+        if (next <= 0 && prevChapter.asData?.value != null) {
           showSnackbar.value = .previous;
-        } else if (currentPage >= state.totalPages - 1 &&
+        } else if (next >= state.totalPages - 1 &&
             nextChapter.asData?.value != null) {
           showSnackbar.value = .next;
         } else {
@@ -208,14 +210,8 @@ class ReaderProgress extends ConsumerWidget {
     final navState = ref.watch(
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
     );
-    final currentPage = navState.currentPage;
 
-    final readerState = ref.watch(
-      readerProvider(seriesId: seriesId, chapterId: chapterId),
-    );
-    final totalPages = readerState.value?.totalPages ?? 1;
-
-    final progress = currentPage / (totalPages - 1);
+    final progress = navState.currentPage / (navState.totalPages - 1);
 
     return LinearProgressIndicator(
       value: progress,

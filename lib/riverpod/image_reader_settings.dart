@@ -67,7 +67,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
 
   void setVerticalImageGap(double gap) {
     state = state.copyWith(
-      verticalImageGap: gap.clamp(0.0, 32.0),
+      verticalImageGap: gap.clamp(0.0, 64.0),
     );
   }
 }

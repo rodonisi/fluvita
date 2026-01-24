@@ -33,7 +33,7 @@ class ReaderNavigation extends _$ReaderNavigation {
 
   void jumpToPage(int page) {
     state = state.copyWith(
-      currentPage: page.clamp(0, state.totalPages),
+      currentPage: page.clamp(0, state.totalPages-1),
     );
 
     ref
