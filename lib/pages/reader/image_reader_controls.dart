@@ -19,8 +19,8 @@ class ImageReaderControls extends ConsumerWidget {
         IconButton(
           icon: FaIcon(
             settings.readDirection == .leftToRight
-                ? FontAwesomeIcons.anglesLeft
-                : FontAwesomeIcons.anglesRight,
+                ? FontAwesomeIcons.anglesRight
+                : FontAwesomeIcons.anglesLeft,
           ),
           tooltip: 'Read Direction',
           onPressed: () {

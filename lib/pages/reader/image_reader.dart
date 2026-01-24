@@ -28,10 +28,14 @@ class ImageReader extends ConsumerWidget {
       seriesId: seriesId,
       chapterId: chapterId,
       onNextPage: () {
-        ref.read(navProvider.notifier).nextPage();
+        settings.readDirection == .leftToRight
+            ? ref.read(navProvider.notifier).nextPage()
+            : ref.read(navProvider.notifier).previousPage();
       },
       onPreviousPage: () {
-        ref.read(navProvider.notifier).previousPage();
+        settings.readDirection == .leftToRight
+            ? ref.read(navProvider.notifier).previousPage()
+            : ref.read(navProvider.notifier).nextPage();
       },
       onJumpToPage: (page) {
         ref.read(navProvider.notifier).jumpToPage(page);
