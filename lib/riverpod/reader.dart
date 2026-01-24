@@ -64,48 +64,6 @@ class Reader extends _$Reader {
     );
   }
 
-  Future<void> nextPage() async {
-    final current = await future;
-
-    if (current.currentPage < current.totalPages) {
-      await gotoPage(current.currentPage + 1);
-    }
-  }
-
-  Future<void> previousPage() async {
-    final current = await future;
-    if (current.currentPage > 0) {
-      await gotoPage(current.currentPage - 1);
-    }
-  }
-
-  Future<void> gotoPage(int page) async {
-    if (state.isLoading) return;
-    final current = await future;
-
-    if (page < 0 || page >= current.totalPages) return;
-
-    final client = ref.read(restClientProvider);
-    await client.apiReaderProgressPost(
-      body: ProgressDto(
-        libraryId: current.libraryId,
-        seriesId: current.series.id,
-        volumeId: current.volumeId,
-        chapterId: current.chapter.id,
-        pageNum: page,
-        lastModifiedUtc: DateTime.now().toUtc(),
-      ),
-    );
-
-    if (page >= current.totalPages - 1) {
-      await markComplete();
-    }
-
-    state = AsyncValue.data(
-      current.copyWith(currentPage: page),
-    );
-  }
-
   Future<void> saveProgress({required int page, String? scrollId}) async {
     if (state.isLoading) return;
     final current = await future;
