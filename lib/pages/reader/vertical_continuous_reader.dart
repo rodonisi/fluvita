@@ -30,7 +30,6 @@ class _VerticalContinuousReaderState
   late SliverObserverController _observerController;
   final Map<int, double> _cachedHeights = {};
   BuildContext? _sliverContext;
-  int? _lastObservedIndex;
   int? _totalPages;
 
   @override
@@ -39,14 +38,36 @@ class _VerticalContinuousReaderState
     _initializeState();
   }
 
+  /// Emit last-page progress when scrolled to bottom edge.
+  void _handleScrollEnd() {
+    final pos = _scrollController.position;
+    if (pos.atEdge &&
+        pos.pixels >= pos.maxScrollExtent &&
+        _totalPages != null) {
+      final lastIndex = _totalPages! - 1;
+      final navProvider = readerNavigationProvider(
+        seriesId: widget.seriesId,
+        chapterId: widget.chapterId,
+      );
+      if (ref.read(navProvider).currentPage != lastIndex) {
+        log.d('Scrolled to bottom edge, ensuring last page $lastIndex');
+        ref
+            .read(navProvider.notifier)
+            .jumpToPage(lastIndex, fromObserver: true);
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_handleScrollEnd);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _initializeState() {
     _scrollController = ScrollController();
+    _scrollController.addListener(_handleScrollEnd);
 
     // Get initial page from navigation state
     final initialPage = ref
@@ -67,14 +88,12 @@ class _VerticalContinuousReaderState
               ObserverIndexPositionModel(index: initialPage);
   }
 
-  Future<void> _handleObserve(ObserveModel model) async {
+  void _handleObserve(ObserveModel model) {
     if (model is! ListViewObserveModel) return;
 
     final firstVisibleIndex = model.firstChild?.index;
     if (firstVisibleIndex == null) return;
     log.d('First visible index: $firstVisibleIndex');
-
-    _lastObservedIndex = firstVisibleIndex;
 
     final navProvider = readerNavigationProvider(
       seriesId: widget.seriesId,
@@ -83,60 +102,65 @@ class _VerticalContinuousReaderState
 
     final currentPage = ref.read(navProvider).currentPage;
     if (firstVisibleIndex != currentPage) {
-      await ref.read(navProvider.notifier).jumpToPage(firstVisibleIndex);
+      ref
+          .read(navProvider.notifier)
+          .jumpToPage(firstVisibleIndex, fromObserver: true);
     }
   }
 
   Widget _buildItem(BuildContext context, int index) {
     _sliverContext ??= context;
 
-    return Consumer(
-      builder: (context, ref, _) {
-        final image = ref.watch(
-          readerImageProvider(
-            chapterId: widget.chapterId,
-            page: index,
-          ),
-        );
+    return _KeepAlivePage(
+      key: ValueKey(index),
+      child: Consumer(
+        builder: (context, ref, _) {
+          final image = ref.watch(
+            readerImageProvider(
+              chapterId: widget.chapterId,
+              page: index,
+            ),
+          );
 
-        if (_cachedHeights.containsKey(index)) {
-          return SizedBox(
-            height: _cachedHeights[index]!,
-            child: Async(
-              asyncValue: image,
-              data: (data) => Image.memory(
+          if (_cachedHeights.containsKey(index)) {
+            return SizedBox(
+              height: _cachedHeights[index]!,
+              child: Async(
+                asyncValue: image,
+                data: (data) => Image.memory(
+                  data,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            );
+          }
+
+          return Async(
+            asyncValue: image,
+            data: (data) => MeasuredImage(
+              onSizeMeasured: (size) {
+                if (size.height > 0) {
+                  log.d('Caching height for page $index: ${size.height}');
+                  _cachedHeights[index] = size.height;
+                }
+              },
+              child: Image.memory(
                 data,
                 fit: BoxFit.fitWidth,
               ),
             ),
-          );
-        }
-
-        return Async(
-          asyncValue: image,
-          data: (data) => MeasuredImage(
-            onSizeMeasured: (size) {
-              if (size.height > 0) {
-                log.d('Caching height for page $index: ${size.height}');
-                _cachedHeights[index] = size.height;
-              }
+            loading: () {
+              return AspectRatio(
+                aspectRatio: 5 / 8,
+                child: Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
             },
-            child: Image.memory(
-              data,
-              fit: BoxFit.fitWidth,
-            ),
-          ),
-          loading: () {
-            return AspectRatio(
-              aspectRatio: 5 / 8,
-              child: Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            );
-          },
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -161,9 +185,8 @@ class _VerticalContinuousReaderState
 
         // If the new page matches what we just observed from scrolling, ignore it
         // This prevents the circular feedback loop
-        if (_lastObservedIndex != null &&
-            next.currentPage == _lastObservedIndex) {
-          log.d('Already at page $next, ignoring navigation change');
+        if (next.fromObserver) {
+          log.d('Ignoring observer update');
           return;
         }
 
@@ -191,12 +214,13 @@ class _VerticalContinuousReaderState
       onObserve: _handleObserve,
       child: CustomScrollView(
         controller: _scrollController,
-        cacheExtent: MediaQuery.of(context).size.height * 100,
+        cacheExtent: MediaQuery.of(context).size.height * 5,
         scrollBehavior: ScrollConfiguration.of(context).copyWith(
           scrollbars: false,
         ),
         slivers: [
           SliverList.separated(
+            addAutomaticKeepAlives: true,
             itemCount: _totalPages,
             itemBuilder: _buildItem,
             separatorBuilder: (context, index) =>
@@ -205,5 +229,25 @@ class _VerticalContinuousReaderState
         ],
       ),
     );
+  }
+}
+
+class _KeepAlivePage extends StatefulWidget {
+  final Widget child;
+  const _KeepAlivePage({super.key, required this.child});
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage>
+    with AutomaticKeepAliveClientMixin<_KeepAlivePage> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

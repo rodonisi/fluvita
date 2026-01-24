@@ -27,15 +27,15 @@ class ImageReader extends ConsumerWidget {
     return ReaderOverlay(
       seriesId: seriesId,
       chapterId: chapterId,
-      onNextPage: () async {
+      onNextPage: () {
         settings.readDirection == .leftToRight
-            ? await ref.read(navProvider.notifier).nextPage()
-            : await ref.read(navProvider.notifier).previousPage();
+            ? ref.read(navProvider.notifier).nextPage()
+            : ref.read(navProvider.notifier).previousPage();
       },
-      onPreviousPage: () async {
+      onPreviousPage: () {
         settings.readDirection == .leftToRight
-            ? await ref.read(navProvider.notifier).previousPage()
-            : await ref.read(navProvider.notifier).nextPage();
+            ? ref.read(navProvider.notifier).previousPage()
+            : ref.read(navProvider.notifier).nextPage();
       },
       onJumpToPage: (page) {
         ref.read(navProvider.notifier).jumpToPage(page);
