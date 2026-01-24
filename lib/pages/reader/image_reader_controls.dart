@@ -18,8 +18,8 @@ class ImageReaderControls extends ConsumerWidget {
         IconButton(
           icon: Icon(
             settings.readDirection == .leftToRight
-                ? LucideIcons.chevronsLeft
-                : LucideIcons.chevronsRight,
+                ? LucideIcons.chevronsRight
+                : LucideIcons.chevronsLeft,
           ),
           tooltip: 'Read Direction',
           onPressed: () {

@@ -10,6 +10,7 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
   const factory ReaderNavigationState({
     required int currentPage,
     required int totalPages,
+    required bool fromUserInteraction,
   }) = _ReaderNavigationState;
 }
 
@@ -25,17 +26,23 @@ class ReaderNavigation extends _$ReaderNavigation {
       readerProvider(seriesId: seriesId, chapterId: chapterId),
     );
 
+    listenSelf((_, next) async => await saveProgress(next.currentPage));
+
     return ReaderNavigationState(
       currentPage: readerState.value?.initialPage ?? 0,
       totalPages: readerState.value?.totalPages ?? 0,
+      fromUserInteraction: false,
     );
   }
 
-  Future<void> jumpToPage(int page) async {
+  void jumpToPage(int page, {bool fromUserInteraction = true}) {
     state = state.copyWith(
       currentPage: page.clamp(0, state.totalPages - 1),
+      fromUserInteraction: fromUserInteraction,
     );
+  }
 
+  Future<void> saveProgress(int page) async {
     await ref
         .read(
           readerProvider(
@@ -46,6 +53,6 @@ class ReaderNavigation extends _$ReaderNavigation {
         .saveProgress(page: page);
   }
 
-  Future<void> nextPage() async => await jumpToPage(state.currentPage + 1);
-  Future<void> previousPage() async => await jumpToPage(state.currentPage - 1);
+  void nextPage() => jumpToPage(state.currentPage + 1);
+  void previousPage() => jumpToPage(state.currentPage - 1);
 }
