@@ -190,6 +190,9 @@ class _VerticalContinuousReaderState
       child: CustomScrollView(
         controller: _scrollController,
         cacheExtent: MediaQuery.of(context).size.height * 100,
+        scrollBehavior: ScrollConfiguration.of(context).copyWith(
+          scrollbars: false,
+        ),
         slivers: [
           SliverList.separated(
             itemCount: _totalPages,
