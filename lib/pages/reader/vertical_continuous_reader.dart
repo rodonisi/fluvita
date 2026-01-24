@@ -189,6 +189,7 @@ class _VerticalContinuousReaderState
       controller: _observerController,
       sliverContexts: () => [if (_sliverContext != null) _sliverContext!],
       onObserve: _handleObserve,
+      toNextOverPercent: 0.5,
       child: CustomScrollView(
         controller: _scrollController,
         cacheExtent: MediaQuery.of(context).size.height * 100,
