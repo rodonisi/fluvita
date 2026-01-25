@@ -18,13 +18,24 @@ enum ReaderMode {
   vertical,
 }
 
+sealed class ImageReaderSettingsLimits {
+  static const double verticalReaderGapMin = 0.0;
+  static const double verticalReaderGapMax = 128.0;
+  static const double verticalReaderGapStep = 4.0;
+
+  static const double verticalReaderPaddingMin = 0.0;
+  static const double verticalReaderPaddingMax = 128.0;
+  static const double verticalReaderPaddingStep = 4.0;
+}
+
 @freezed
 sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
   const factory ImageReaderSettingsState({
-    required ImageScaleType scaleType,
-    required ReadDirection readDirection,
-    required ReaderMode readerMode,
-    @Default(0.0) double verticalImageGap,
+    @Default(ImageScaleType.fitWidth) ImageScaleType scaleType,
+    @Default(ReadDirection.leftToRight) ReadDirection readDirection,
+    @Default(ReaderMode.horizontal) ReaderMode readerMode,
+    @Default(0.0) double verticalReaderGap,
+    @Default(0.0) double verticalReaderPadding,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -38,11 +49,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
   ImageReaderSettingsState build() {
     persist(ref.watch(storageProvider.future));
 
-    return ImageReaderSettingsState(
-      scaleType: .fitWidth,
-      readDirection: .leftToRight,
-      readerMode: .horizontal,
-    );
+    return ImageReaderSettingsState();
   }
 
   void toggleScaleType() {
@@ -65,9 +72,51 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     );
   }
 
-  void setVerticalImageGap(double gap) {
+  void _setVerticalReaderGap(double gap) {
     state = state.copyWith(
-      verticalImageGap: gap.clamp(0.0, 64.0),
+      verticalReaderGap: gap.clamp(
+        ImageReaderSettingsLimits.verticalReaderGapMin,
+        ImageReaderSettingsLimits.verticalReaderGapMax,
+      ),
     );
+  }
+
+  void decreaseVerticalReaderGap() {
+    _setVerticalReaderGap(
+      state.verticalReaderGap - ImageReaderSettingsLimits.verticalReaderGapStep,
+    );
+  }
+
+  void increaseVerticalReaderGap() {
+    _setVerticalReaderGap(
+      state.verticalReaderGap + ImageReaderSettingsLimits.verticalReaderGapStep,
+    );
+  }
+
+  void _setVerticalReaderPadding(double padding) {
+    state = state.copyWith(
+      verticalReaderPadding: padding.clamp(
+        ImageReaderSettingsLimits.verticalReaderPaddingMin,
+        ImageReaderSettingsLimits.verticalReaderPaddingMax,
+      ),
+    );
+  }
+
+  void decreaseVerticalReaderPadding() {
+    _setVerticalReaderPadding(
+      state.verticalReaderPadding -
+          ImageReaderSettingsLimits.verticalReaderPaddingStep,
+    );
+  }
+
+  void increaseVerticalReaderPadding() {
+    _setVerticalReaderPadding(
+      state.verticalReaderPadding +
+          ImageReaderSettingsLimits.verticalReaderPaddingStep,
+    );
+  }
+
+  void reset() {
+    state = ImageReaderSettingsState();
   }
 }

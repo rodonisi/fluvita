@@ -9,46 +9,17 @@ class EpubReaderControls extends ConsumerWidget {
   const EpubReaderControls({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(epubReaderSettingsProvider);
-
-    return Row(
-      mainAxisAlignment: .spaceEvenly,
-      children: [
-        IconButton(
-          icon: const Icon(LucideIcons.aArrowDown),
-          tooltip: 'Decrease Font Size',
-          onPressed: settings.canDecreaseFontSize
-              ? () {
-                  ref
-                      .read(epubReaderSettingsProvider.notifier)
-                      .decreaseFontSize();
-                }
-              : null,
-        ),
-        IconButton(
-          icon: const Icon(LucideIcons.aArrowUp),
-          tooltip: 'Increase Font Size',
-          onPressed: settings.canIncreaseFontSize
-              ? () {
-                  ref
-                      .read(epubReaderSettingsProvider.notifier)
-                      .increaseFontSize();
-                }
-              : null,
-        ),
-        IconButton(
-          icon: const Icon(LucideIcons.slidersHorizontal),
-          tooltip: 'Reader Settings',
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              showDragHandle: true,
-              isScrollControlled: true,
-              builder: (context) => const _ReaderSettingsBottomSheet(),
-            );
-          },
-        ),
-      ],
+    return IconButton(
+      icon: const Icon(LucideIcons.slidersHorizontal),
+      tooltip: 'Reader Settings',
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          isScrollControlled: true,
+          builder: (context) => const _ReaderSettingsBottomSheet(),
+        );
+      },
     );
   }
 }

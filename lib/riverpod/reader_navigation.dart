@@ -19,7 +19,7 @@ class ReaderNavigation extends _$ReaderNavigation {
   @override
   ReaderNavigationState build({
     required int seriesId,
-    required int chapterId,
+    int? chapterId,
   }) {
     // Initialize from reader state's last saved page
     final readerState = ref.watch(
