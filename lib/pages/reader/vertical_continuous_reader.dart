@@ -208,6 +208,19 @@ class _VerticalContinuousReaderState
       },
     );
 
+    ref.listen(
+      imageReaderSettingsProvider.select(
+        (settings) => settings.verticalReaderPadding,
+      ),
+      (previous, next) {
+        if (previous != next) {
+          setState(() {
+            _cachedHeights.clear();
+          });
+        }
+      },
+    );
+
     return SliverViewObserver(
       controller: _observerController,
       sliverContexts: () => [if (_sliverContext != null) _sliverContext!],
@@ -219,12 +232,17 @@ class _VerticalContinuousReaderState
           scrollbars: false,
         ),
         slivers: [
-          SliverList.separated(
-            addAutomaticKeepAlives: true,
-            itemCount: _totalPages,
-            itemBuilder: _buildItem,
-            separatorBuilder: (context, index) =>
-                SizedBox(height: settings.verticalImageGap),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: settings.verticalReaderPadding,
+            ),
+            sliver: SliverList.separated(
+              addAutomaticKeepAlives: true,
+              itemCount: _totalPages,
+              itemBuilder: _buildItem,
+              separatorBuilder: (context, index) =>
+                  SizedBox(height: settings.verticalReaderGap),
+            ),
           ),
         ],
       ),

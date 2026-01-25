@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/reader_navigation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/pages/reader/epub_reader_controls.dart';
 import 'package:fluvita/pages/reader/image_reader_controls.dart';
@@ -31,13 +32,26 @@ class ReaderControls extends HookConsumerWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            PageSlider(
-              seriesId: seriesId,
-              chapterId: chapterId,
-              onJumpToPage: onJumpToPage,
+            Row(
+              children: [
+                Expanded(
+                  child: PageSlider(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    onJumpToPage: (page) => ref
+                        .read(
+                          readerNavigationProvider(
+                            seriesId: seriesId,
+                            chapterId: chapterId,
+                          ).notifier,
+                        )
+                        .jumpToPage(page),
+                  ),
+                ),
+                if (format == .epub) EpubReaderControls(),
+                if (format == .cbz) ImageReaderControls(),
+              ],
             ),
-            if (format == .epub) EpubReaderControls(),
-            if (format == .cbz) ImageReaderControls(),
           ],
         ),
       ),

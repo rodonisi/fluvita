@@ -29,16 +29,17 @@ class PageSlider extends HookConsumerWidget {
     final navState = ref.watch(
       readerNavigationProvider(
         seriesId: seriesId,
-        chapterId: chapterId ?? 0,
+        chapterId: chapterId,
       ),
     );
     final currentPage = navState.currentPage + 1;
-    final sliderValue = useState(currentPage * 1.0);
+    final sliderValue = useState(currentPage.toDouble());
 
     useEffect(() {
-      sliderValue.value = currentPage * 1.0;
+      sliderValue.value = currentPage.toDouble();
       return null;
     }, [currentPage]);
+
     return Row(
       mainAxisAlignment: .spaceEvenly,
       children: [
@@ -47,16 +48,16 @@ class PageSlider extends HookConsumerWidget {
         Expanded(
           child: Slider(
             value: sliderValue.value,
-            min: 1,
+            min: 0,
             max: totalPages.toDouble(),
             divisions: totalPages > 1 ? totalPages - 1 : null,
-            label: '${sliderValue.value.floor()}',
+            label: '${sliderValue.value.floor() + 1}',
             onChanged: (value) {
               sliderValue.value = value;
             },
             onChangeEnd: (value) {
               onJumpToPage?.call(
-                sliderValue.value.floor() - 1,
+                sliderValue.value.floor(),
               );
             },
           ),
