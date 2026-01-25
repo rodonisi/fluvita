@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-class MeasuredImage extends StatefulWidget {
+class MeasuredWidget extends StatefulWidget {
   final Widget child;
-  final ValueChanged<Size> onSizeMeasured;
+  final ValueChanged<Size>? onSizeMeasured;
 
-  const MeasuredImage({
+  const MeasuredWidget({
     super.key,
     required this.child,
-    required this.onSizeMeasured,
+    this.onSizeMeasured,
   });
 
   @override
-  State<MeasuredImage> createState() => _MeasuredImageState();
+  State<MeasuredWidget> createState() => _MeasuredWidgetState();
 }
 
-class _MeasuredImageState extends State<MeasuredImage> {
+class _MeasuredWidgetState extends State<MeasuredWidget> {
   final _key = GlobalKey();
 
   @override
@@ -26,7 +26,7 @@ class _MeasuredImageState extends State<MeasuredImage> {
   void _measureSize(_) {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null && renderBox.hasSize) {
-      widget.onSizeMeasured(renderBox.size);
+      widget.onSizeMeasured?.call(renderBox.size);
     }
   }
 
