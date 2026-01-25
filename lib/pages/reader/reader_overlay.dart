@@ -19,7 +19,7 @@ enum ShowSnackbar {
 }
 
 class ReaderOverlay extends HookConsumerWidget {
-  static const double snackbarOffset = 120.0;
+  static const double snackbarOffset = 80.0;
 
   final void Function()? onNextPage;
   final void Function()? onPreviousPage;
