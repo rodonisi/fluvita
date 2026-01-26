@@ -1,4 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
 import 'package:fluvita/riverpod/api/series.dart';
 import 'package:fluvita/riverpod/router.dart';
@@ -141,6 +147,7 @@ class SeriesInfo extends ConsumerWidget {
                   ),
                 ],
               ),
+              Summary(seriesId: seriesId),
             ],
           ),
         ),
@@ -314,6 +321,88 @@ class Cover extends ConsumerWidget {
             });
           },
         ),
+      ),
+    );
+  }
+}
+
+class Summary extends HookConsumerWidget {
+  final int seriesId;
+
+  const Summary({
+    super.key,
+    required this.seriesId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(
+      seriesMetadataProvider(seriesId: seriesId).select(
+        (value) => value.asData?.value.summary ?? '',
+      ),
+    );
+    final collapsed = useState(true);
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .end,
+      children: [
+        TextButton(
+          onPressed: () => collapsed.value = !collapsed.value,
+          child: Text(
+            collapsed.value ? 'Show More' : 'Show Less',
+          ),
+        ),
+        _SummaryContent(summary: summary, collapsed: collapsed.value),
+      ],
+    );
+  }
+}
+
+class _SummaryContent extends HookWidget {
+  final String summary;
+  final bool collapsed;
+
+  const _SummaryContent({
+    super.key,
+    required this.summary,
+    required this.collapsed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // if (!collapsed) {
+    //   return HtmlWidget(summary);
+    // }
+    final height = useMemoized(() => collapsed ? 60.0 : null, [collapsed]);
+
+    return AnimatedSize(
+      duration: 100.ms,
+      alignment: Alignment.topCenter,
+      child: SizedBox(
+        height: height,
+        child: collapsed
+            ? ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: const [0.5, 0.9],
+                  ).createShader(bounds);
+                },
+                blendMode: .dstIn,
+                child: Markdown(
+                  data: summary,
+                  shrinkWrap: true,
+                ),
+              )
+            : Markdown(
+                data: summary,
+                shrinkWrap: true,
+              ),
       ),
     );
   }

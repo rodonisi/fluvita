@@ -37,6 +37,8 @@ class SeriesAppBar extends HookConsumerWidget {
       [infoHeight.value, collapsedHeight],
     );
 
+    final maxFlexibleSpaceHeight = MediaQuery.of(context).size.height * 0.7;
+
     return AsyncSliver(
       asyncValue: series,
       data: (data) {
@@ -68,7 +70,12 @@ class SeriesAppBar extends HookConsumerWidget {
                           log.d('Measured SeriesInfo size: $size');
                           infoHeight.value = size.height;
                         },
-                        child: SeriesInfo(seriesId: data.id),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: maxFlexibleSpaceHeight,
+                          ),
+                          child: SeriesInfo(seriesId: data.id),
+                        ),
                       ),
                     ),
                   ),
