@@ -5,12 +5,10 @@ import 'package:fluvita/pages/library/series_detail_page/series_info.dart';
 import 'package:fluvita/riverpod/api/series.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:fluvita/widgets/async_value.dart';
+import 'package:fluvita/widgets/measured_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SeriesAppBar extends HookConsumerWidget {
-  static const height = 500.0;
-  static const expandedSummaryHeight = 800.0;
-
   final int seriesId;
   final PreferredSizeWidget? bottom;
 
@@ -22,9 +20,22 @@ class SeriesAppBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
     final series = ref.watch(seriesProvider(seriesId: seriesId));
+
     final isCollapsed = useState(false);
-    final expandedHeight = useState(height);
+    final infoHeight = useState(500.0);
+
+    final collapsedHeight = useMemoized(
+      () => kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
+      [kToolbarHeight, topPadding, bottom],
+    );
+
+    final expandedHeight = useMemoized(
+      () => infoHeight.value + collapsedHeight,
+      [infoHeight.value, collapsedHeight],
+    );
 
     return AsyncSliver(
       asyncValue: series,
@@ -36,29 +47,31 @@ class SeriesAppBar extends HookConsumerWidget {
                 ).animate(target: isCollapsed.value ? 1 : 0).fade()
               : null,
           pinned: true,
-          expandedHeight: expandedHeight.value,
+          expandedHeight: expandedHeight,
           flexibleSpace: LayoutBuilder(
             builder: (context, constraints) {
-              final topPadding = MediaQuery.of(context).padding.top;
-              log.d(
-                'height: ${constraints.maxHeight}, top padding: $topPadding',
-              );
               final value =
-                  (constraints.maxHeight - kToolbarHeight) /
-                  (expandedHeight.value - kToolbarHeight - topPadding);
+                  (constraints.maxHeight - kToolbarHeight) / infoHeight.value;
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                isCollapsed.value =
-                    constraints.maxHeight <=
-                    kToolbarHeight +
-                        topPadding +
-                        (bottom?.preferredSize.height ?? .0);
+                isCollapsed.value = constraints.maxHeight <= collapsedHeight;
               });
 
               return Opacity(
                 opacity: value.clamp(0.0, 1.0),
                 child: FlexibleSpaceBar(
-                  background: SeriesInfo(seriesId: data.id),
+                  background: SeriesInfoFlexibleSpace(
+                    seriesId: data.id,
+                    child: SafeArea(
+                      child: MeasuredWidget(
+                        onSizeMeasured: (size) {
+                          log.d('Measured SeriesInfo size: $size');
+                          infoHeight.value = size.height;
+                        },
+                        child: SeriesInfo(seriesId: data.id),
+                      ),
+                    ),
+                  ),
                 ),
               );
             },

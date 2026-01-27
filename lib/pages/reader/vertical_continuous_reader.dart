@@ -6,7 +6,7 @@ import 'package:fluvita/utils/logging.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
 import 'package:fluvita/widgets/async_value.dart';
-import 'package:fluvita/widgets/measured_image.dart';
+import 'package:fluvita/widgets/measured_widget.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 
 class VerticalContinuousReader extends ConsumerStatefulWidget {
@@ -137,7 +137,7 @@ class _VerticalContinuousReaderState
 
           return Async(
             asyncValue: image,
-            data: (data) => MeasuredImage(
+            data: (data) => MeasuredWidget(
               onSizeMeasured: (size) {
                 if (size.height > 0) {
                   log.d('Caching height for page $index: ${size.height}');

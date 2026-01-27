@@ -11,11 +11,13 @@ import 'package:fluvita/widgets/cover_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class SeriesInfo extends ConsumerWidget {
+class SeriesInfoFlexibleSpace extends ConsumerWidget {
   final int seriesId;
-  const SeriesInfo({
+  final Widget child;
+  const SeriesInfoFlexibleSpace({
     super.key,
     required this.seriesId,
+    required this.child,
   });
 
   @override
@@ -48,84 +50,99 @@ class SeriesInfo extends ConsumerWidget {
                 ),
               ),
             ),
-            Positioned.fill(
-              child: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.largePadding,
-                  ),
-                  child: Column(
-                    spacing: LayoutConstants.largePadding,
-                    crossAxisAlignment: .start,
-                    mainAxisAlignment: .start,
-                    mainAxisSize: .min,
-                    children: [
-                      SizedBox.square(dimension: kToolbarHeight),
-                      Text(
-                        series.name,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        maxLines: 2,
-                        overflow: .ellipsis,
-                      ),
-                      Row(
-                        spacing: LayoutConstants.largePadding,
-                        children: [
-                          SizedBox(
-                            height: 250,
-                            child: Cover(seriesId: series.id),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              spacing: LayoutConstants.largePadding,
-                              children: [
-                                Wrap(
-                                  spacing: LayoutConstants.mediumPadding,
-                                  runSpacing: LayoutConstants.mediumPadding,
-                                  alignment: .spaceBetween,
-                                  children: [
-                                    if ((series.wordCount ?? 0) > 0)
-                                      WordCount(wordCount: series.wordCount!),
-                                    Pages(pages: series.pages),
-                                    RemainingHours(
-                                      hours: series.avgHoursToRead,
-                                    ),
-                                    if (metadata.releaseYear != null)
-                                      ReleaseYear(
-                                        releaseYear: metadata.releaseYear!,
-                                      ),
-                                  ],
-                                ),
-                                Wrap(
-                                  spacing: LayoutConstants.mediumPadding,
-                                  runSpacing: LayoutConstants.mediumPadding,
-                                  alignment: .spaceBetween,
-                                  children: [
-                                    LimitedList(
-                                      title: 'Writers',
-                                      items: metadata.writers
-                                          .map((w) => w.name)
-                                          .toList(),
-                                    ),
-                                    LimitedList(
-                                      title: 'Genres',
-                                      items: metadata.genres
-                                          .map((a) => a.name)
-                                          .toList(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            child,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SeriesInfo extends ConsumerWidget {
+  final int seriesId;
+  const SeriesInfo({
+    super.key,
+    required this.seriesId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final series = ref.watch(seriesProvider(seriesId: seriesId));
+    final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
+    return Async(
+      asyncValue: metadata,
+      data: (metadata) => Async(
+        asyncValue: series,
+        data: (series) => Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: LayoutConstants.largePadding,
+          ),
+          child: Column(
+            spacing: LayoutConstants.largePadding,
+            crossAxisAlignment: .start,
+            mainAxisAlignment: .start,
+            mainAxisSize: .min,
+            children: [
+              SizedBox.square(dimension: kToolbarHeight),
+              Text(
+                series.name,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Row(
+                spacing: LayoutConstants.largePadding,
+                children: [
+                  SizedBox(
+                    height: 250,
+                    child: Cover(seriesId: series.id),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: .start,
+                      spacing: LayoutConstants.largePadding,
+                      children: [
+                        Wrap(
+                          spacing: LayoutConstants.mediumPadding,
+                          runSpacing: LayoutConstants.mediumPadding,
+                          alignment: .spaceBetween,
+                          children: [
+                            if ((series.wordCount ?? 0) > 0)
+                              WordCount(wordCount: series.wordCount!),
+                            Pages(pages: series.pages),
+                            RemainingHours(
+                              hours: series.avgHoursToRead,
+                            ),
+                            if (metadata.releaseYear != null)
+                              ReleaseYear(
+                                releaseYear: metadata.releaseYear!,
+                              ),
+                          ],
+                        ),
+                        Wrap(
+                          spacing: LayoutConstants.mediumPadding,
+                          runSpacing: LayoutConstants.mediumPadding,
+                          alignment: .spaceBetween,
+                          children: [
+                            LimitedList(
+                              title: 'Writers',
+                              items: metadata.writers
+                                  .map((w) => w.name)
+                                  .toList(),
+                            ),
+                            LimitedList(
+                              title: 'Genres',
+                              items: metadata.genres
+                                  .map((a) => a.name)
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

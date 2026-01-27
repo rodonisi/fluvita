@@ -28,9 +28,13 @@ class ReaderControls extends HookConsumerWidget {
     return Card(
       margin: LayoutConstants.mediumEdgeInsets,
       child: Padding(
-        padding: LayoutConstants.smallEdgeInsets,
+        padding: EdgeInsets.symmetric(
+          horizontal: LayoutConstants.mediumPadding,
+          vertical: LayoutConstants.largePadding,
+        ),
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: .end,
           children: [
             Row(
               children: [

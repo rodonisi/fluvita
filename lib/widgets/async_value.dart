@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/utils/logging.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class Async<T> extends StatelessWidget {
   final AsyncValue<T> asyncValue;
@@ -21,7 +23,12 @@ class Async<T> extends StatelessWidget {
       data: data,
       loading:
           loading ?? () => const Center(child: CircularProgressIndicator()),
-      error: error ?? (error, stack) => Center(child: Text('Error: $error')),
+      error:
+          error ??
+          (error, stack) => _Error(
+            error: error,
+            stacktrace: stack,
+          ),
     );
   }
 }
@@ -51,8 +58,35 @@ class AsyncSliver<T> extends StatelessWidget {
           ),
       error:
           error ??
-          (error, stack) =>
-              SliverToBoxAdapter(child: Center(child: Text('Error: $error'))),
+          (error, stack) {
+            return SliverToBoxAdapter(
+              child: _Error(
+                error: error,
+                stacktrace: stack,
+              ),
+            );
+          },
+    );
+  }
+}
+
+class _Error extends StatelessWidget {
+  final Object error;
+  final StackTrace stacktrace;
+  const _Error({required this.error, required this.stacktrace});
+
+  @override
+  Widget build(BuildContext context) {
+    log.e(
+      'Provider errored',
+      error: error,
+      stackTrace: stacktrace,
+    );
+    return Center(
+      child: Icon(
+        LucideIcons.circleX,
+        color: Theme.of(context).colorScheme.error,
+      ),
     );
   }
 }
