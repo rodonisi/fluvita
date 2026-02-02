@@ -60,6 +60,7 @@ Future<DocumentFragment> preprocessedHtml(
   Ref ref, {
   required int chapterId,
   int? page,
+  String? resumeScrollId,
 }) async {
   final html = await ref.watch(
     bookPageProvider(chapterId: chapterId, page: page).future,
@@ -68,6 +69,9 @@ Future<DocumentFragment> preprocessedHtml(
   Future<void> walk(Node node) async {
     for (var n in node.children) {
       n.attributes['scroll-id'] = n.scrollId;
+      if (n.attributes['scroll-id'] == resumeScrollId) {
+        n.classes.add('resume-paragraph');
+      }
 
       if (n.localName == 'img') {
         final src = 'https:${n.attributes['src']}';
@@ -141,9 +145,14 @@ Future<PageContent> preprocessedPage(
   Ref ref, {
   required int chapterId,
   int? page,
+  String? resumeScrollId,
 }) async {
   final frag = await ref.watch(
-    preprocessedHtmlProvider(chapterId: chapterId, page: page).future,
+    preprocessedHtmlProvider(
+      chapterId: chapterId,
+      page: page,
+      resumeScrollId: resumeScrollId,
+    ).future,
   );
 
   final styles = <String, Map<String, String>>{};
@@ -153,6 +162,10 @@ Future<PageContent> preprocessedPage(
     styles.addAll(_parseStyles(stylesElement.innerHtml));
     stylesElement.remove();
   }
+
+  styles['.resume-paragraph'] = {
+    'background-color': 'rgba(255,255,0,0.2);',
+  };
 
   return PageContent(root: frag, styles: styles);
 }

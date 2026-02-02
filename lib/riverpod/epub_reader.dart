@@ -86,10 +86,12 @@ class EpubReader extends _$EpubReader {
         )
         .currentPage;
 
+    final scrollId = readerState.bookScrollId;
     final page = await ref.watch(
       preprocessedPageProvider(
         chapterId: chapterId,
         page: currentPage,
+        resumeScrollId: scrollId,
       ).future,
     );
 
@@ -97,7 +99,6 @@ class EpubReader extends _$EpubReader {
       root: page.root.nodes.firstWhere((node) => node is Element) as Element,
     );
 
-    final scrollId = readerState.bookScrollId;
     final hadState = state.value != null;
     final fromLast = (state.value != null)
         ? state.value!.pageIndex == currentPage + 1
@@ -261,7 +262,7 @@ class EpubReader extends _$EpubReader {
             totalPages: measuring.totalPages,
             page: measuring.page,
             subpage: fragment,
-            subpageIndex: measuring.subpageIndex,
+            subpageIndex: newSubpages.length - 1,
             subpages: newSubpages,
           ),
         );
