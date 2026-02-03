@@ -40,7 +40,7 @@ sealed class ReaderState with _$ReaderState {
 
 @riverpod
 class Reader extends _$Reader {
-  Timer? saveProgressDebounce;
+  Timer? _saveProgressDebounce;
 
   @override
   Future<ReaderState> build({required int seriesId, int? chapterId}) async {
@@ -73,9 +73,9 @@ class Reader extends _$Reader {
     if (state.isLoading) return;
     final current = await future;
 
-    saveProgressDebounce?.cancel();
+    _saveProgressDebounce?.cancel();
 
-    saveProgressDebounce = Timer(500.ms, () async {
+    _saveProgressDebounce = Timer(500.ms, () async {
       log.d(
         'Saving progress: page=$page, scrollId=$scrollId, chapter=${current.chapter.id}',
       );
