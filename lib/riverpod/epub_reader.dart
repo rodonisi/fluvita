@@ -22,6 +22,7 @@ sealed class EpubReaderState with _$EpubReaderState {
     required int totalPages,
     required PageContent page,
     required DocumentFragment subpage,
+    required NodeCursor cursor,
     @Default(0) int subpageIndex,
     @Default(false) bool fromLast,
     @Default(null) String? scrollId,
@@ -33,6 +34,7 @@ sealed class EpubReaderState with _$EpubReaderState {
     required int totalPages,
     required PageContent page,
     required DocumentFragment subpage,
+    required NodeCursor cursor,
     @Default(0) int subpageIndex,
     @Default([]) List<DocumentFragment> subpages,
   }) = Display;
@@ -61,7 +63,6 @@ sealed class EpubReaderState with _$EpubReaderState {
 
 @riverpod
 class EpubReader extends _$EpubReader {
-  late NodeCursor cursor;
   bool _processingRender = false;
 
   @override
@@ -88,7 +89,7 @@ class EpubReader extends _$EpubReader {
         .currentPage;
 
     final scrollId = readerState.bookScrollId;
-    final page = await ref.watch(
+    final pageContent = await ref.watch(
       preprocessedPageProvider(
         chapterId: chapterId,
         page: currentPage,
@@ -96,8 +97,10 @@ class EpubReader extends _$EpubReader {
       ).future,
     );
 
-    cursor = NodeCursor(
-      root: page.root.nodes.firstWhere((node) => node is Element) as Element,
+    final cursor = NodeCursor(
+      root:
+          pageContent.root.nodes.firstWhere((node) => node is Element)
+              as Element,
     );
 
     final hadState = state.value != null;
@@ -131,9 +134,10 @@ class EpubReader extends _$EpubReader {
       pageIndex: currentPage,
       totalPages: readerState.totalPages,
       fromLast: fromLast,
-      page: page,
+      page: pageContent,
       subpage: fragment,
       scrollId: hadState ? null : scrollId,
+      cursor: cursor,
     );
   }
 
@@ -158,12 +162,13 @@ class EpubReader extends _$EpubReader {
               subpage: measuring.subpages[measuring.subpageIndex],
               subpageIndex: measuring.subpageIndex,
               subpages: measuring.subpages,
+              cursor: measuring.cursor,
             ),
           );
           return;
         }
 
-        final next = cursor.next();
+        final next = measuring.cursor.next();
 
         if (next == null) {
           log.d('no next element, all elements measured');
@@ -179,6 +184,7 @@ class EpubReader extends _$EpubReader {
               subpage: measuring.subpage,
               subpageIndex: measuring.subpageIndex,
               subpages: newSubpages,
+              cursor: measuring.cursor,
             ),
           );
           return;
@@ -204,13 +210,13 @@ class EpubReader extends _$EpubReader {
       measuring: (measuring) {
         log.d('overflow detected');
 
-        if (cursor.splitChild()) {
+        if (measuring.cursor.splitChild()) {
           log.d('splitting child node for overflow');
           addElement();
           return;
         }
 
-        final newSubpageNode = cursor.split();
+        final newSubpageNode = measuring.cursor.split();
         if (!newSubpageNode.hasChildNodes()) {
           log.d('split resulted in an empty page, re-measuring');
           state = AsyncData(
@@ -267,6 +273,7 @@ class EpubReader extends _$EpubReader {
             subpage: fragment,
             subpageIndex: newSubpages.length - 1,
             subpages: newSubpages,
+            cursor: measuring.cursor,
           ),
         );
       },
@@ -292,7 +299,7 @@ class EpubReader extends _$EpubReader {
         }
 
         //  Need to measure a new subpage
-        if (cursor.hasNext) {
+        if (display.cursor.hasNext) {
           log.d('start measuring for subpage $nextSubpageIndex');
           final next = EpubReaderState.measuring(
             pageIndex: display.pageIndex,
@@ -301,6 +308,7 @@ class EpubReader extends _$EpubReader {
             subpage: DocumentFragment(),
             page: display.page,
             subpages: display.subpages,
+            cursor: display.cursor,
           );
 
           state = const AsyncLoading();
