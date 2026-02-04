@@ -27,14 +27,16 @@ class SeriesAppBar extends HookConsumerWidget {
     final isCollapsed = useState(false);
     final infoHeight = useState(500.0);
 
-    final collapsedHeight = useMemoized(
-      () => kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
-      [kToolbarHeight, topPadding, bottom],
+    final minFlexibleHeight = useMemoized(
+      () => kToolbarHeight + topPadding + (bottom?.preferredSize.height ?? 0.0),
+      [topPadding],
     );
-
     final expandedHeight = useMemoized(
-      () => infoHeight.value + collapsedHeight,
-      [infoHeight.value, collapsedHeight],
+      () =>
+          infoHeight.value +
+          minFlexibleHeight +
+          (bottom?.preferredSize.height ?? 0.0),
+      [infoHeight.value, minFlexibleHeight, bottom],
     );
 
     return AsyncSliver(
@@ -51,10 +53,11 @@ class SeriesAppBar extends HookConsumerWidget {
           flexibleSpace: LayoutBuilder(
             builder: (context, constraints) {
               final value =
-                  (constraints.maxHeight - kToolbarHeight) / infoHeight.value;
+                  (constraints.maxHeight - minFlexibleHeight) /
+                  infoHeight.value;
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                isCollapsed.value = constraints.maxHeight <= collapsedHeight;
+                isCollapsed.value = constraints.maxHeight <= minFlexibleHeight;
               });
 
               return Opacity(
