@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
 import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/riverpod/api/want_to_read.dart';
 import 'package:fluvita/riverpod/router.dart';
 import 'package:fluvita/utils/extensions/color.dart';
 import 'package:fluvita/utils/extensions/int.dart';
@@ -100,10 +101,12 @@ class SeriesInfo extends ConsumerWidget {
                       crossAxisAlignment: .start,
                       spacing: LayoutConstants.largePadding,
                       children: [
+                        WantToRead(seriesId: series.id),
                         Wrap(
                           spacing: LayoutConstants.mediumPadding,
                           runSpacing: LayoutConstants.mediumPadding,
-                          alignment: .spaceBetween,
+                          alignment: .center,
+                          runAlignment: .start,
                           children: [
                             if ((series.wordCount ?? 0) > 0)
                               WordCount(wordCount: series.wordCount!),
@@ -180,6 +183,32 @@ class LimitedList extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class WantToRead extends ConsumerWidget {
+  final int seriesId;
+  const WantToRead({super.key, required this.seriesId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wantToRead = ref.watch(wantToReadProvider(seriesId: seriesId));
+
+    return Async(
+      asyncValue: wantToRead,
+      data: (data) {
+        return IconButton(
+          icon: Icon(data ? LucideIcons.star : LucideIcons.starOff),
+          color: data ? Theme.of(context).colorScheme.primary : null,
+          onPressed: () async {
+            final notifier = ref.read(
+              wantToReadProvider(seriesId: seriesId).notifier,
+            );
+            data ? notifier.remove() : notifier.add();
+          },
+        );
+      },
     );
   }
 }

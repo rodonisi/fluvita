@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluvita/utils/layout_constants.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class NavigatorContainer extends StatelessWidget {
+class NavigatorContainer extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const NavigatorContainer({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       extendBody: true,
       body: navigationShell,
@@ -27,14 +28,20 @@ class NavigatorContainer extends StatelessWidget {
             borderRadius: BorderRadiusGeometry.all(Radius.circular(24.0)),
             child: NavigationBar(
               selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: (index) => navigationShell.goBranch(
-                index,
-                initialLocation: true,
-              ),
+              onDestinationSelected: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: true,
+                );
+              },
               destinations: const [
                 NavigationDestination(
                   icon: Icon(LucideIcons.house),
                   label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.star),
+                  label: 'Want to Read',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.library),

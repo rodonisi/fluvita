@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:fluvita/pages/home/home_page.dart';
 import 'package:fluvita/pages/library/libraries_page/libraries_page.dart';
 import 'package:fluvita/pages/library/series_detail_page/series_detail_page.dart';
-import 'package:fluvita/pages/library/series_page.dart';
+import 'package:fluvita/pages/library/series_page/series_page.dart';
+import 'package:fluvita/pages/library/want_to_read/want_to_read_page.dart';
 import 'package:fluvita/pages/reader/reader_page.dart';
 import 'package:fluvita/pages/settings/settings_page.dart';
 import 'package:fluvita/widgets/navigator_container.dart';
@@ -24,6 +25,11 @@ GoRouter router(Ref ref) {
     TypedStatefulShellBranch<HomeBranch>(
       routes: [
         TypedGoRoute<HomeRoute>(path: '/'),
+      ],
+    ),
+    TypedStatefulShellBranch<WantToReadBranch>(
+      routes: [
+        TypedGoRoute<WantToReadRoute>(path: '/want-to-read'),
       ],
     ),
     TypedStatefulShellBranch<LibraryBranch>(
@@ -66,6 +72,10 @@ class HomeBranch extends StatefulShellBranchData {
   const HomeBranch();
 }
 
+class WantToReadBranch extends StatefulShellBranchData {
+  const WantToReadBranch();
+}
+
 class LibraryBranch extends StatefulShellBranchData {
   const LibraryBranch();
 }
@@ -79,6 +89,14 @@ class HomeRoute extends GoRouteData with $HomeRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const HomePage();
+}
+
+class WantToReadRoute extends GoRouteData with $WantToReadRoute {
+  const WantToReadRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const WantToReadPage();
 }
 
 class LibraryRoute extends GoRouteData with $LibraryRoute {
