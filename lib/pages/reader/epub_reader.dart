@@ -1,3 +1,4 @@
+import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fluvita/pages/reader/reader_overlay.dart';
@@ -140,6 +141,7 @@ class RenderContent extends ConsumerWidget {
           child: HtmlWidget(
             html,
             buildAsync: false,
+            enableCaching: true,
             customStylesBuilder: (element) {
               final s = element.classes
                   .map((className) {
@@ -154,9 +156,10 @@ class RenderContent extends ConsumerWidget {
                     return acc;
                   });
 
+              s.addAll(styles[element.localName] ?? {});
+
               return s;
             },
-            enableCaching: true,
             textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontSize: epubSettings.fontSize,
               height: epubSettings.lineHeight,

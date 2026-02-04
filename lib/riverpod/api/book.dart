@@ -165,6 +165,8 @@ Future<PageContent> preprocessedPage(
     'background-color': 'rgba(255,255,0,0.2);',
   };
 
+  styles['a'] = {'text-decoration': 'none'};
+
   return PageContent(root: frag, styles: styles);
 }
 
