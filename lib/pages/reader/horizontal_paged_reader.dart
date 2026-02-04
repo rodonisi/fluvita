@@ -51,6 +51,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
           controller: pageController,
           allowImplicitScrolling: true,
           scrollDirection: .horizontal,
+          reverse: settings.readDirection == .rightToLeft,
           itemCount: state.totalPages,
           pageSnapping: true,
           onPageChanged: (index) {
