@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fluvita/pages/library/series_detail_page/series_app_bar.dart';
-import 'package:fluvita/widgets/adaptive_sliver_grid.dart';
 import 'package:fluvita/widgets/chapter_card.dart';
+import 'package:fluvita/pages/library/series_detail_page/series_app_bar.dart';
+import 'package:fluvita/widgets/volume_card.dart';
+import 'package:fluvita/widgets/adaptive_sliver_grid.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/models/chapter_model.dart';
 import 'package:fluvita/models/volume_model.dart';
 import 'package:fluvita/riverpod/api/series.dart';
-import 'package:fluvita/riverpod/router.dart';
 import 'package:fluvita/widgets/async_value.dart';
-import 'package:fluvita/widgets/cover_image.dart';
 import 'package:fluvita/widgets/sliver_bottom_padding.dart';
 
 class SeriesDetailPage extends HookConsumerWidget {
@@ -150,19 +149,7 @@ class _VolumeGrid extends StatelessWidget {
       itemCount: volumes.length,
       builder: (context, index) {
         final volume = volumes[index];
-        return ChapterCard(
-          title: volume.name,
-          coverImage: VolumeCoverImage(volumeId: volume.id),
-          progress: volume.pagesRead / volume.pages,
-          onTap: () {
-            if (volume.chapters.isNotEmpty) {
-              ReaderRoute(
-                seriesId: volume.seriesId,
-                chapterId: volume.chapters.first.id,
-              ).push(context);
-            }
-          },
-        );
+        return VolumeCard(volume: volume);
       },
     );
   }
@@ -180,17 +167,7 @@ class _ChapterGrid extends StatelessWidget {
       itemCount: chapters.length,
       builder: (context, index) {
         final chapter = chapters[index];
-        return ChapterCard(
-          title: chapter.title,
-          coverImage: ChapterCoverImage(chapterId: chapter.id),
-          progress: chapter.pagesRead / chapter.pages,
-          onTap: () {
-            ReaderRoute(
-              seriesId: seriesId,
-              chapterId: chapter.id,
-            ).push(context);
-          },
-        );
+        return ChapterCard(chapter: chapter, seriesId: seriesId);
       },
     );
   }

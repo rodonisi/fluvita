@@ -7,7 +7,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ProviderScope(
-      // retry: (retryCount, error) => null,
       child: const App(),
     ),
   );

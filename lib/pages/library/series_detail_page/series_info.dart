@@ -6,8 +6,9 @@ import 'package:fluvita/riverpod/router.dart';
 import 'package:fluvita/utils/extensions/color.dart';
 import 'package:fluvita/utils/extensions/int.dart';
 import 'package:fluvita/utils/layout_constants.dart';
+import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/async_value.dart';
-import 'package:fluvita/widgets/chapter_card.dart';
+import 'package:fluvita/widgets/cover_card.dart';
 import 'package:fluvita/widgets/cover_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -101,12 +102,45 @@ class SeriesInfo extends ConsumerWidget {
                       crossAxisAlignment: .start,
                       spacing: LayoutConstants.largePadding,
                       children: [
-                        WantToRead(seriesId: series.id),
                         Wrap(
                           spacing: LayoutConstants.mediumPadding,
                           runSpacing: LayoutConstants.mediumPadding,
-                          alignment: .center,
-                          runAlignment: .start,
+                          alignment: .spaceBetween,
+                          children: [
+                            WantToRead(seriesId: series.id),
+                            ActionsMenuButton(
+                              child: Icon(LucideIcons.ellipsis),
+                              onMarkRead: () {
+                                ref
+                                    .read(
+                                      markSeriesReadProvider(
+                                        seriesId: seriesId,
+                                      ).notifier,
+                                    )
+                                    .markRead();
+                                ref.invalidate(
+                                  seriesDetailProvider(seriesId: seriesId),
+                                );
+                              },
+                              onMarkUnread: () {
+                                ref
+                                    .read(
+                                      markSeriesReadProvider(
+                                        seriesId: seriesId,
+                                      ).notifier,
+                                    )
+                                    .markUnread();
+                                ref.invalidate(
+                                  seriesDetailProvider(seriesId: seriesId),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        Wrap(
+                          spacing: LayoutConstants.mediumPadding,
+                          runSpacing: LayoutConstants.mediumPadding,
+                          alignment: .spaceBetween,
                           children: [
                             if ((series.wordCount ?? 0) > 0)
                               WordCount(wordCount: series.wordCount!),
@@ -326,7 +360,7 @@ class Cover extends ConsumerWidget {
       aspectRatio: LayoutConstants.chapterCardAspectRatio,
       child: Async(
         asyncValue: continuePoint,
-        data: (data) => ChapterCard(
+        data: (data) => CoverCard(
           title: data.title,
           actionLabel: 'Continue',
           progress: data.progress,

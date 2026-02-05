@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluvita/pages/library/series_detail_page/series_info.dart';
 import 'package:fluvita/riverpod/api/series.dart';
-import 'package:fluvita/utils/logging.dart';
 import 'package:fluvita/widgets/async_value.dart';
 import 'package:fluvita/widgets/measured_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -68,7 +67,6 @@ class SeriesAppBar extends HookConsumerWidget {
                     child: SafeArea(
                       child: MeasuredWidget(
                         onSizeMeasured: (size) {
-                          log.d('Measured SeriesInfo size: $size');
                           infoHeight.value = size.height;
                         },
                         child: SeriesInfo(seriesId: data.id),

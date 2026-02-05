@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:fluvita/models/chapter_model.dart';
-import 'package:fluvita/riverpod/api/chapter.dart';
+import 'package:fluvita/models/volume_model.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
+import 'package:fluvita/riverpod/api/volume.dart';
 import 'package:fluvita/riverpod/router.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/cover_card.dart';
 import 'package:fluvita/widgets/cover_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ChapterCard extends ConsumerWidget {
-  const ChapterCard({
+class VolumeCard extends ConsumerWidget {
+  const VolumeCard({
     super.key,
-    required this.chapter,
-    required this.seriesId,
+    required this.volume,
   });
 
-  final ChapterModel chapter;
-  final int seriesId;
+  final VolumeModel volume;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = chapterProvider(chapterId: this.chapter.id);
-    final chapter = ref.watch(provider).value ?? this.chapter;
+    final provider = volumeProvider(volumeId: this.volume.id);
+    final volume = ref.watch(provider).value ?? this.volume;
 
-    final markReadProvider = markChapterReadProvider(
-      seriesId: seriesId,
-      chapterId: chapter.id,
+    final markReadProvider = markVolumeReadProvider(
+      seriesId: volume.seriesId,
+      volumeId: volume.id,
     );
 
     return ActionsContextMenu(
@@ -38,14 +36,16 @@ class ChapterCard extends ConsumerWidget {
         ref.invalidate(provider);
       },
       child: CoverCard(
-        title: chapter.title,
-        coverImage: ChapterCoverImage(chapterId: chapter.id),
-        progress: chapter.progress,
+        title: volume.name,
+        coverImage: VolumeCoverImage(volumeId: volume.id),
+        progress: volume.pagesRead / volume.pages,
         onTap: () {
-          ReaderRoute(
-            seriesId: seriesId,
-            chapterId: chapter.id,
-          ).push(context);
+          if (volume.chapters.isNotEmpty) {
+            ReaderRoute(
+              seriesId: volume.seriesId,
+              chapterId: volume.chapters.first.id,
+            ).push(context);
+          }
         },
       ),
     );
