@@ -72,10 +72,15 @@ class TocEntry extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final nav = ref.watch(
+      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
+    );
+
     return Column(
       mainAxisSize: .min,
       children: [
         ListTile(
+          selected: nav.currentPage == chapter.page,
           contentPadding: depth > 0
               ? EdgeInsetsGeometry.only(
                   left: depth * LayoutConstants.largePadding,
