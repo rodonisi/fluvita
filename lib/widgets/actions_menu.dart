@@ -6,12 +6,16 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class ActionsContextMenu extends StatelessWidget {
   final void Function()? onMarkRead;
   final void Function()? onMarkUnread;
+  final void Function()? onAddWantToRead;
+  final void Function()? onRemoveWantToRead;
   final Widget child;
 
   const ActionsContextMenu({
     super.key,
     this.onMarkRead,
     this.onMarkUnread,
+    this.onAddWantToRead,
+    this.onRemoveWantToRead,
     required this.child,
   });
 
@@ -22,6 +26,8 @@ class ActionsContextMenu extends StatelessWidget {
       contextMenu: _getContextMenu(
         onMarkRead: onMarkRead,
         onMarkUnread: onMarkUnread,
+        onAddWantToRead: onAddWantToRead,
+        onRemoveWantToRead: onRemoveWantToRead,
       ),
       child: child,
     );
@@ -108,6 +114,8 @@ class _LocalContextMenuButton extends StatelessWidget {
 ContextMenu _getContextMenu({
   void Function()? onMarkRead,
   void Function()? onMarkUnread,
+  void Function()? onAddWantToRead,
+  void Function()? onRemoveWantToRead,
 }) {
   return ContextMenu(
     entries: [
@@ -122,6 +130,18 @@ ContextMenu _getContextMenu({
           label: Text('Mark Unread'),
           icon: Icon(LucideIcons.bookX),
           onSelected: (_) => onMarkUnread(),
+        ),
+      if (onAddWantToRead != null)
+        MenuItem(
+          label: Text('Add to Want to Read'),
+          icon: Icon(LucideIcons.star),
+          onSelected: (_) => onAddWantToRead(),
+        ),
+      if (onRemoveWantToRead != null)
+        MenuItem(
+          label: Text('Remove from Want to Read'),
+          icon: Icon(LucideIcons.starOff),
+          onSelected: (_) => onRemoveWantToRead(),
         ),
     ],
   );

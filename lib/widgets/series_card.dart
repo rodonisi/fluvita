@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
 import 'package:fluvita/riverpod/api/series.dart';
+import 'package:fluvita/riverpod/api/want_to_read.dart';
 import 'package:fluvita/riverpod/router.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
@@ -23,6 +24,9 @@ class SeriesCard extends ConsumerWidget {
     final provider = seriesProvider(seriesId: this.series.id);
     final series = ref.watch(provider).value ?? this.series;
 
+    final wantToRead = wantToReadProvider(seriesId: series.id);
+    final isWantToRead = ref.watch(wantToRead).value ?? false;
+
     final markReadProvider = markSeriesReadProvider(seriesId: series.id);
 
     return ActionsContextMenu(
@@ -34,6 +38,17 @@ class SeriesCard extends ConsumerWidget {
         await ref.read(markReadProvider.notifier).markUnread();
         ref.invalidate(provider);
       },
+
+      onAddWantToRead: isWantToRead
+          ? null
+          : () async {
+              await ref.read(wantToRead.notifier).add();
+            },
+      onRemoveWantToRead: isWantToRead
+          ? () async {
+              await ref.read(wantToRead.notifier).remove();
+            }
+          : null,
       child: CoverCard(
         title: series.name,
         icon: Icon(
