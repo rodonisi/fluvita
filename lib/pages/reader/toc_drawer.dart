@@ -38,7 +38,7 @@ class TocDrawer extends ConsumerWidget {
               itemBuilder: (context, index) {
                 return Card.filled(
                   clipBehavior: .hardEdge,
-                  margin: EdgeInsets.symmetric(
+                  margin: const EdgeInsets.symmetric(
                     horizontal: LayoutConstants.mediumPadding,
                     vertical: LayoutConstants.smallerPadding,
                   ),

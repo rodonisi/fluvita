@@ -76,7 +76,7 @@ class SeriesInfo extends ConsumerWidget {
       data: (metadata) => Async(
         asyncValue: series,
         data: (series) => Padding(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: LayoutConstants.largePadding,
           ),
           child: Column(
@@ -85,7 +85,7 @@ class SeriesInfo extends ConsumerWidget {
             mainAxisAlignment: .start,
             mainAxisSize: .min,
             children: [
-              SizedBox.square(dimension: kToolbarHeight),
+              const SizedBox.square(dimension: kToolbarHeight),
               Text(
                 series.name,
                 style: Theme.of(context).textTheme.headlineMedium,
@@ -109,7 +109,7 @@ class SeriesInfo extends ConsumerWidget {
                           children: [
                             WantToRead(seriesId: series.id),
                             ActionsMenuButton(
-                              child: Icon(LucideIcons.ellipsis),
+                              child: const Icon(LucideIcons.ellipsis),
                               onMarkRead: () {
                                 ref
                                     .read(
@@ -204,7 +204,7 @@ class LimitedList extends StatelessWidget {
       children: [
         Text(title, style: Theme.of(context).textTheme.titleMedium),
         Wrap(
-          spacing: LayoutConstants.smallPadding,
+          spacing: LayoutConstants.mediumPadding,
           children: [
             for (final writer in display)
               Text(writer, style: Theme.of(context).textTheme.labelMedium),
@@ -261,7 +261,7 @@ class WordCount extends StatelessWidget {
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
       children: [
-        Icon(
+        const Icon(
           LucideIcons.fileText,
           size: LayoutConstants.smallIcon,
         ),
@@ -286,7 +286,7 @@ class ReleaseYear extends StatelessWidget {
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
       children: [
-        Icon(
+        const Icon(
           LucideIcons.calendar,
           size: LayoutConstants.smallIcon,
         ),
@@ -310,7 +310,7 @@ class RemainingHours extends StatelessWidget {
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
       children: [
-        Icon(
+        const Icon(
           LucideIcons.clock,
           size: LayoutConstants.smallIcon,
         ),
@@ -335,7 +335,7 @@ class Pages extends StatelessWidget {
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
       children: [
-        Icon(
+        const Icon(
           LucideIcons.fileStack,
           size: LayoutConstants.smallIcon,
         ),

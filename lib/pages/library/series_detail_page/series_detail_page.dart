@@ -113,7 +113,7 @@ class SeriesDetailPage extends HookConsumerWidget {
                             padding: const EdgeInsets.all(8.0),
                             sliver: view,
                           ),
-                          SliverBottomPadding(),
+                          const SliverBottomPadding(),
                         ],
                       );
                     },

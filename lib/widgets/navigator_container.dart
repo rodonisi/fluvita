@@ -15,7 +15,7 @@ class NavigatorContainer extends ConsumerWidget {
       extendBody: true,
       body: navigationShell,
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           left: LayoutConstants.mediumPadding,
           right: LayoutConstants.mediumPadding,
           bottom: LayoutConstants.mediumPadding,
@@ -25,7 +25,7 @@ class NavigatorContainer extends ConsumerWidget {
           removeBottom: true,
           removeTop: true,
           child: ClipRRect(
-            borderRadius: BorderRadiusGeometry.all(Radius.circular(24.0)),
+            borderRadius: const BorderRadiusGeometry.all(Radius.circular(24.0)),
             child: NavigationBar(
               selectedIndex: navigationShell.currentIndex,
               onDestinationSelected: (index) {

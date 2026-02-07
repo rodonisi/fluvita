@@ -114,7 +114,8 @@ class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
   const AllSeriesRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => AllSeriesPage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AllSeriesPage();
 }
 
 class SeriesRoute extends GoRouteData with $SeriesRoute {

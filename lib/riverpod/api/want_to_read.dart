@@ -24,7 +24,7 @@ class WantToRead extends _$WantToRead {
     final res = await client.apiWantToReadAddSeriesPost(
       body: UpdateWantToReadDto(seriesIds: [seriesId]),
     );
-    if (res.isSuccessful) state = AsyncValue.data(true);
+    if (res.isSuccessful) state = const AsyncValue.data(true);
     ref.invalidateSelf();
   }
 
@@ -33,7 +33,7 @@ class WantToRead extends _$WantToRead {
     final res = await client.apiWantToReadRemoveSeriesPost(
       body: UpdateWantToReadDto(seriesIds: [seriesId]),
     );
-    if (res.isSuccessful) state = AsyncValue.data(false);
+    if (res.isSuccessful) state = const AsyncValue.data(false);
     ref.invalidateSelf();
   }
 }

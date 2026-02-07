@@ -19,7 +19,7 @@ class WantToReadPage extends ConsumerWidget {
         onRefresh: () async => await ref.refresh(wantToReadListProvider),
         child: CustomScrollView(
           slivers: [
-            SliverAppBar.large(title: Text("Want to Read")),
+            const SliverAppBar.large(title: Text("Want to Read")),
             AsyncSliver(
               asyncValue: series,
               data: (data) => SliverPadding(
@@ -29,7 +29,7 @@ class WantToReadPage extends ConsumerWidget {
                 ),
               ),
             ),
-            SliverBottomPadding(),
+            const SliverBottomPadding(),
           ],
         ),
       ),

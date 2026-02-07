@@ -121,26 +121,26 @@ ContextMenu _getContextMenu({
     entries: [
       if (onMarkRead != null)
         MenuItem(
-          label: Text('Mark Read'),
-          icon: Icon(LucideIcons.bookCheck),
+          label: const Text('Mark Read'),
+          icon: const Icon(LucideIcons.bookCheck),
           onSelected: (_) => onMarkRead(),
         ),
       if (onMarkUnread != null)
         MenuItem(
-          label: Text('Mark Unread'),
-          icon: Icon(LucideIcons.bookX),
+          label: const Text('Mark Unread'),
+          icon: const Icon(LucideIcons.bookX),
           onSelected: (_) => onMarkUnread(),
         ),
       if (onAddWantToRead != null)
         MenuItem(
-          label: Text('Add to Want to Read'),
-          icon: Icon(LucideIcons.star),
+          label: const Text('Add to Want to Read'),
+          icon: const Icon(LucideIcons.star),
           onSelected: (_) => onAddWantToRead(),
         ),
       if (onRemoveWantToRead != null)
         MenuItem(
-          label: Text('Remove from Want to Read'),
-          icon: Icon(LucideIcons.starOff),
+          label: const Text('Remove from Want to Read'),
+          icon: const Icon(LucideIcons.starOff),
           onSelected: (_) => onRemoveWantToRead(),
         ),
     ],
