@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/riverpod/api/reader.dart';
 import 'package:fluvita/riverpod/api/series.dart';
@@ -11,7 +12,7 @@ import 'package:fluvita/widgets/cover_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class SeriesCard extends ConsumerWidget {
+class SeriesCard extends HookConsumerWidget {
   const SeriesCard({
     super.key,
     required this.series,
@@ -21,13 +22,26 @@ class SeriesCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = seriesProvider(seriesId: this.series.id);
-    final series = ref.watch(provider).value ?? this.series;
+    final provider = seriesProvider(seriesId: series.id);
 
-    final wantToRead = wantToReadProvider(seriesId: series.id);
+    final state = useState(series);
+
+    ref.listen(provider, (previous, next) {
+      if (next.hasValue) {
+        // keep the name from the argument model as the series endpoint may return a different name
+        state.value = next.value!.copyWith(name: series.name);
+      }
+    });
+
+    useEffect(() {
+      state.value = series;
+      return null;
+    }, [series]);
+
+    final wantToRead = wantToReadProvider(seriesId: state.value.id);
     final isWantToRead = ref.watch(wantToRead).value ?? false;
 
-    final markReadProvider = markSeriesReadProvider(seriesId: series.id);
+    final markReadProvider = markSeriesReadProvider(seriesId: state.value.id);
 
     return ActionsContextMenu(
       onMarkRead: () async {
@@ -50,26 +64,26 @@ class SeriesCard extends ConsumerWidget {
             }
           : null,
       child: CoverCard(
-        title: series.name,
+        title: state.value.name,
         icon: Icon(
-          switch (series.format) {
+          switch (state.value.format) {
             .epub => LucideIcons.bookText,
             .cbz => LucideIcons.fileArchive,
             .unknown => LucideIcons.fileQuestionMark,
           },
           size: LayoutConstants.smallIcon,
         ),
-        progress: series.pagesRead / series.pages,
-        coverImage: SeriesCoverImage(seriesId: series.id),
+        progress: state.value.progress,
+        coverImage: SeriesCoverImage(seriesId: state.value.id),
         onTap: () {
           SeriesDetailRoute(
-            libraryId: series.libraryId,
-            seriesId: series.id,
+            libraryId: state.value.libraryId,
+            seriesId: state.value.id,
           ).push(context);
         },
         onRead: () {
           ReaderRoute(
-            seriesId: series.id,
+            seriesId: state.value.id,
           ).push(context);
         },
       ),

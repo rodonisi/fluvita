@@ -34,8 +34,8 @@ class VolumeAppBar extends ConsumerWidget {
       actions: [
         ActionsMenuButton(
           child: const Icon(LucideIcons.ellipsisVertical),
-          onMarkRead: () {
-            ref
+          onMarkRead: () async {
+            await ref
                 .read(
                   markVolumeReadProvider(
                     seriesId: volume.seriesId,
@@ -45,8 +45,8 @@ class VolumeAppBar extends ConsumerWidget {
                 .markRead();
             ref.invalidate(volumeProvider(volumeId: volume.id));
           },
-          onMarkUnread: () {
-            ref
+          onMarkUnread: () async {
+            await ref
                 .read(
                   markVolumeReadProvider(
                     seriesId: volume.seriesId,

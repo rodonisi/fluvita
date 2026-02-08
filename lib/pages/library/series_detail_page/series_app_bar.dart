@@ -37,8 +37,8 @@ class SeriesAppBar extends HookConsumerWidget {
             WantToReadToggle(seriesId: data.id),
             ActionsMenuButton(
               child: const Icon(LucideIcons.ellipsisVertical),
-              onMarkRead: () {
-                ref
+              onMarkRead: () async {
+                await ref
                     .read(
                       markSeriesReadProvider(
                         seriesId: seriesId,
@@ -49,8 +49,8 @@ class SeriesAppBar extends HookConsumerWidget {
                   seriesDetailProvider(seriesId: seriesId),
                 );
               },
-              onMarkUnread: () {
-                ref
+              onMarkUnread: () async {
+                await ref
                     .read(
                       markSeriesReadProvider(
                         seriesId: seriesId,
