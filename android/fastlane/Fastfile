@@ -22,24 +22,13 @@ platform :android do
   end
 
   desc 'Submit a new Beta Build to Crashlytics Beta'
-  lane :beta do |options|
-    options[:version]
-    options[:build_number]
-
+  lane :beta do
     setup_ci
-
-    # gradle(
-    #   task: 'assemble',
-    #   build_type: 'Release',
-    #   properties: {
-    #     'android.injected.version.code' => build_number,
-    #     'android.injected.version.name' => version
-    #   }
-    # )
 
     upload_to_play_store(
       aab: '../build/app/outputs/bundle/release/app-release.aab',
-      track: 'internal'
+      track: 'internal',
+      release_status: 'draft'
     )
   end
 end
