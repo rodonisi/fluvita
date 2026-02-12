@@ -23,6 +23,12 @@ class _MeasuredWidgetState extends State<MeasuredWidget> {
     WidgetsBinding.instance.addPostFrameCallback(_measureSize);
   }
 
+  @override
+  void didUpdateWidget(covariant MeasuredWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback(_measureSize);
+  }
+
   void _measureSize(_) {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null && renderBox.hasSize) {
