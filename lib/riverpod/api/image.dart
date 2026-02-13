@@ -1,75 +1,101 @@
-import 'dart:typed_data';
-
+import 'package:fluvita/models/image_model.dart';
 import 'package:fluvita/riverpod/api/client.dart';
 import 'package:fluvita/riverpod/settings.dart';
+import 'package:fluvita/riverpod/storage.dart';
+import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image.g.dart';
 
 @riverpod
-Future<Uint8List> seriesCover(Ref ref, {required int seriesId}) async {
-  final client = ref.watch(restClientProvider);
-  final key = ref.watch(apiKeyProvider);
+@JsonPersist()
+class SeriesCover extends _$SeriesCover {
+  @override
+  Future<ImageModel> build({required int seriesId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  final res = await client.apiImageSeriesCoverGet(
-    seriesId: seriesId,
-    apiKey: key,
-  );
+    final client = ref.watch(restClientProvider);
+    final key = ref.watch(apiKeyProvider);
 
-  if (!res.isSuccessful) {
-    throw Exception('Failed to load series cover: ${res.error}');
+    final res = await client.apiImageSeriesCoverGet(
+      seriesId: seriesId,
+      apiKey: key,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load series cover: ${res.error}');
+    }
+
+    return ImageModel(data: res.bodyBytes);
   }
-
-  return res.bodyBytes;
 }
 
 @riverpod
-Future<Uint8List> chapterCover(Ref ref, {required int chapterId}) async {
-  final client = ref.watch(restClientProvider);
-  final key = ref.watch(apiKeyProvider);
+@JsonPersist()
+class ChapterCover extends _$ChapterCover {
+  @override
+  Future<ImageModel> build({required int chapterId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  final res = await client.apiImageChapterCoverGet(
-    chapterId: chapterId,
-    apiKey: key,
-  );
+    final client = ref.watch(restClientProvider);
+    final key = ref.watch(apiKeyProvider);
 
-  if (!res.isSuccessful) {
-    throw Exception('Failed to load chapter cover: ${res.error}');
+    final res = await client.apiImageChapterCoverGet(
+      chapterId: chapterId,
+      apiKey: key,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load chapter cover: ${res.error}');
+    }
+
+    return ImageModel(data: res.bodyBytes);
   }
-
-  return res.bodyBytes;
 }
 
 @riverpod
-Future<Uint8List> volumeCover(Ref ref, {required int volumeId}) async {
-  final client = ref.watch(restClientProvider);
-  final key = ref.watch(apiKeyProvider);
+@JsonPersist()
+class VolumeCover extends _$VolumeCover {
+  @override
+  Future<ImageModel> build({required int volumeId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  final res = await client.apiImageVolumeCoverGet(
-    volumeId: volumeId,
-    apiKey: key,
-  );
+    final client = ref.watch(restClientProvider);
+    final key = ref.watch(apiKeyProvider);
 
-  if (!res.isSuccessful) {
-    throw Exception('Failed to load volume cover: ${res.error}');
+    final res = await client.apiImageVolumeCoverGet(
+      volumeId: volumeId,
+      apiKey: key,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load volume cover: ${res.error}');
+    }
+
+    return ImageModel(data: res.bodyBytes);
   }
-
-  return res.bodyBytes;
 }
 
 @riverpod
-Future<Uint8List> libraryCover(Ref ref, {required int libraryId}) async {
-  final client = ref.watch(restClientProvider);
-  final key = ref.watch(apiKeyProvider);
+@JsonPersist()
+class LibraryCover extends _$LibraryCover {
+  @override
+  Future<ImageModel> build({required int libraryId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  final res = await client.apiImageLibraryCoverGet(
-    libraryId: libraryId,
-    apiKey: key,
-  );
+    final client = ref.watch(restClientProvider);
+    final key = ref.watch(apiKeyProvider);
 
-  if (!res.isSuccessful) {
-    throw Exception('Failed to load library cover: ${res.error}');
+    final res = await client.apiImageLibraryCoverGet(
+      libraryId: libraryId,
+      apiKey: key,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load library cover: ${res.error}');
+    }
+
+    return ImageModel(data: res.bodyBytes);
   }
-
-  return res.bodyBytes;
 }

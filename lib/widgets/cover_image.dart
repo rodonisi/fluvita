@@ -24,7 +24,7 @@ class SeriesCoverImage extends ConsumerWidget {
     return Async(
       asyncValue: ref.watch(seriesCoverProvider(seriesId: seriesId)),
       data: (imageData) => Image.memory(
-        imageData,
+        imageData.data,
         fit: fit,
         height: height,
         width: width,
@@ -55,7 +55,7 @@ class VolumeCoverImage extends ConsumerWidget {
       asyncValue: ref.watch(volumeCoverProvider(volumeId: volumeId)),
       data: (imageData) => ClipRRect(
         child: Image.memory(
-          imageData,
+          imageData.data,
           fit: fit,
           height: height,
           width: width,
@@ -87,7 +87,7 @@ class ChapterCoverImage extends ConsumerWidget {
       asyncValue: ref.watch(chapterCoverProvider(chapterId: chapterId)),
       data: (imageData) => ClipRRect(
         child: Image.memory(
-          imageData,
+          imageData.data,
           fit: fit,
           height: height,
           width: width,

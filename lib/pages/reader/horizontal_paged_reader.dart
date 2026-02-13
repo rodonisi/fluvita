@@ -64,7 +64,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
               ),
               data: (data) {
                 return Image.memory(
-                  data,
+                  data.data,
                   fit: settings.scaleType == .fitWidth ? .fitWidth : .fitHeight,
                 );
               },

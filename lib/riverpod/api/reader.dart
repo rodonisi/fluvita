@@ -1,102 +1,131 @@
-import 'dart:typed_data';
-
 import 'package:fluvita/api/openapi.swagger.dart';
 import 'package:fluvita/models/chapter_model.dart';
+import 'package:fluvita/models/image_model.dart';
 import 'package:fluvita/models/progress_model.dart';
 import 'package:fluvita/riverpod/api/client.dart';
 import 'package:fluvita/riverpod/settings.dart';
+import 'package:fluvita/riverpod/storage.dart';
+import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reader.g.dart';
 
 @riverpod
-Future<ChapterModel> continuePoint(Ref ref, {required int seriesId}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiReaderContinuePointGet(seriesId: seriesId);
+@JsonPersist()
+class ContinuePoint extends _$ContinuePoint {
+  @override
+  Future<ChapterModel> build({required int seriesId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  if (!res.isSuccessful || res.body == null) {
-    throw Exception('Failed to load continue point: ${res.error}');
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiReaderContinuePointGet(seriesId: seriesId);
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load continue point: ${res.error}');
+    }
+
+    return ChapterModel.fromChapterDto(res.body!);
   }
-
-  return ChapterModel.fromChapterDto(res.body!);
 }
 
 @riverpod
-Future<ProgressModel> bookProgress(Ref ref, {required int chapterId}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiReaderGetProgressGet(chapterId: chapterId);
+@JsonPersist()
+class BookProgress extends _$BookProgress {
+  @override
+  Future<ProgressModel> build({required int chapterId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  if (!res.isSuccessful || res.body == null) {
-    throw Exception('Failed to load progress: ${res.error}');
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiReaderGetProgressGet(chapterId: chapterId);
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load progress: ${res.error}');
+    }
+
+    return ProgressModel.fromProgressDto(res.body!);
   }
-
-  return ProgressModel.fromProgressDto(res.body!);
 }
 
 @riverpod
-Future<Uint8List> readerImage(
-  Ref ref, {
-  required int chapterId,
-  required int page,
-}) async {
-  final client = ref.watch(restClientProvider);
-  final key = ref.watch(apiKeyProvider);
+@JsonPersist()
+class ReaderImage extends _$ReaderImage {
+  @override
+  Future<ImageModel> build({
+    required int chapterId,
+    required int page,
+  }) async {
+    persist(ref.watch(storageProvider.future));
 
-  final res = await client.apiReaderImageGet(
-    chapterId: chapterId,
-    page: page,
-    apiKey: key,
-  );
+    final client = ref.watch(restClientProvider);
+    final key = ref.watch(apiKeyProvider);
 
-  if (!res.isSuccessful) {
-    throw Exception('Failed to load image: ${res.error}');
+    final res = await client.apiReaderImageGet(
+      chapterId: chapterId,
+      page: page,
+      apiKey: key,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load image: ${res.error}');
+    }
+
+    return ImageModel(data: res.bodyBytes);
   }
-
-  return res.bodyBytes;
 }
 
 @riverpod
-Future<int?> prevChapter(
-  Ref ref, {
-  int? seriesId,
-  int? volumeId,
-  int? chapterId,
-}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiReaderPrevChapterGet(
-    seriesId: seriesId,
-    volumeId: volumeId,
-    currentChapterId: chapterId,
-  );
+@JsonPersist()
+class PrevChapter extends _$PrevChapter {
+  @override
+  Future<int?> build({
+    int? seriesId,
+    int? volumeId,
+    int? chapterId,
+  }) async {
+    persist(ref.watch(storageProvider.future));
 
-  if (!res.isSuccessful || res.body == null) {
-    return null;
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiReaderPrevChapterGet(
+      seriesId: seriesId,
+      volumeId: volumeId,
+      currentChapterId: chapterId,
+    );
+
+    if (!res.isSuccessful || res.body == null) {
+      return null;
+    }
+
+    final chapter = res.body!;
+    return chapter >= 0 ? chapter : null;
   }
-
-  final chapter = res.body!;
-  return chapter >= 0 ? chapter : null;
 }
 
 @riverpod
-Future<int?> nextChapter(
-  Ref ref, {
-  int? seriesId,
-  int? volumeId,
-  int? chapterId,
-}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiReaderNextChapterGet(
-    seriesId: seriesId,
-    volumeId: volumeId,
-    currentChapterId: chapterId,
-  );
+@JsonPersist()
+class NextChapter extends _$NextChapter {
+  @override
+  Future<int?> build({
+    int? seriesId,
+    int? volumeId,
+    int? chapterId,
+  }) async {
+    persist(ref.watch(storageProvider.future));
 
-  if (!res.isSuccessful || res.body == null) {
-    return null;
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiReaderNextChapterGet(
+      seriesId: seriesId,
+      volumeId: volumeId,
+      currentChapterId: chapterId,
+    );
+
+    if (!res.isSuccessful || res.body == null) {
+      return null;
+    }
+
+    final chapter = res.body!;
+    return chapter >= 0 ? chapter : null;
   }
-
-  final chapter = res.body!;
-  return chapter >= 0 ? chapter : null;
 }
 
 @riverpod

@@ -4,26 +4,35 @@ import 'dart:typed_data';
 import 'package:fluvita/models/book_chapter_model.dart';
 import 'package:fluvita/models/book_info_model.dart';
 import 'package:fluvita/riverpod/api/client.dart';
+import 'package:fluvita/riverpod/storage.dart';
 import 'package:fluvita/utils/extensions/element.dart';
 import 'package:fluvita/utils/html_constants.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:hooks_riverpod/experimental/persist.dart';
 
 part 'book.freezed.dart';
 part 'book.g.dart';
 
 @riverpod
-Future<BookInfoModel> bookInfo(Ref ref, {required int chapterId}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiBookChapterIdBookInfoGet(chapterId: chapterId);
+@JsonPersist()
+class BookInfo extends _$BookInfo {
+  @override
+  Future<BookInfoModel> build({required int chapterId}) async {
+    persist(ref.watch(storageProvider.future));
 
-  if (!res.isSuccessful || res.body == null) {
-    throw Exception('Failed to load book info: ${res.error}');
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiBookChapterIdBookInfoGet(chapterId: chapterId);
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load book info: ${res.error}');
+    }
+
+    return BookInfoModel.fromBookInfoDto(res.body!);
   }
-
-  return BookInfoModel.fromBookInfoDto(res.body!);
 }
 
 @riverpod
@@ -132,6 +141,8 @@ Future<DocumentFragment> preprocessedHtml(
 
 @freezed
 sealed class PageContent with _$PageContent {
+  const PageContent._();
+
   const factory PageContent({
     required DocumentFragment root,
     required Map<String, Map<String, String>> styles,

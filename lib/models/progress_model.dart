@@ -2,6 +2,7 @@ import 'package:fluvita/api/openapi.swagger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'progress_model.freezed.dart';
+part 'progress_model.g.dart';
 
 @freezed
 sealed class ProgressModel with _$ProgressModel {
@@ -16,6 +17,9 @@ sealed class ProgressModel with _$ProgressModel {
     String? bookScrollId,
     DateTime? lastModifiedUtc,
   }) = _ProgressModel;
+
+  factory ProgressModel.fromJson(Map<String, dynamic> json) =>
+      _$ProgressModelFromJson(json);
 
   factory ProgressModel.fromProgressDto(ProgressDto dto) {
     return ProgressModel(

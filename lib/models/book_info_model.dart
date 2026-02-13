@@ -2,15 +2,9 @@ import 'package:fluvita/api/openapi.swagger.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'book_info_model.freezed.dart';
+part 'book_info_model.g.dart';
 
-enum BookInfoSeriesFormat {
-  none,
-  comic,
-  manga,
-  webtoon,
-  book,
-  unknown
-}
+enum BookInfoSeriesFormat { none, comic, manga, webtoon, book, unknown }
 
 @freezed
 sealed class BookInfoModel with _$BookInfoModel {
@@ -29,6 +23,9 @@ sealed class BookInfoModel with _$BookInfoModel {
     bool? isSpecial,
     String? chapterTitle,
   }) = _BookInfoModel;
+
+  factory BookInfoModel.fromJson(Map<String, dynamic> json) =>
+      _$BookInfoModelFromJson(json);
 
   factory BookInfoModel.fromBookInfoDto(BookInfoDto dto) {
     return BookInfoModel(

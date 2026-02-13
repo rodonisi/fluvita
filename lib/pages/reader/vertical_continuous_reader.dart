@@ -128,7 +128,7 @@ class _VerticalContinuousReaderState
               child: Async(
                 asyncValue: image,
                 data: (data) => Image.memory(
-                  data,
+                  data.data,
                   fit: BoxFit.fitWidth,
                 ),
               ),
@@ -145,7 +145,7 @@ class _VerticalContinuousReaderState
                 }
               },
               child: Image.memory(
-                data,
+                data.data,
                 fit: BoxFit.fitWidth,
               ),
             ),
