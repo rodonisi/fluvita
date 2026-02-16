@@ -43,7 +43,7 @@ sealed class SeriesModel with _$SeriesModel {
     );
   }
 
-  factory SeriesModel.fromDatabaseModel(Sery table) {
+  factory SeriesModel.fromDatabaseModel(SeriesData table) {
     return SeriesModel(
       id: table.id,
       libraryId: table.libraryId,

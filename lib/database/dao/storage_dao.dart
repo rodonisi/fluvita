@@ -13,7 +13,7 @@ class StorageDao extends DatabaseAccessor<AppDatabase> with _$StorageDaoMixin {
   }
 
   Future<void> deleteKey(String key) async {
-    await (delete(riverpodStorage)..where((row) => row.key.like(key))).go();
+    await (delete(riverpodStorage)..where((row) => row.key.equals(key))).go();
   }
 
   Future<void> deleteOutOfDate() async {
@@ -23,9 +23,9 @@ class StorageDao extends DatabaseAccessor<AppDatabase> with _$StorageDaoMixin {
   }
 
   Future<RiverpodStorageData?> read(String key) async {
-    return (await (select(
+    return await (select(
       riverpodStorage,
-    )..where((row) => row.key.like(key))).get()).firstOrNull;
+    )..where((row) => row.key.like(key))).getSingleOrNull();
   }
 
   Future<void> write(RiverpodStorageCompanion entry) async {

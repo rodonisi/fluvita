@@ -50,7 +50,7 @@ class ReaderControls extends HookConsumerWidget {
                   ),
                 ),
                 if (format == .epub) const EpubReaderControls(),
-                if (format == .cbz) const ImageReaderControls(),
+                if (format == .archive) const ImageReaderControls(),
               ],
             ),
           ],

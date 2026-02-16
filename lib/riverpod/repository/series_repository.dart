@@ -30,17 +30,56 @@ class SeriesRepository {
     refreshAllSeries();
   }
 
+  Stream<SeriesModel> watchSeries(int seriesId) {
+    refreshSeries(seriesId);
+    return _db.seriesDao
+        .watchSeries(seriesId)
+        .map(SeriesModel.fromDatabaseModel);
+  }
+
+  Stream<List<SeriesModel>> watchAllSeries({int? libraryId}) {
+    refreshAllSeries(libraryId: libraryId);
+    return _db.seriesDao
+        .watchAllSeries(libraryId: libraryId)
+        .map(
+          (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
+        );
+  }
+
   Stream<List<SeriesModel>> watchOnDeck() {
     refreshedOnDeck();
-    return _db.watchOnDeck().map(
+    return _db.seriesDao.watchOnDeck().map(
       (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
     );
   }
 
-  Future<void> refreshAllSeries() async {
+  Stream<List<SeriesModel>> watchRecentlyUpdated() {
+    refreshRecentlyUpdated();
+    return _db.seriesDao.watchRecentlyUpdated().map(
+      (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
+    );
+  }
+
+  Stream<List<SeriesModel>> watchRecentlyAdded() {
+    refreshRecentlyAdded();
+    return _db.seriesDao.watchRecentlyAdded().map(
+      (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
+    );
+  }
+
+  Future<void> refreshSeries(int seriesId) async {
     try {
-      final series = await _client.getAllSeries();
-      await _db.upsertSeriesBatch(series);
+      final series = await _client.getSeries(seriesId);
+      await _db.seriesDao.upsertSeries(series);
+    } catch (e) {
+      log.e(e);
+    }
+  }
+
+  Future<void> refreshAllSeries({int? libraryId}) async {
+    try {
+      final series = await _client.getAllSeries(libraryId: libraryId);
+      await _db.seriesDao.upsertSeriesBatch(series);
     } catch (e) {
       log.e(e);
     }
@@ -50,7 +89,7 @@ class SeriesRepository {
     try {
       log.d('refreshing on deck');
       final series = await _client.getOnDeck();
-      await _db.upsertSeriesBatch(series);
+      await _db.seriesDao.upsertSeriesBatch(series);
     } catch (e) {
       log.e(e);
     }
@@ -58,8 +97,8 @@ class SeriesRepository {
 
   Future<void> refreshRecentlyUpdated() async {
     try {
-      final ids = await _client.getRecentlyUpdated();
-      await _db.upsertRecentlyUpdated(ids);
+      final series = await _client.getRecentlyUpdated();
+      await _db.seriesDao.upsertRecentlyUpdated(series);
     } catch (e) {
       log.e(e);
     }
@@ -68,7 +107,7 @@ class SeriesRepository {
   Future<void> refreshRecentlyAdded() async {
     try {
       final series = await _client.getRecentlyAdded();
-      await _db.upsertSeriesBatch(series);
+      await _db.seriesDao.upsertSeriesBatch(series);
     } catch (e) {
       log.e(e);
     }
@@ -80,7 +119,17 @@ class SeriesRemoteOperations {
 
   const SeriesRemoteOperations(this._client);
 
-  Future<Iterable<SeriesCompanion>> getAllSeries() async {
+  Future<SeriesCompanion> getSeries(int seriesId) async {
+    final res = await _client.apiSeriesSeriesIdGet(seriesId: seriesId);
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load series: ${res.error}');
+    }
+
+    return _mapSeriesCompanion(res.body!);
+  }
+
+  Future<Iterable<SeriesCompanion>> getAllSeries({int? libraryId}) async {
     final res = await _client.apiSeriesV2Post(
       body: FilterV2Dto(
         id: 0,
@@ -90,7 +139,14 @@ class SeriesRemoteOperations {
           isAscending: false,
         ),
         limitTo: 0,
-        statements: [],
+        statements: [
+          if (libraryId != null)
+            FilterStatementDto(
+              comparison: FilterStatementDtoComparison.value_0.value,
+              field: FilterStatementDtoField.value_19.value,
+              value: libraryId.toString(),
+            ),
+        ],
       ),
     );
 
@@ -113,14 +169,21 @@ class SeriesRemoteOperations {
     );
   }
 
-  Future<Iterable<int>> getRecentlyUpdated() async {
+  Future<Iterable<SeriesCompanion>> getRecentlyUpdated() async {
     final res = await _client.apiSeriesRecentlyUpdatedSeriesPost();
 
     if (!res.isSuccessful || res.body == null) {
       throw Exception('Failed to load recently updated: ${res.error}');
     }
 
-    return res.body!.map((entry) => entry.seriesId!);
+    return Future.wait(
+      res.body!.map(
+        (entry) async {
+          final series = await getSeries(entry.seriesId!);
+          return series.copyWith(isRecentlyUpdated: const Value(true));
+        },
+      ),
+    );
   }
 
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {

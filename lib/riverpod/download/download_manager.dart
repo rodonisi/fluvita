@@ -132,7 +132,7 @@ class DownloadManager extends _$DownloadManager {
 
     return switch (format) {
       .epub => const DownloadManagerState.epub(),
-      .cbz => const DownloadManagerState.image(),
+      .archive => const DownloadManagerState.image(),
       _ => throw Exception('unsupported format'),
     };
   }

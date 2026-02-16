@@ -2,25 +2,26 @@ import 'package:drift/drift.dart';
 
 enum Format {
   epub,
-  cbz,
+  archive,
   unknown
   ;
 
   factory Format.fromDtoFormat(int value) {
     return switch (value) {
       3 => Format.epub,
-      1 => Format.cbz,
+      1 => Format.archive,
       _ => Format.unknown,
     };
   }
 }
 
+@DataClassName('SeriesData')
 class Series extends Table {
   IntColumn get id => integer()();
   TextColumn get name => text()();
   TextColumn get originalName => text().nullable()();
   TextColumn get localizedName => text().nullable()();
-  TextColumn get sortName => text()();
+  TextColumn get sortName => text().nullable()();
   IntColumn get libraryId => integer()();
 
   // Metadata
@@ -46,7 +47,7 @@ class Series extends Table {
 
   // Timestamps
   DateTimeColumn get created => dateTime()();
-  DateTimeColumn get lastModified => dateTime()();
+  DateTimeColumn get lastModified => dateTime().nullable()();
   DateTimeColumn get lastChapterAdded => dateTime().nullable()();
   DateTimeColumn get lastRead => dateTime().nullable()();
 

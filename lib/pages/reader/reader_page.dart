@@ -24,7 +24,7 @@ class ReaderPage extends HookConsumerWidget {
           asyncValue: ref.watch(provider),
           data: (data) {
             return switch (data.series.format) {
-              .cbz => ImageReader(
+              .archive => ImageReader(
                 seriesId: data.series.id,
                 chapterId: data.chapter.id,
               ),

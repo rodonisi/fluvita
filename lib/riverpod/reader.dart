@@ -140,7 +140,7 @@ ReadDirection readDirection(
 
   return switch (format) {
     .epub => .rightToLeft,
-    .cbz => ref.watch(imageReaderSettingsProvider).readDirection,
+    .archive => ref.watch(imageReaderSettingsProvider).readDirection,
     .unknown => .rightToLeft,
   };
 }
