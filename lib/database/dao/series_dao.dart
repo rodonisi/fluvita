@@ -2,10 +2,11 @@ import 'package:drift/drift.dart';
 import 'package:fluvita/database/app_database.dart';
 import 'package:fluvita/database/tables/series.dart';
 import 'package:fluvita/utils/logging.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 part 'series_dao.g.dart';
 
-@DriftAccessor(tables: [Series])
+@DriftAccessor(tables: [Series, SeriesCovers])
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   SeriesDao(super.attachedDatabase);
 
@@ -45,6 +46,14 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .watch();
   }
 
+  Stream<SeriesCover> watchSeriesCover({required int seriesId}) {
+    return (select(
+          seriesCovers,
+        )..where((row) => row.seriesId.equals(seriesId)))
+        .watchSingleOrNull()
+        .whereNotNull();
+  }
+
   Future<void> upsertSeries(SeriesCompanion entry) async {
     log.d('upserting series ${entry.id.value}');
     await into(series).insertOnConflictUpdate(entry);
@@ -76,6 +85,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       await clearIsRecentlyAdded();
       await upsertSeriesBatch(entries);
     });
+  }
+
+  Future<void> upsertSeriesCover(SeriesCoversCompanion cover) async {
+    await into(seriesCovers).insertOnConflictUpdate(cover);
   }
 
   Future<void> clearOnDeck() async {

@@ -2,9 +2,11 @@ import 'package:drift/drift.dart';
 import 'package:fluvita/api/openapi.swagger.dart';
 import 'package:fluvita/database/app_database.dart';
 import 'package:fluvita/database/tables/series.dart';
+import 'package:fluvita/models/image_model.dart';
 import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/riverpod/api/client.dart';
 import 'package:fluvita/riverpod/repository/database.dart';
+import 'package:fluvita/riverpod/settings.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,7 +15,12 @@ part 'series_repository.g.dart';
 @riverpod
 SeriesRepository seriesRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
-  final client = SeriesRemoteOperations(ref.watch(restClientProvider));
+  final restClient = ref.watch(restClientProvider);
+  final apiKey = ref.watch(apiKeyProvider);
+  final client = SeriesRemoteOperations(
+    client: restClient,
+    apiKey: apiKey ?? '',
+  );
   return SeriesRepository(db, client);
 }
 
@@ -62,6 +69,13 @@ class SeriesRepository {
     );
   }
 
+  Stream<ImageModel> watchSeriesCover(int seriesId) {
+    refreshSeriesCover(seriesId);
+    return _db.seriesDao
+        .watchSeriesCover(seriesId: seriesId)
+        .map((cover) => ImageModel(data: cover.image));
+  }
+
   Future<void> refreshSeries(int seriesId) async {
     try {
       final series = await _client.getSeries(seriesId);
@@ -107,12 +121,26 @@ class SeriesRepository {
       log.e(e);
     }
   }
+
+  Future<void> refreshSeriesCover(int seriesId) async {
+    try {
+      final seriesCover = await _client.getSeriesCover(seriesId);
+      await _db.seriesDao.upsertSeriesCover(seriesCover);
+    } catch (e) {
+      log.e(e);
+    }
+  }
 }
 
 class SeriesRemoteOperations {
   final Openapi _client;
+  final String _apiKey;
 
-  const SeriesRemoteOperations(this._client);
+  const SeriesRemoteOperations({
+    required Openapi client,
+    required String apiKey,
+  }) : _client = client,
+       _apiKey = apiKey;
 
   Future<SeriesCompanion> getSeries(int seriesId) async {
     final res = await _client.apiSeriesSeriesIdGet(seriesId: seriesId);
@@ -202,6 +230,22 @@ class SeriesRemoteOperations {
     return res.body!.map(
       (dto) =>
           _mapSeriesCompanion(dto).copyWith(isRecentlyAdded: const Value(true)),
+    );
+  }
+
+  Future<SeriesCoversCompanion> getSeriesCover(int seriesId) async {
+    final res = await _client.apiImageSeriesCoverGet(
+      seriesId: seriesId,
+      apiKey: _apiKey,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to load series cover: ${res.error}');
+    }
+
+    return SeriesCoversCompanion(
+      seriesId: Value(seriesId),
+      image: Value(res.bodyBytes),
     );
   }
 

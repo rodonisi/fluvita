@@ -1,3 +1,4 @@
+import 'package:fluvita/models/image_model.dart';
 import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/riverpod/api/client.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
@@ -10,6 +11,12 @@ part 'series.g.dart';
 Stream<SeriesModel> series(Ref ref, {required int seriesId}) async* {
   final repo = ref.watch(seriesRepositoryProvider);
   yield* repo.watchSeries(seriesId);
+}
+
+@riverpod
+Stream<ImageModel> seriesCover(Ref ref, {required int seriesId}) async* {
+  final repo = ref.watch(seriesRepositoryProvider);
+  yield* repo.watchSeriesCover(seriesId);
 }
 
 @riverpod

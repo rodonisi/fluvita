@@ -6,26 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'image.g.dart';
 
 @riverpod
-class SeriesCover extends _$SeriesCover {
-  @override
-  Future<ImageModel> build({required int seriesId}) async {
-    final client = ref.watch(restClientProvider);
-    final key = ref.watch(apiKeyProvider);
-
-    final res = await client.apiImageSeriesCoverGet(
-      seriesId: seriesId,
-      apiKey: key,
-    );
-
-    if (!res.isSuccessful) {
-      throw Exception('Failed to load series cover: ${res.error}');
-    }
-
-    return ImageModel(data: res.bodyBytes);
-  }
-}
-
-@riverpod
 class ChapterCover extends _$ChapterCover {
   @override
   Future<ImageModel> build({required int chapterId}) async {

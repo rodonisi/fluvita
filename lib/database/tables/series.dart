@@ -58,3 +58,11 @@ class Series extends Table {
     {name, libraryId}, // Series name unique per library
   ];
 }
+
+class SeriesCovers extends Table {
+  IntColumn get seriesId => integer().references(Series, #id)();
+  BlobColumn get image => blob()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {seriesId};
+}

@@ -17,6 +17,7 @@ part 'app_database.g.dart';
     RiverpodStorage,
     Series,
     SeriesMetadata,
+    SeriesCovers,
     People,
     Genres,
     Tags,
