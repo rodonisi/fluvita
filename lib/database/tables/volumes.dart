@@ -4,6 +4,8 @@ import 'package:fluvita/database/tables/series.dart';
 class Volumes extends Table {
   IntColumn get id => integer()();
   IntColumn get seriesId => integer().references(Series, #id)();
+  RealColumn get minNumber => real()();
+  RealColumn get maxNumber => real()();
   TextColumn get name => text().nullable()();
   IntColumn get wordCount => integer().withDefault(const Constant(0))();
   IntColumn get pages => integer()();

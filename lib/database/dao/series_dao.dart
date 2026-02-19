@@ -59,9 +59,16 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   }
 
   Stream<SeriesDetailWithRelations> watchSeriesDetail(int seriesId) {
-    final volumesStream = (select(
-      volumes,
-    )..where((row) => row.seriesId.equals(seriesId))).watch();
+    final volumesStream =
+        (select(
+                volumes,
+              )
+              ..where((row) => row.seriesId.equals(seriesId))
+              ..orderBy([
+                (volumes) => OrderingTerm.asc(volumes.minNumber),
+                (volumes) => OrderingTerm.asc(volumes.maxNumber),
+              ]))
+            .watch();
     final chaptersQuery =
         (select(
             chapters,

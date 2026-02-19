@@ -104,6 +104,8 @@ class VolumeRemoteOperations {
       volume: VolumesCompanion(
         id: Value(dto.id!),
         seriesId: Value(dto.seriesId!),
+        minNumber: Value(dto.minNumber!),
+        maxNumber: Value(dto.maxNumber!),
         name: Value(dto.name),
         wordCount: Value(dto.wordCount!),
         pages: Value(dto.pages!),
