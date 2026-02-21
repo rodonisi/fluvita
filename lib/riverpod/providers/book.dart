@@ -1,5 +1,6 @@
 import 'package:fluvita/models/book_chapter_model.dart';
-import 'package:fluvita/riverpod/providers/client.dart';
+import 'package:fluvita/models/image_model.dart';
+import 'package:fluvita/models/page_content.dart';
 import 'package:fluvita/riverpod/repository/book_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,21 +12,25 @@ Stream<List<BookChapterModel>> bookChapters(
   required int chapterId,
 }) async* {
   final repo = ref.watch(bookRepositoryProvider);
-  yield* repo.watchBookChapters(chapterId);
+  yield* repo.watchBookChapters(chapterId).distinct();
 }
 
-/// Raw HTML page content — ephemeral, not cached in the DB.
 @riverpod
-Future<String> bookPage(Ref ref, {required int chapterId, int? page}) async {
-  final client = ref.watch(restClientProvider);
-  final res = await client.apiBookChapterIdBookPageGet(
-    chapterId: chapterId,
-    page: page,
-  );
+Future<PageContent> epubPage(
+  Ref ref, {
+  required int chapterId,
+  required int page,
+}) async {
+  final repo = ref.watch(bookRepositoryProvider);
+  return repo.getEpubPage(chapterId: chapterId, page: page);
+}
 
-  if (!res.isSuccessful || res.body == null) {
-    throw Exception('Failed to load book page: ${res.error}');
-  }
-
-  return res.body!;
+@riverpod
+Future<ImageModel> imagePage(
+  Ref ref, {
+  required int chapterId,
+  required int page,
+}) async {
+  final repo = ref.watch(bookRepositoryProvider);
+  return repo.getImagePage(chapterId: chapterId, page: page);
 }
