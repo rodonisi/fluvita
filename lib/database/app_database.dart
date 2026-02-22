@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:fluvita/database/dao/book_dao.dart';
 import 'package:fluvita/database/dao/chapters_dao.dart';
@@ -22,7 +21,6 @@ import 'package:fluvita/database/tables/volumes.dart';
 import 'package:fluvita/database/tables/want_to_read.dart';
 import 'package:fluvita/models/enums/format.dart';
 import 'package:fluvita/models/enums/library_type.dart';
-import 'package:fluvita/utils/safe_platform.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
@@ -74,16 +72,16 @@ class AppDatabase extends _$AppDatabase {
   }
 
   static QueryExecutor _openConnection() {
-    if (SafePlatform.isWeb) {
-      return NativeDatabase.memory();
-    }
     return driftDatabase(
       name: 'fluvita_db',
       native: const DriftNativeOptions(
         databaseDirectory: getApplicationSupportDirectory,
         shareAcrossIsolates: true,
       ),
-      // If you need web support, see https://drift.simonbinder.eu/platforms/web/
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.dart.js'),
+      ),
     );
   }
 }
