@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/utils/layout_constants.dart';
 
 class AppListTile extends StatelessWidget {
   const AppListTile({
@@ -16,7 +17,10 @@ class AppListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card.filled(
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: LayoutConstants.mediumPadding,
+          vertical: LayoutConstants.smallPadding,
+        ),
         leading: icon != null
             ? CircleAvatar(
                 child: icon,
@@ -32,4 +36,3 @@ class AppListTile extends StatelessWidget {
     );
   }
 }
-

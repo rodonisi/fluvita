@@ -4,7 +4,6 @@ import 'package:fluvita/database/tables/chapters.dart';
 import 'package:fluvita/database/tables/progress.dart';
 import 'package:fluvita/database/tables/volumes.dart';
 import 'package:fluvita/utils/logging.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 part 'volumes_dao.g.dart';
 
@@ -12,28 +11,23 @@ part 'volumes_dao.g.dart';
 class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   VolumesDao(super.attachedDatabase);
 
-  Stream<VolumeWithRelations> watchVolume(int volumeId) {
-    final volumeQuery = select(volumes)
-      ..where((row) => row.id.equals(volumeId));
-
-    final chaptersQuery = select(chapters)
-      ..where((row) => row.volumeId.equals(volumeId))
-      ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]);
-
-    return volumeQuery.watchSingleOrNull().switchMap((volume) async* {
-      if (volume == null) {
-        return;
-      }
-
-      await for (final chaptersList in chaptersQuery.watch()) {
-        yield VolumeWithRelations(
-          volume: volume,
-          chapters: chaptersList,
-        );
-      }
-    });
+  /// Get a [SingleSelectable] for volume [volumeId]
+  SingleSelectable<VolumeWithRelations> volume(int volumeId) {
+    return managers.volumes
+        .withReferences(
+          (prefetch) => prefetch(chaptersRefs: true),
+        )
+        .filter((f) => f.id(volumeId))
+        .map((result) {
+          final (vol, refs) = result;
+          return VolumeWithRelations(
+            volume: vol,
+            chapters: refs.chaptersRefs.prefetchedData ?? [],
+          );
+        });
   }
 
+  /// Watch pages read for volume [volumeId]
   Stream<int?> watchPagesRead({required int volumeId}) {
     final pagesReadSum = readingProgress.pagesRead.sum();
 
@@ -45,15 +39,14 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     return query.watchSingleOrNull().map((row) => row?.read(pagesReadSum));
   }
 
-  Stream<VolumeCover> watchVolumeCover({required int volumeId}) {
+  /// Watch cover for volume [volumeId]. If no cover is present, returns null.
+  Stream<VolumeCover?> watchVolumeCover({required int volumeId}) {
     return (select(
-          volumeCovers,
-        )..where((row) => row.volumeId.equals(volumeId)))
-        .watchSingleOrNull()
-        .whereNotNull()
-        .distinct();
+      volumeCovers,
+    )..where((row) => row.volumeId.equals(volumeId))).watchSingleOrNull();
   }
 
+  /// Get all volume ids missing a cover
   Future<List<int>> getMissingCovers() async {
     final query = select(volumes).join([
       leftOuterJoin(volumeCovers, volumeCovers.volumeId.equalsExp(volumes.id)),
@@ -64,13 +57,8 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     return await query.map((row) => row.readTable(volumes).id).get();
   }
 
-  Future<void> upsertVolume(VolumeWithChaptersCompanion entry) async {
-    await transaction(() async {
-      await into(volumes).insertOnConflictUpdate(entry.volume);
-      db.chaptersDao.upsertChapterBatch(entry.chapters);
-    });
-  }
-
+  /// Upsert a batch of [VolumeWithRelations], effectively upserting the volume,
+  /// as well as all its chapters.
   Future<void> upsertVolumeBatch(
     Iterable<VolumeWithChaptersCompanion> entries,
   ) async {
@@ -85,12 +73,9 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     });
   }
 
+  /// Upsert a volume cover
   Future<void> upsertVolumeCover(VolumeCoversCompanion cover) async {
     await into(volumeCovers).insertOnConflictUpdate(cover);
-  }
-
-  Future<void> clearSeriesVolumes({required int seriesId}) async {
-    await (delete(volumes)..where((row) => row.seriesId.equals(seriesId))).go();
   }
 }
 

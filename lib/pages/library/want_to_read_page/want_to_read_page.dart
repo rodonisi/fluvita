@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/riverpod/providers/want_to_read.dart';
 import 'package:fluvita/widgets/login_guard.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,37 +13,50 @@ class WantToReadPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.invalidate(wantToReadListProvider);
-    final series = ref.watch(wantToReadListProvider);
+    ref.read(syncManagerProvider.notifier).syncLibraries();
 
     return Scaffold(
       extendBody: true,
       body: LoginGuard(
-        child: RefreshIndicator(
-          onRefresh: () async => await ref.refresh(wantToReadListProvider),
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: LayoutConstants.smallEdgeInsets,
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    "Want to Read",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-              ),
-              AsyncSliver(
-                asyncValue: series,
-                data: (data) => SliverPadding(
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async => await ref.refresh(wantToReadListProvider),
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
                   padding: LayoutConstants.smallEdgeInsets,
-                  sliver: SeriesSliverGrid(
-                    series: data,
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      "Want to Read",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
                 ),
-              ),
-              const SliverBottomPadding(),
-            ],
+                const WantToReadGrid(),
+                const SliverBottomPadding(),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class WantToReadGrid extends ConsumerWidget {
+  const WantToReadGrid({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final series = ref.watch(wantToReadListProvider);
+    return AsyncSliver(
+      asyncValue: series,
+      data: (data) => SliverPadding(
+        padding: LayoutConstants.smallEdgeInsets,
+        sliver: SeriesSliverGrid(
+          series: data,
         ),
       ),
     );

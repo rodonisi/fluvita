@@ -136,7 +136,7 @@ class _VolumeGrid extends StatelessWidget {
       itemCount: volumes.length,
       builder: (context, index) {
         final volume = volumes[index];
-        return VolumeCard(volume: volume);
+        return VolumeCard(volumeId: volume.id);
       },
     );
   }

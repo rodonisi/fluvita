@@ -1,11 +1,10 @@
 import 'package:drift/drift.dart';
-import 'package:fluvita/api/openapi.swagger.dart';
 import 'package:fluvita/database/app_database.dart';
-import 'package:fluvita/mapping/tables/reading_progress_data.dart';
 import 'package:fluvita/models/chapter_model.dart';
 import 'package:fluvita/models/progress_model.dart';
 import 'package:fluvita/riverpod/providers/client.dart';
 import 'package:fluvita/riverpod/repository/database.dart';
+import 'package:fluvita/sync/reader_sync_operations.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,25 +14,38 @@ part 'reader_repository.g.dart';
 ReaderRepository readerRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final client = ReaderRemoteOperations(client: restClient);
+  final client = ReaderSyncOperations(client: restClient);
   return ReaderRepository(db, client);
 }
 
 class ReaderRepository {
   final AppDatabase _db;
-  final ReaderRemoteOperations _client;
+  final ReaderSyncOperations _client;
 
   ReaderRepository(this._db, this._client);
 
+  /// Get continue point for [seriesId]
   Future<ChapterModel> getContinuePoint({required int seriesId}) async {
-    final chapter = await _db.readerDao.getContinuePoint(seriesId: seriesId);
+    final chapter = await _db.readerDao
+        .continuePoint(seriesId: seriesId)
+        .getSingle();
     return ChapterModel.fromDatabaseModel(chapter);
   }
 
+  /// Watch continue point for [seriesId]
+  Stream<ChapterModel> watchContinuePoint({required int seriesId}) {
+    return _db.readerDao
+        .continuePoint(seriesId: seriesId)
+        .watchSingle()
+        .map(ChapterModel.fromDatabaseModel);
+  }
+
+  /// Watch reading progress percent for continue points of [seriesId]
   Stream<double> watchContinuePointProgress({required int seriesId}) {
     return _db.readerDao.watchContinuePointProgress(seriesId: seriesId);
   }
 
+  /// Get reading progress for [chapterId]
   Future<ProgressModel?> getProgress(int chapterId) async {
     final progress = await _db.readerDao.getProgress(chapterId);
 
@@ -44,11 +56,7 @@ class ReaderRepository {
     return ProgressModel.fromDatabaseModel(progress);
   }
 
-  Future<void> refreshProgress(int chapterId) async {
-    final entry = await _client.getProgress(chapterId);
-    await _db.readerDao.mergeProgress(entry);
-  }
-
+  /// Watch expected previous chapter
   Stream<int?> watchPrevChapterId({
     required int seriesId,
     int? volumeId,
@@ -63,6 +71,7 @@ class ReaderRepository {
         .map((chapter) => chapter?.id);
   }
 
+  /// Watch expected next chapter
   Stream<int?> watchNextChapterId({
     required int seriesId,
     int? volumeId,
@@ -77,8 +86,10 @@ class ReaderRepository {
         .map((chapter) => chapter?.id);
   }
 
+  /// Save local progress reading progress, setting the entry as dirty.
+  /// Also tries to push the change to the server.
   Future<void> saveProgress(ProgressModel progress) async {
-    await _db.readerDao.upsertProgress(
+    final prog = await _db.readerDao.upsertProgress(
       ReadingProgressCompanion(
         chapterId: Value(progress.chapterId),
         volumeId: Value(progress.volumeId),
@@ -90,8 +101,16 @@ class ReaderRepository {
         dirty: const Value(true),
       ),
     );
+
+    try {
+      await _client.sendProgress(prog);
+    } catch (e) {
+      log.e('could not send progress', error: e);
+    }
   }
 
+  /// Refresh complete progress for continue points. Does not update dirty
+  /// entries.
   Future<void> refreshContinuePointsAndProgress() async {
     final series = await _db.seriesDao.allSeries().get();
     final updates = await Future.wait(
@@ -110,7 +129,8 @@ class ReaderRepository {
     );
   }
 
-  /// Synchronize all dirty progress entries by sending them to the backend and refetching the updated state.
+  /// Synchronize all dirty progress entries by sending them to the backend,
+  /// refetching the updated state and finally merging it with the local state.
   Future<void> mergeProgress() async {
     final dirty = await _db.readerDao.getDirtyProgress();
     log.d('processing ${dirty.length} progress entries');
@@ -120,122 +140,41 @@ class ReaderRepository {
       await _client.sendProgress(d);
       updatedProgress.add(await _client.getProgress(d.chapterId));
     }
-    await _db.readerDao.upsertProgressBatch(updatedProgress);
+
+    await _db.readerDao.mergeProgressBatch(updatedProgress);
   }
 
+  /// Mark [seriesId] as read. This will set the progress for all chapters
+  /// belonging to this series
   Future<void> markSeriesRead(int seriesId) async {
     await _db.readerDao.markSeriesRead(seriesId, isRead: true);
   }
 
+  /// Mark [seriesId] as unread. This will set the progress for all chapters
+  /// belonging to this series
   Future<void> markSeriesUnread(int seriesId) async {
     await _db.readerDao.markSeriesRead(seriesId, isRead: false);
   }
 
-  Future<void> markVolumeRead(int seriesId, int volumeId) async {
-    await _db.readerDao.markVolumeRead(seriesId, volumeId, isRead: true);
+  /// Mark [volumeId] as read. This will set the progress for all chapters
+  /// belonging to this volume
+  Future<void> markVolumeRead(int volumeId) async {
+    await _db.readerDao.markVolumeRead(volumeId, isRead: true);
   }
 
-  Future<void> markVolumeUnread(int seriesId, int volumeId) async {
-    await _db.readerDao.markVolumeRead(seriesId, volumeId, isRead: false);
+  /// Mark [volumeId] as unread. This will set the progress for all chapters
+  /// belonging to this volume
+  Future<void> markVolumeUnread(int volumeId) async {
+    await _db.readerDao.markVolumeRead(volumeId, isRead: false);
   }
 
-  Future<void> markChapterRead(int seriesId, int chapterId) async {
+  /// Mark [chapterId] as read.
+  Future<void> markChapterRead(int chapterId) async {
     await _db.readerDao.markChapterRead(chapterId, isRead: true);
   }
 
-  Future<void> markChapterUnread(int seriesId, int chapterId) async {
+  /// Mark [chapterId] as unread.
+  Future<void> markChapterUnread(int chapterId) async {
     await _db.readerDao.markChapterRead(chapterId, isRead: false);
-  }
-}
-
-class ReaderRemoteOperations {
-  final Openapi _client;
-
-  const ReaderRemoteOperations({required Openapi client}) : _client = client;
-
-  Future<int> getContinuePoint(int seriesId) async {
-    final res = await _client.apiReaderContinuePointGet(seriesId: seriesId);
-
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to load continue point: ${res.error}');
-    }
-
-    final chapterDto = res.body!;
-    return chapterDto.id!;
-  }
-
-  Future<ReadingProgressCompanion> getProgress(int chapterId) async {
-    final res = await _client.apiReaderGetProgressGet(chapterId: chapterId);
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to load progress: ${res.error}');
-    }
-    final dto = res.body!;
-    return ReadingProgressCompanion(
-      chapterId: Value(chapterId),
-      volumeId: Value(dto.volumeId),
-      seriesId: Value(dto.seriesId),
-      libraryId: Value(dto.libraryId),
-      pagesRead: Value(dto.pageNum),
-      bookScrollId: Value(dto.bookScrollId),
-      lastModified: Value.absentIfNull(dto.lastModifiedUtc),
-    );
-  }
-
-  Future<void> sendProgress(ReadingProgressData progress) async {
-    await _client.apiReaderProgressPost(body: progress.toProgressDto());
-  }
-
-  Future<void> markSeriesRead(int seriesId) async {
-    final res = await _client.apiReaderMarkReadPost(
-      body: MarkReadDto(seriesId: seriesId),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark series as read: ${res.error}');
-    }
-  }
-
-  Future<void> markSeriesUnread(int seriesId) async {
-    final res = await _client.apiReaderMarkUnreadPost(
-      body: MarkReadDto(seriesId: seriesId),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark series as unread: ${res.error}');
-    }
-  }
-
-  Future<void> markVolumeRead(int seriesId, int volumeId) async {
-    final res = await _client.apiReaderMarkVolumeReadPost(
-      body: MarkVolumeReadDto(seriesId: seriesId, volumeId: volumeId),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark volume as read: ${res.error}');
-    }
-  }
-
-  Future<void> markVolumeUnread(int seriesId, int volumeId) async {
-    final res = await _client.apiReaderMarkVolumeUnreadPost(
-      body: MarkVolumeReadDto(seriesId: seriesId, volumeId: volumeId),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark volume as unread: ${res.error}');
-    }
-  }
-
-  Future<void> markChaptersRead(int seriesId, List<int> chapterIds) async {
-    final res = await _client.apiReaderMarkMultipleReadPost(
-      body: MarkVolumesReadDto(seriesId: seriesId, chapterIds: chapterIds),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark chapter as read: ${res.error}');
-    }
-  }
-
-  Future<void> markChaptersUnread(int seriesId, List<int> chapterIds) async {
-    final res = await _client.apiReaderMarkMultipleUnreadPost(
-      body: MarkVolumesReadDto(seriesId: seriesId, chapterIds: chapterIds),
-    );
-    if (!res.isSuccessful) {
-      throw Exception('Failed to mark chapter as unread: ${res.error}');
-    }
   }
 }

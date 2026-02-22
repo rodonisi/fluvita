@@ -11,7 +11,8 @@ part 'reader_dao.g.dart';
 class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   ReaderDao(super.attachedDatabase);
 
-  JoinedSelectStatement<HasResultSet, dynamic> continuePointQuery({
+  /// Base continue point query
+  JoinedSelectStatement<HasResultSet, dynamic> _continuePointQuery({
     required int seriesId,
   }) {
     return select(chapters).join([
@@ -36,14 +37,16 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       ..limit(1);
   }
 
-  Future<Chapter> getContinuePoint({required int seriesId}) {
-    return continuePointQuery(
+  /// [SingleSelectable] continue point for series [seriesId]
+  SingleSelectable<Chapter> continuePoint({required int seriesId}) {
+    return _continuePointQuery(
       seriesId: seriesId,
-    ).map((row) => row.readTable(chapters)).getSingle();
+    ).map((row) => row.readTable(chapters));
   }
 
+  /// Watch progress percent for continue point of series [seriesId]
   Stream<double> watchContinuePointProgress({required int seriesId}) {
-    return continuePointQuery(seriesId: seriesId).watchSingleOrNull().map((
+    return _continuePointQuery(seriesId: seriesId).watchSingleOrNull().map((
       row,
     ) {
       if (row == null) return 0.0;
@@ -54,46 +57,57 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     });
   }
 
+  /// Get progress for chapter [chapterId]
   Future<ReadingProgressData?> getProgress(int chapterId) {
     return (select(
       readingProgress,
     )..where((row) => row.chapterId.equals(chapterId))).getSingleOrNull();
   }
 
+  /// Get all dirty progress entries
   Future<List<ReadingProgressData>> getDirtyProgress() async {
     return await managers.readingProgress.filter((f) => f.dirty(true)).get();
   }
 
-  Future<void> upsertProgress(ReadingProgressCompanion entry) async {
-    log.d('upsert progress chapter=${entry.chapterId.value}');
-    await into(readingProgress).insertOnConflictUpdate(entry);
-  }
-
-  Future<void> mergeProgress(ReadingProgressCompanion incoming) async {
-    await transaction(() async {
-      final local =
-          await (select(
-                readingProgress,
-              )..where((tbl) => tbl.chapterId.equals(incoming.chapterId.value)))
-              .getSingleOrNull();
-
-      final localWins =
-          local != null &&
-          local.dirty &&
-          local.lastModified.isAfter(incoming.lastModified.value);
-
-      if (!localWins) {
-        await into(readingProgress).insertOnConflictUpdate(incoming);
-      }
-    });
-  }
-
-  Future<void> upsertProgressBatch(
-    Iterable<ReadingProgressCompanion> incoming,
+  /// Upsert progress entry. Returns the inserted or updated entry
+  Future<ReadingProgressData> upsertProgress(
+    ReadingProgressCompanion entry,
   ) async {
-    await batch(
-      (batch) => batch.insertAllOnConflictUpdate(readingProgress, incoming),
+    log.d('upsert progress chapter=${entry.chapterId.value}');
+    return await into(
+      readingProgress,
+    ).insertReturning(
+      entry,
+      onConflict: DoUpdate((old) => entry),
     );
+  }
+
+  /// Merge a progress batch. Updates all entries that are last modified at the
+  /// same time or before the existing dirty progress entry
+  Future<void> mergeProgressBatch(
+    List<ReadingProgressCompanion> incomingList,
+  ) async {
+    final ids = incomingList.map((p) => p.chapterId.value).toList();
+    final localRecords = await (select(
+      readingProgress,
+    )..where((tbl) => tbl.chapterId.isIn(ids))).get();
+
+    final localMap = {for (var r in localRecords) r.chapterId: r};
+
+    final toUpdate = incomingList.where((incoming) {
+      final local = localMap[incoming.chapterId.value];
+
+      return !_localWins(
+        local: local,
+        incoming: incoming,
+      );
+    }).toList();
+
+    if (toUpdate.isNotEmpty) {
+      await batch((b) {
+        b.insertAllOnConflictUpdate(readingProgress, toUpdate);
+      });
+    }
   }
 
   /// Upsert chapter progress batch only where the existing progress is not
@@ -129,6 +143,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     });
   }
 
+  /// Watch previous chapter for chapter [chapterId]
   Stream<Chapter?> watchPrevChapter({
     required int seriesId,
     int? volumeId,
@@ -153,6 +168,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return query.watchSingleOrNull();
   }
 
+  /// Watch next chapter for chapter [chapterId]
   Stream<Chapter?> watchNextChapter({
     required int seriesId,
     int? volumeId,
@@ -177,6 +193,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return query.watchSingleOrNull();
   }
 
+  /// Mark all chapters for [seriesId] as [isRead]
   Future<void> markSeriesRead(int seriesId, {required bool isRead}) async {
     await transaction(() async {
       await (update(
@@ -205,7 +222,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
           dirty: const Value(true),
-          // totalReads will already be incremented from step 1
+          lastModified: Value(DateTime.timestamp()),
         );
       });
 
@@ -215,8 +232,8 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     });
   }
 
+  /// Mark all chapters for [volumeId] as [isRead]
   Future<void> markVolumeRead(
-    int seriesId,
     int volumeId, {
     required bool isRead,
   }) async {
@@ -224,8 +241,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       await (update(
             readingProgress,
           )..where(
-            (tbl) =>
-                tbl.seriesId.equals(seriesId) & tbl.volumeId.equals(volumeId),
+            (tbl) => tbl.volumeId.equals(volumeId),
           ))
           .write(
             ReadingProgressCompanion.custom(
@@ -237,9 +253,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           (select(
                 chapters,
               )..where(
-                (row) =>
-                    row.seriesId.equals(seriesId) &
-                    row.volumeId.equals(volumeId),
+                (row) => row.volumeId.equals(volumeId),
               ))
               .join([
                 innerJoin(series, series.id.equalsExp(chapters.seriesId)),
@@ -256,7 +270,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
           dirty: const Value(true),
-          // totalReads will already be incremented from step 1
+          lastModified: Value(DateTime.timestamp()),
         );
       });
 
@@ -266,6 +280,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     });
   }
 
+  /// Mark chapter [chapterId] as [isRead]
   Future<void> markChapterRead(int chapterId, {required bool isRead}) async {
     await transaction(() async {
       (update(
@@ -295,9 +310,20 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
+          lastModified: Value(DateTime.timestamp()),
           dirty: const Value(true),
         ),
       );
     });
+  }
+
+  /// Progress data merge local wins condition
+  static bool _localWins({
+    ReadingProgressData? local,
+    required ReadingProgressCompanion incoming,
+  }) {
+    return local != null &&
+        local.dirty &&
+        local.lastModified.isAfter(incoming.lastModified.value);
   }
 }

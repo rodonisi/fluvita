@@ -12,6 +12,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     with _$ChaptersDaoMixin {
   ChaptersDao(super.attachedDatabase);
 
+  /// Watch chapter [chapterId]
   Stream<Chapter> watchChapter(int chapterId) {
     return (select(
           chapters,
@@ -20,6 +21,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
         .whereNotNull();
   }
 
+  /// Watch pages read for chapter [chapterId]
   Stream<int?> watchPagesRead({required int chapterId}) {
     final query = selectOnly(readingProgress)
       ..where(readingProgress.chapterId.equals(chapterId))
@@ -30,15 +32,14 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-  Stream<ChapterCover> watchChapterCover({required int chapterId}) {
+  /// Watch cover for chapter [chapterId]. Returns null if no cover is present
+  Stream<ChapterCover?> watchChapterCover({required int chapterId}) {
     return (select(
-          chapterCovers,
-        )..where((row) => row.chapterId.equals(chapterId)))
-        .watchSingleOrNull()
-        .whereNotNull()
-        .distinct();
+      chapterCovers,
+    )..where((row) => row.chapterId.equals(chapterId))).watchSingleOrNull();
   }
 
+  /// Get the list chapter ids missing a cover
   Future<List<int>> getMissingCovers() async {
     final query = select(chapters).join([
       leftOuterJoin(
@@ -52,10 +53,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     return await query.map((row) => row.readTable(chapters).id).get();
   }
 
-  Future<void> upsertChapter(ChaptersCompanion chapter) async {
-    await into(chapters).insertOnConflictUpdate(chapter);
-  }
-
+  /// Upsert a batch of chapters
   Future<void> upsertChapterBatch(Iterable<ChaptersCompanion> entries) async {
     log.d('upserting chapter batch with ${entries.length} entries');
     await batch((batch) {
@@ -63,13 +61,8 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  /// Upsert a chapter cover
   Future<void> upsertChapterCover(ChapterCoversCompanion cover) async {
     await into(chapterCovers).insertOnConflictUpdate(cover);
-  }
-
-  Future<void> clearSeriesChapters({required int seriesId}) async {
-    await (delete(
-      chapters,
-    )..where((row) => row.seriesId.equals(seriesId))).go();
   }
 }

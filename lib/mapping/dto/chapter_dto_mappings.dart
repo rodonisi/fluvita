@@ -12,6 +12,7 @@ extension ChapterDtoMappings on ChapterDto {
       volumeId: Value(id!),
       pagesRead: Value(pagesRead!),
       totalReads: Value(totalReads!),
+      lastModified: Value.absentIfNull(lastReadingProgressUtc),
     );
   }
 
@@ -38,7 +39,6 @@ extension ChapterDtoMappings on ChapterDto {
       releaseDate: Value.absentIfNull(releaseDate),
       created: Value.absentIfNull(createdUtc),
       lastModified: Value.absentIfNull(lastModifiedUtc),
-      lastReadingProgress: Value.absentIfNull(lastReadingProgressUtc),
     );
   }
 }

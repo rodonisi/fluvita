@@ -38,7 +38,6 @@ class VolumeAppBar extends ConsumerWidget {
             await ref
                 .read(
                   markVolumeReadProvider(
-                    seriesId: volume.seriesId,
                     volumeId: volume.id,
                   ).notifier,
                 )
@@ -49,7 +48,6 @@ class VolumeAppBar extends ConsumerWidget {
             await ref
                 .read(
                   markVolumeReadProvider(
-                    seriesId: volume.seriesId,
                     volumeId: volume.id,
                   ).notifier,
                 )

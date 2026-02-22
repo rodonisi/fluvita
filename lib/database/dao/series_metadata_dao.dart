@@ -20,6 +20,7 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
     with _$SeriesMetadataDaoMixin {
   SeriesMetadataDao(super.attachedDatabase);
 
+  /// Get series metadata for series [seriesId]
   Stream<SeriesMetadataWithRelations> watchSeriesMetadata(int seriesId) {
     final query = select(seriesMetadata)
       ..where((row) => row.seriesId.equals(seriesId));
@@ -35,7 +36,6 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
         return;
       }
 
-      // Watch writers
       final writersQuery = select(people).join([
         innerJoin(
           seriesPeopleRoles,
@@ -44,7 +44,6 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
         ),
       ]);
 
-      // Watch genres
       final genresQuery = select(genres).join([
         innerJoin(
           seriesGenres,
@@ -82,67 +81,27 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<void> upsertMetadata(
-    SeriesMetadataCompanion metadata, {
-    Iterable<PeopleCompanion> writers = const [],
-    Iterable<GenresCompanion> genres = const [],
-    Iterable<TagsCompanion> tags = const [],
-  }) async {
-    await transaction(() async {
-      await into(seriesMetadata).insertOnConflictUpdate(metadata);
-      await (delete(
-        seriesPeopleRoles,
-      )..where((row) => row.seriesMetadataId.equals(metadata.id.value))).go();
-      await (delete(
-        seriesGenres,
-      )..where((row) => row.seriesMetadataId.equals(metadata.id.value))).go();
-      await (delete(
-        seriesTags,
-      )..where((row) => row.seriesMetadataId.equals(metadata.id.value))).go();
+  /// Upsert batch of [SeriesMetadataCompanions]
+  Future<void> upsertMetadataBatch(
+    Iterable<SeriesMetadataCompanions> metadata,
+  ) async {
+    final items = metadata.toList();
+    final meta = items.map((m) => m.metadata);
+    final ws = items.map((m) => m.writers).expand((e) => e);
+    final gs = items.map((m) => m.genres).expand((e) => e);
+    final ts = items.map((m) => m.tags).expand((e) => e);
+    final prs = items.map((m) => m.peopleRoles).expand((e) => e);
+    final sgs = items.map((m) => m.seriesGenres).expand((e) => e);
+    final sts = items.map((m) => m.seriesTags).expand((e) => e);
 
-      await batch(
-        (batch) {
-          batch.insertAllOnConflictUpdate(people, writers);
-          batch.insertAllOnConflictUpdate(
-            seriesPeopleRoles,
-            writers.map(
-              (entry) => SeriesPeopleRolesCompanion(
-                seriesMetadataId: metadata.id,
-                personId: entry.id,
-                role: const Value(.writer),
-              ),
-            ),
-          );
-        },
-      );
-      await batch(
-        (batch) {
-          batch.insertAllOnConflictUpdate(this.genres, genres);
-          batch.insertAllOnConflictUpdate(
-            seriesGenres,
-            genres.map(
-              (entry) => SeriesGenresCompanion(
-                seriesMetadataId: metadata.id,
-                genreId: entry.id,
-              ),
-            ),
-          );
-        },
-      );
-      await batch(
-        (batch) {
-          batch.insertAllOnConflictUpdate(this.tags, tags);
-          batch.insertAllOnConflictUpdate(
-            seriesTags,
-            tags.map(
-              (entry) => SeriesTagsCompanion(
-                seriesMetadataId: metadata.id,
-                tagId: entry.id,
-              ),
-            ),
-          );
-        },
-      );
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(seriesMetadata, meta);
+      batch.insertAllOnConflictUpdate(people, ws);
+      batch.insertAllOnConflictUpdate(genres, gs);
+      batch.insertAllOnConflictUpdate(tags, ts);
+      batch.insertAllOnConflictUpdate(seriesPeopleRoles, prs);
+      batch.insertAllOnConflictUpdate(seriesGenres, sgs);
+      batch.insertAllOnConflictUpdate(seriesTags, sts);
     });
   }
 }
@@ -158,5 +117,25 @@ class SeriesMetadataWithRelations {
     required this.writers,
     required this.genres,
     required this.tags,
+  });
+}
+
+class SeriesMetadataCompanions {
+  final SeriesMetadataCompanion metadata;
+  final Iterable<PeopleCompanion> writers;
+  final Iterable<GenresCompanion> genres;
+  final Iterable<TagsCompanion> tags;
+  final Iterable<SeriesPeopleRolesCompanion> peopleRoles;
+  final Iterable<SeriesGenresCompanion> seriesGenres;
+  final Iterable<SeriesTagsCompanion> seriesTags;
+
+  SeriesMetadataCompanions({
+    required this.metadata,
+    required this.writers,
+    required this.genres,
+    required this.tags,
+    required this.peopleRoles,
+    required this.seriesGenres,
+    required this.seriesTags,
   });
 }

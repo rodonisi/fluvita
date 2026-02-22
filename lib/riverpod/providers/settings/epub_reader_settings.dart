@@ -1,6 +1,9 @@
 import 'package:fluvita/models/read_direction.dart';
+import 'package:fluvita/riverpod/repository/storage_repository.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'epub_reader_settings.freezed.dart';
@@ -35,9 +38,11 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
 }
 
 @riverpod
+@JsonPersist()
 class EpubReaderSettings extends _$EpubReaderSettings {
   @override
   EpubReaderSettingsState build() {
+    persist(ref.watch(storageProvider.future));
     return const EpubReaderSettingsState();
   }
 

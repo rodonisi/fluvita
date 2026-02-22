@@ -13,16 +13,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class DownloadStatusIcon extends StatelessWidget {
   const DownloadStatusIcon({
     super.key,
-    required this.isDownloaded,
-    required this.isDownloading,
     this.progress,
   });
-
-  /// Whether the content is fully downloaded.
-  final bool isDownloaded;
-
-  /// Whether a download is currently in progress.
-  final bool isDownloading;
 
   /// Download progress as a fraction (0.0–1.0), or `null` for indeterminate.
   /// Only meaningful when [isDownloading] is true.
@@ -30,7 +22,9 @@ class DownloadStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isDownloading) {
+    if (progress == null || progress! <= 0.0) return const SizedBox.shrink();
+
+    if (progress! < 1.0) {
       return Card(
         child: Padding(
           padding: LayoutConstants.smallEdgeInsets,
@@ -42,19 +36,15 @@ class DownloadStatusIcon extends StatelessWidget {
       );
     }
 
-    if (isDownloaded) {
-      return Card(
-        child: Padding(
-          padding: LayoutConstants.smallEdgeInsets,
-          child: Icon(
-            LucideIcons.download,
-            color: Theme.of(context).colorScheme.tertiary,
-            size: 16,
-          ),
+    return Card(
+      child: Padding(
+        padding: LayoutConstants.smallEdgeInsets,
+        child: Icon(
+          LucideIcons.download,
+          color: Theme.of(context).colorScheme.tertiary,
+          size: 16,
         ),
-      );
-    }
-
-    return const SizedBox.shrink();
+      ),
+    );
   }
 }

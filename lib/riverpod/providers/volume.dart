@@ -22,7 +22,7 @@ Stream<double> volumeProgress(Ref ref, {required int volumeId}) async* {
 }
 
 @riverpod
-Stream<ImageModel> volumeCover(Ref ref, {required int volumeId}) async* {
+Stream<ImageModel?> volumeCover(Ref ref, {required int volumeId}) async* {
   final repo = ref.watch(volumesRepositoryProvider);
   yield* repo.watchVolumeCover(volumeId).distinct();
 }

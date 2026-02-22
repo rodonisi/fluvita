@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'download.g.dart';
 
-/// Whether every page of [chapterId] is stored locally.
+/// Whether every page of [chapterId] is stored locally
 @riverpod
 Stream<bool> chapterDownloaded(
   Ref ref, {
@@ -13,21 +13,17 @@ Stream<bool> chapterDownloaded(
   return repo.watchIsChapterDownloaded(chapterId: chapterId).distinct();
 }
 
-/// Number of pages currently stored for [chapterId].
-/// Combine with the chapter's total page count to derive a progress ratio.
+/// The download progress percent for chapter [chapterId]
 @riverpod
-Stream<int> chapterDownloadedPageCount(
+Stream<double> chapterDownloadProgress(
   Ref ref, {
   required int chapterId,
 }) {
   final repo = ref.watch(downloadRepositoryProvider);
-  return repo.watchDownloadedPageCount(chapterId: chapterId).distinct();
+  return repo.watchDownloadProgress(chapterId: chapterId).distinct();
 }
 
-/// Emits download progress percent for a volume identified by its chapter IDs.
-///
-/// [chapterIds] must be a stable sorted list (list identity is used for
-/// provider caching).
+/// Emits download progress percent for volume [volumeId]
 @riverpod
 Stream<double> volumeDownloadProgress(
   Ref ref, {
@@ -37,7 +33,7 @@ Stream<double> volumeDownloadProgress(
   return repo.watchVolumeDownloadProgress(volumeId: volumeId).distinct();
 }
 
-/// Emits download progress percent for every chapter belonging to [seriesId].
+/// Emits total download progress percent for all chapters belonging to series [seriesId]
 @riverpod
 Stream<double> seriesDownloadProgress(
   Ref ref, {

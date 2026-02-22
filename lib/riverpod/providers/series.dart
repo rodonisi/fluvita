@@ -1,6 +1,5 @@
 import 'package:fluvita/models/image_model.dart';
 import 'package:fluvita/models/series_model.dart';
-import 'package:fluvita/riverpod/repository/series_metadata_repository.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -23,7 +22,7 @@ Stream<double> seriesProgress(Ref ref, {required int seriesId}) async* {
 }
 
 @riverpod
-Stream<ImageModel> seriesCover(Ref ref, {required int seriesId}) async* {
+Stream<ImageModel?> seriesCover(Ref ref, {required int seriesId}) async* {
   final repo = ref.watch(seriesRepositoryProvider);
   yield* repo.watchSeriesCover(seriesId).distinct();
 }
@@ -48,7 +47,7 @@ Stream<SeriesMetadataModel> seriesMetadata(
   Ref ref, {
   required int seriesId,
 }) async* {
-  final repo = ref.watch(seriesMetadataRepositoryProvider);
+  final repo = ref.watch(seriesRepositoryProvider);
   yield* repo.watchSeriesMetadata(seriesId).distinct();
 }
 

@@ -29,7 +29,7 @@ Stream<double> chapterProgress(Ref ref, {required int chapterId}) async* {
 }
 
 @riverpod
-Stream<ImageModel> chapterCover(Ref ref, {required int chapterId}) async* {
+Stream<ImageModel?> chapterCover(Ref ref, {required int chapterId}) async* {
   final repo = ref.watch(chaptersRepositoryProvider);
   yield* repo.watchChapterCover(chapterId).distinct();
 }

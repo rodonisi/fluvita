@@ -11,11 +11,7 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     with _$DownloadDaoMixin {
   DownloadDao(super.attachedDatabase);
 
-  /// Returns whether ALL pages of a chapter are stored locally.
-  ///
-  /// Drives from the `chapters` table (always one row) and LEFT JOINs
-  /// `downloadedPages` so the result is never empty, even before any page
-  /// has been saved.
+  /// Returns whether ALL pages of a chapter [chapterId] are stored locally.
   SingleSelectable<bool> isChapterDownloaded({required int chapterId}) {
     final downloadedCount = downloadedPages.chapterId.count();
 
@@ -38,15 +34,25 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  /// Returns how many pages have been downloaded for a chapter.
-  SingleSelectable<int> totalDownloadedPages({required int chapterId}) {
+  /// Returns download progress percentage for chapter [chapterId].
+  SingleSelectable<double> dowloadPercent({required int chapterId}) {
     final countColumn = downloadedPages.chapterId.count();
 
-    final query = selectOnly(downloadedPages)
-      ..addColumns([countColumn])
-      ..where(downloadedPages.chapterId.equals(chapterId));
+    final query =
+        selectOnly(downloadedPages).join([
+            innerJoin(
+              chapters,
+              chapters.id.equalsExp(downloadedPages.chapterId),
+            ),
+          ])
+          ..addColumns([countColumn, chapters.pages])
+          ..where(downloadedPages.chapterId.equals(chapterId));
 
-    return query.map((row) => row.read(countColumn) ?? 0);
+    return query.map((row) {
+      final downloaded = row.read(countColumn) ?? 0;
+      final total = row.read(chapters.pages) ?? 0;
+      return total > 0 ? downloaded / total : 0.0;
+    });
   }
 
   /// Fetches a specific page blob by chapterId + page index.
@@ -97,10 +103,6 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
       )..where((tbl) => tbl.chapterId.isInQuery(chapterIdsQuery))).go();
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // Volume / series batch progress queries
-  // ---------------------------------------------------------------------------
 
   /// Reactively emits the percentage of downloaded pages for [volumeId]
   Stream<double> watchDownloadedProgressByVolume({required int volumeId}) {

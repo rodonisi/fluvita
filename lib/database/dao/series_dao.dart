@@ -24,6 +24,7 @@ part 'series_dao.g.dart';
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   SeriesDao(super.attachedDatabase);
 
+  /// Watch series [seriesId]
   Stream<SeriesData> watchSeries(int seriesId) {
     return managers.series
         .filter((s) => s.id(seriesId))
@@ -32,59 +33,14 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .distinct();
   }
 
-  Stream<int?> watchPagesRead({required int seriesId}) {
-    final pagesReadSum = readingProgress.pagesRead.sum();
-
-    final query = selectOnly(readingProgress)
-      ..addColumns([pagesReadSum])
-      ..where(readingProgress.seriesId.equals(seriesId))
-      ..groupBy([readingProgress.seriesId]);
-
-    return query.watchSingleOrNull().map((row) => row?.read(pagesReadSum));
-  }
-
-  MultiSelectable<SeriesData> allSeries({int? libraryId}) {
-    final query = select(series);
-    if (libraryId != null) {
-      return (query..where((row) => row.libraryId.equals(libraryId)));
-    }
-
-    return query;
-  }
-
-  MultiSelectable<Chapter> allChapters({required int seriesId}) {
-    return managers.chapters.filter((f) => f.seriesId.id(seriesId));
-  }
-
-  Stream<List<SeriesData>> watchOnDeck() {
-    return managers.series
-        .filter((f) => f.isOnDeck(true))
-        .orderBy((o) => o.lastRead.desc())
-        .watch();
-  }
-
-  Stream<List<SeriesData>> watchRecentlyUpdated() {
-    return managers.series
-        .filter((f) => f.isRecentlyUpdated(true))
-        .orderBy((o) => o.lastChapterAdded.desc())
-        .watch();
-  }
-
-  Stream<List<SeriesData>> watchRecentlyAdded() {
-    return managers.series
-        .filter((f) => f.isRecentlyAdded(true))
-        .orderBy((o) => o.created.desc())
-        .watch();
-  }
-
-  Stream<SeriesCover> watchSeriesCover({required int seriesId}) {
+  /// Watch cover for series [seriesId]
+  Stream<SeriesCover?> watchSeriesCover({required int seriesId}) {
     return managers.seriesCovers
         .filter((f) => f.seriesId.id(seriesId))
-        .watchSingleOrNull()
-        .whereNotNull()
-        .distinct();
+        .watchSingleOrNull();
   }
 
+  /// Watch series details for series [seriesId]
   Stream<SeriesDetailWithRelations> watchSeriesDetail(int seriesId) {
     final volumesStream = managers.volumes
         .filter((f) => f.seriesId.id(seriesId))
@@ -126,6 +82,91 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     );
   }
 
+  /// Watch pages read for series [seriesId]
+  Stream<int?> watchPagesRead({required int seriesId}) {
+    final pagesReadSum = readingProgress.pagesRead.sum();
+
+    final query = selectOnly(readingProgress)
+      ..addColumns([pagesReadSum])
+      ..where(readingProgress.seriesId.equals(seriesId))
+      ..groupBy([readingProgress.seriesId]);
+
+    return query.watchSingleOrNull().map((row) => row?.read(pagesReadSum));
+  }
+
+  /// Get all series stored in the database, optionally filtering by [libraryId]
+  MultiSelectable<SeriesData> allSeries({int? libraryId}) {
+    final query = select(series);
+    if (libraryId != null) {
+      return (query..where((row) => row.libraryId.equals(libraryId)));
+    }
+
+    return query;
+  }
+
+  /// Get all chapters for series [seriesId]
+  MultiSelectable<Chapter> allChapters({required int seriesId}) {
+    return managers.chapters.filter((f) => f.seriesId.id(seriesId));
+  }
+
+  /// Watch series on deck
+  Stream<List<SeriesData>> watchOnDeck() {
+    final query = select(series)
+      ..where((t) => t.isOnDeck.equals(true))
+      ..orderBy([
+        (t) {
+          final latestProgress = selectOnly(readingProgress)
+            ..addColumns([readingProgress.lastModified.max()])
+            ..where(readingProgress.seriesId.equalsExp(series.id));
+
+          return OrderingTerm.desc(
+            subqueryExpression<DateTime>(latestProgress),
+          );
+        },
+      ]);
+
+    return query.watch();
+  }
+
+  /// Watch recently updated series
+  Stream<List<SeriesData>> watchRecentlyUpdated() {
+    return managers.series
+        .filter((f) => f.isRecentlyUpdated(true))
+        .orderBy((o) => o.lastChapterAdded.desc())
+        .watch();
+  }
+
+  /// Watch recently added series
+  Stream<List<SeriesData>> watchRecentlyAdded() {
+    return managers.series
+        .filter((f) => f.isRecentlyAdded(true))
+        .orderBy((o) => o.created.desc())
+        .watch();
+  }
+
+  /// Watch whether [seriesId] is want-to-read
+  Stream<bool> watchWantToRead(int seriesId) {
+    return managers.wantToRead
+        .filter((f) => f.seriesId.id(seriesId) & f.isWantToRead(true))
+        .watchSingleOrNull()
+        .map((i) => i != null && i.isWantToRead);
+  }
+
+  /// Watch the want-to-read list
+  Stream<List<SeriesData>> watchWantToReadList() {
+    return (select(wantToRead).join([
+          innerJoin(series, series.id.equalsExp(wantToRead.seriesId)),
+        ])..where(wantToRead.isWantToRead.equals(true)))
+        .map((res) => res.readTable(series))
+        .watch();
+  }
+
+  /// Get all locally modified want-to-read entries
+  Future<List<WantToReadData>> getDirtyWantToRead() async {
+    return await managers.wantToRead.filter((f) => f.dirty(true)).get();
+  }
+
+  /// Get the list of series ids without a cover
   Future<List<int>> getMissingCovers() async {
     final query = select(series).join([
       leftOuterJoin(seriesCovers, seriesCovers.seriesId.equalsExp(series.id)),
@@ -136,11 +177,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     return await query.map((row) => row.readTable(series).id).get();
   }
 
-  Future<void> upsertSeries(SeriesCompanion entry) async {
-    log.d('upserting series ${entry.id.value}');
-    await into(series).insertOnConflictUpdate(entry);
-  }
-
+  /// Upsert a batch of series
   Future<void> upsertSeriesBatch(Iterable<SeriesCompanion> entries) async {
     log.d('upserting series batch with ${entries.length} entries');
     await batch((batch) {
@@ -148,27 +185,39 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  Future<void> upsertSeriesDetail({
-    required int seriesId,
-    required SeriesDetailCompanions entries,
-  }) async {
+  /// Upsert series details. Also deletes chapters and volumes not part of the
+  /// series anymore.
+  Future<void> upsertSeriesDetail(SeriesDetailCompanions entry) async {
+    final cs = {
+      ...entry.chapters,
+      ...entry.specials,
+      ...entry.storyline,
+    };
+
+    final chapterIds = cs.map((c) => c.id.value);
+    final volumeIds = entry.volumes.map((v) => v.volume.id.value);
+
     await transaction(() async {
-      await db.chaptersDao.clearSeriesChapters(seriesId: seriesId);
-      await db.volumesDao.clearSeriesVolumes(seriesId: seriesId);
-      await db.chaptersDao.upsertChapterBatch({
-        ...entries.chapters,
-        ...entries.specials,
-        ...entries.storyline,
-      });
-      await db.volumesDao.upsertVolumeBatch(entries.volumes);
+      await (delete(
+            chapters,
+          )..where(
+            (c) => c.seriesId.equals(entry.seriesId) & c.id.isNotIn(chapterIds),
+          ))
+          .go();
+      await (delete(volumes)..where(
+            (v) => v.seriesId.equals(entry.seriesId) & v.id.isNotIn(volumeIds),
+          ))
+          .go();
+      await db.volumesDao.upsertVolumeBatch(entry.volumes);
+      await db.chaptersDao.upsertChapterBatch(cs);
 
       final s = await (select(
         series,
-      )..where((tbl) => tbl.id.equals(seriesId))).getSingle();
+      )..where((tbl) => tbl.id.equals(entry.seriesId))).getSingle();
 
-      final progress = entries.progress.map(
+      final progress = entry.progress.map(
         (c) => c.copyWith(
-          seriesId: Value(seriesId),
+          seriesId: Value(entry.seriesId),
           libraryId: Value(s.libraryId),
           dirty: const Value(false),
         ),
@@ -178,6 +227,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
+  /// Clear all on deck and upsert provided [entries]
   Future<void> upsertOnDeck(Iterable<SeriesCompanion> entries) async {
     await transaction(() async {
       await clearOnDeck();
@@ -185,6 +235,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
+  /// Clear all recently updated and upsert provided [entries]
   Future<void> upsertRecentlyUpdated(Iterable<SeriesCompanion> entries) async {
     await transaction(() async {
       await clearIsRecentlyUpdated();
@@ -192,6 +243,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
+  /// Clear all recently added and upsert provided [entries]
   Future<void> upsertRecentlyAdded(Iterable<SeriesCompanion> entries) async {
     await transaction(() async {
       await clearIsRecentlyAdded();
@@ -199,66 +251,65 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  Stream<bool> watchWantToRead(int seriesId) {
-    return managers.wantToRead
-        .filter((f) => f.seriesId.id(seriesId))
-        .watchSingleOrNull()
-        .map((i) => i != null && i.isWantToRead);
-  }
-
-  Stream<List<SeriesData>> watchWantToReadList() {
-    return select(wantToRead)
-        .join([innerJoin(series, series.id.equalsExp(wantToRead.seriesId))])
-        .map((res) => res.readTable(series))
-        .watch();
-  }
-
-  Future<List<WantToReadData>> getDirtyWantToRead() async {
-    return await managers.wantToRead.filter((f) => f.dirty(true)).get();
-  }
-
+  /// Upsert want-to-read entry
   Future<void> upsertWantToRead(WantToReadCompanion entry) async {
     await into(wantToRead).insertOnConflictUpdate(entry);
   }
 
-  Future<void> upsertWantToReadBatch(
-    Iterable<WantToReadCompanion> entries,
+  /// Upsert the provided [entries] batch of series as want-to-read
+  Future<void> upsertWantToReadFromSeriesBatch(
+    Iterable<SeriesCompanion> entries,
   ) async {
-    await batch(
-      (batch) => batch.insertAllOnConflictUpdate(wantToRead, entries),
+    final wantToReads = entries.map(
+      (s) => WantToReadCompanion(seriesId: s.id),
     );
+    await transaction(() async {
+      await clearWantToRead();
+      await batch(
+        (batch) {
+          batch.insertAllOnConflictUpdate(series, entries);
+          batch.insertAllOnConflictUpdate(wantToRead, wantToReads);
+        },
+      );
+    });
   }
 
+  /// Remove [seriesId] from want-to-read. Sets the entry as dirty.
   Future<void> removeWantToRead({required int seriesId}) async {
     await (update(
       wantToRead,
     )..where((tbl) => tbl.seriesId.equals(seriesId))).write(
-      const WantToReadCompanion(isWantToRead: Value(true), dirty: Value(true)),
+      const WantToReadCompanion(isWantToRead: Value(false), dirty: Value(true)),
     );
   }
 
+  /// Upsert a series cover
   Future<void> upsertSeriesCover(SeriesCoversCompanion cover) async {
     await into(seriesCovers).insertOnConflictUpdate(cover);
   }
 
+  /// Set all isOnDeck flags to false
   Future<void> clearOnDeck() async {
     await (update(series)..where((row) => row.isOnDeck)).write(
       const SeriesCompanion(isOnDeck: Value(false)),
     );
   }
 
+  /// Set all isRecentlyUpdated flags to false
   Future<void> clearIsRecentlyUpdated() async {
     await (update(series)..where((row) => row.isRecentlyUpdated)).write(
       const SeriesCompanion(isRecentlyUpdated: Value(false)),
     );
   }
 
+  /// Clear all isRecentlyAdded flags
   Future<void> clearIsRecentlyAdded() async {
     await (update(series)..where((row) => row.isRecentlyAdded)).write(
       const SeriesCompanion(isRecentlyAdded: Value(false)),
     );
   }
 
+  /// Clear the want to read list
   Future<void> clearWantToRead() async {
     await delete(wantToRead).go();
   }
@@ -279,6 +330,7 @@ class SeriesDetailWithRelations {
 }
 
 class SeriesDetailCompanions {
+  final int seriesId;
   final Iterable<ChaptersCompanion> storyline;
   final Iterable<ChaptersCompanion> specials;
   final Iterable<ChaptersCompanion> chapters;
@@ -286,6 +338,7 @@ class SeriesDetailCompanions {
   final Iterable<ReadingProgressCompanion> progress;
 
   const SeriesDetailCompanions({
+    required this.seriesId,
     required this.storyline,
     required this.specials,
     required this.chapters,

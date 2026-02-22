@@ -1,13 +1,14 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluvita/riverpod/providers/auth.dart';
+import 'package:fluvita/riverpod/providers/connectivity.dart';
 import 'package:fluvita/riverpod/providers/series.dart';
+import 'package:fluvita/riverpod/repository/book_repository.dart';
 import 'package:fluvita/riverpod/repository/chapters_repository.dart';
 import 'package:fluvita/riverpod/repository/libraries_repository.dart';
 import 'package:fluvita/riverpod/repository/reader_repository.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
 import 'package:fluvita/riverpod/repository/volumes_repository.dart';
 import 'package:fluvita/riverpod/repository/want_to_read_repository.dart';
-import 'package:fluvita/riverpod/settings.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -41,21 +42,23 @@ sealed class SyncState with _$SyncState {
 
 @riverpod
 class SyncManager extends _$SyncManager {
-  bool _hasCredentials = false;
+  bool _hasUser = false;
   bool _hasConnection = false;
+  final Set<SyncPhase> _runningPhases = {};
 
   @override
   SyncState build() {
-    _listenCredentials();
+    _listenUser();
     _listenConnectivity();
     _listenAppLifecycle();
     return const SyncState.idle();
   }
 
+  /// Perform full sync with server
   Future<void> fullSync() async {
     await _syncAllSeries();
-    await _syncAllSeriesDetails();
     await Future.wait([
+      _syncAllSeriesDetails(),
       _syncOnDeck(),
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
@@ -66,18 +69,24 @@ class SyncManager extends _$SyncManager {
     await _syncCovers();
   }
 
-  Future<void> syncHome() async {
+  /// Sync on deck, updated, and new series, as well as progress
+  Future<void> partialSync() async {
     await Future.wait([
       _syncOnDeck(),
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
+      _syncProgress(),
     ]);
+
+    await _syncCovers();
   }
 
-  Future<void> syncLibrary() async {
+  /// Sync libraries
+  Future<void> syncLibraries() async {
     await _syncLibraries();
   }
 
+  /// Sync progress
   Future<void> syncProgress() async {
     await _syncProgress();
   }
@@ -85,18 +94,19 @@ class SyncManager extends _$SyncManager {
   Future<void> _syncAllSeries() async {
     await _runPhase(.allSeries, () async {
       final seriesRepo = ref.read(seriesRepositoryProvider);
-      final readerRepo = ref.read(readerRepositoryProvider);
 
       await seriesRepo.refreshAllSeries();
-      await readerRepo.refreshContinuePointsAndProgress();
     });
   }
 
   Future<void> _syncAllSeriesDetails() async {
     await _runPhase(.seriesDetails, () async {
       final seriesRepo = ref.read(seriesRepositoryProvider);
+      final bookRepo = ref.read(bookRepositoryProvider);
 
       await seriesRepo.refreshAllSeriesDetails();
+      await seriesRepo.refreshAllSeriesMetadata();
+      await bookRepo.refreshMissingChaptersTocs();
     });
   }
 
@@ -115,7 +125,7 @@ class SyncManager extends _$SyncManager {
       state = const SyncState.syncing(phase: .onDeck);
       final seriesRepo = ref.read(seriesRepositoryProvider);
 
-      await seriesRepo.refreshedOnDeck();
+      await seriesRepo.refreshOnDeck();
     });
   }
 
@@ -140,6 +150,7 @@ class SyncManager extends _$SyncManager {
     await _runPhase(.progress, () async {
       final readerRepo = ref.read(readerRepositoryProvider);
 
+      await readerRepo.refreshContinuePointsAndProgress();
       await readerRepo.mergeProgress();
     });
   }
@@ -162,9 +173,10 @@ class SyncManager extends _$SyncManager {
     SyncPhase phase,
     FutureOr<void> Function() callback,
   ) async {
-    if (!_hasCredentials || !_hasConnection) return;
+    if (!_hasUser || !_hasConnection || _runningPhases.contains(phase)) return;
 
     state = SyncState.syncing(phase: phase);
+    _runningPhases.add(phase);
 
     try {
       await callback();
@@ -174,43 +186,41 @@ class SyncManager extends _$SyncManager {
         phase: state.whenOrNull(syncing: (phase) => phase) ?? .none,
         error: e,
       );
-    }
 
-    state = const SyncState.idle();
+      return;
+    } finally {
+      _runningPhases.remove(phase);
+      if (_runningPhases.isEmpty) {
+        state = const SyncState.idle();
+      }
+    }
   }
 
-  void _listenCredentials() {
-    ref.listen(settingsProvider, (prev, next) {
-      final creds = next.value;
-      if ((creds?.url?.isEmpty ?? true) || (creds?.apiKey?.isEmpty ?? true)) {
-        return;
-      }
+  void _listenUser() {
+    ref.listen(currentUserProvider, (prev, next) {
+      _hasUser = next.hasValue;
 
-      final prevCreds = prev?.value;
-      final firstLoad =
-          (prevCreds?.url?.isEmpty ?? true) ||
-          (prevCreds?.apiKey?.isEmpty ?? true);
-      final changed =
-          creds?.url != prevCreds?.url || creds?.apiKey != prevCreds?.apiKey;
+      if (next.hasError) return;
 
-      if (firstLoad || changed) fullSync();
-      _hasCredentials =
-          (creds?.url?.isNotEmpty ?? false) &&
-          (creds?.apiKey?.isNotEmpty ?? false);
+      if (prev == null || prev.value != next.value) fullSync();
     });
   }
 
   void _listenConnectivity() {
-    final sub = Connectivity().onConnectivityChanged.listen((results) {
-      final isOnline = results.any((r) => r != ConnectivityResult.none);
-      if (isOnline && !_hasConnection) fullSync();
-      _hasConnection = isOnline;
+    ref.listen(hasConnectionProvider, (prev, next) {
+      next.whenData((good) {
+        _hasConnection = good;
+
+        // skip update on first event as we are syncing already
+        if (prev != null && good && good != prev.value) {
+          partialSync();
+        }
+      });
     });
-    ref.onDispose(sub.cancel);
   }
 
   void _listenAppLifecycle() {
-    final observer = _SyncLifecycleObserver(onResume: fullSync);
+    final observer = _SyncLifecycleObserver(onResume: partialSync);
     WidgetsBinding.instance.addObserver(observer);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
   }
@@ -222,6 +232,6 @@ class _SyncLifecycleObserver extends WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState appState) {
-    if (appState == AppLifecycleState.resumed) onResume();
+    if (appState == .resumed) onResume();
   }
 }
