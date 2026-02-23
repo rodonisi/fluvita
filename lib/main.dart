@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fluvita/riverpod/provideres/theme.dart';
+import 'package:fluvita/sync/background.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeBackgroundTask();
+
   runApp(
     const ProviderScope(
       child: App(),

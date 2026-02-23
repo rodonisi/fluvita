@@ -5,6 +5,7 @@ import 'package:fluvita/database/dao/chapters_dao.dart';
 import 'package:fluvita/database/dao/download_dao.dart';
 import 'package:fluvita/database/dao/libraries_dao.dart';
 import 'package:fluvita/database/dao/reader_dao.dart';
+import 'package:fluvita/database/dao/riverpod_dao.dart';
 import 'package:fluvita/database/dao/series_dao.dart';
 import 'package:fluvita/database/dao/series_metadata_dao.dart';
 import 'package:fluvita/database/dao/storage_dao.dart';
@@ -57,6 +58,7 @@ part 'app_database.g.dart';
     ReaderDao,
     BookDao,
     DownloadDao,
+    RiverpodDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -64,12 +66,6 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
-
-  Future<void> clearAllData() async {
-    await transaction(() async {
-      await delete(series).go();
-    });
-  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

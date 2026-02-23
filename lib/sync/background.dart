@@ -8,6 +8,8 @@ import 'package:fluvita/utils/logging.dart';
 import 'package:fluvita/utils/safe_platform.dart';
 import 'package:workmanager/workmanager.dart';
 
+const String _periodicTaskId = 'com.rodonisi.fluvita.periodic_task';
+
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
@@ -47,8 +49,8 @@ Future<void> initializeBackgroundTask() async {
     );
 
     await Workmanager().registerPeriodicTask(
-      "unique-periodic-sync",
-      "fetchAndSaveTask",
+      _periodicTaskId,
+      _periodicTaskId,
       frequency: 1.hours,
       initialDelay: 5.minutes,
 

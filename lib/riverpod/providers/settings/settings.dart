@@ -22,10 +22,13 @@ sealed class SettingsState with _$SettingsState {
 @riverpod
 @JsonPersist()
 class Settings extends _$Settings {
+  static const String settingsKey = 'Settings';
+
   @override
   Future<SettingsState> build() async {
     await persist(
       ref.watch(storageProvider.future),
+      key: settingsKey,
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 

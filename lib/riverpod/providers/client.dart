@@ -5,6 +5,19 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'client.g.dart';
 
+ChopperClient getChopperClient(Uri uri, String apiKey) {
+  return ChopperClient(
+    baseUrl: uri,
+    interceptors: [
+      HeadersInterceptor({
+        'x-api-key': apiKey,
+        "Content-Type": "application/json",
+      }),
+    ],
+    converter: $JsonSerializableConverter(),
+  );
+}
+
 @riverpod
 ChopperClient authenticatedClient(Ref ref) {
   final settings = ref.watch(settingsProvider).value;
