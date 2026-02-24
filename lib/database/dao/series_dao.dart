@@ -111,8 +111,29 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   /// Watch series on deck
   Stream<List<SeriesData>> watchOnDeck() {
+    final hasActiveChapter =
+        selectOnly(chapters).join([
+            leftOuterJoin(
+              readingProgress,
+              readingProgress.chapterId.equalsExp(chapters.id),
+            ),
+          ])
+          ..addColumns([chapters.id])
+          ..where(
+            chapters.seriesId.equalsExp(series.id) &
+                (readingProgress.chapterId.isNull() |
+                    readingProgress.pagesRead.equals(0) |
+                    (readingProgress.pagesRead.isBiggerThan(const Constant(0)) &
+                        readingProgress.pagesRead.isSmallerThan(
+                          chapters.pages,
+                        ))),
+          )
+          ..limit(1);
+
     final query = select(series)
-      ..where((t) => t.isOnDeck.equals(true))
+      ..where(
+        (t) => t.isOnDeck.equals(true) & existsQuery(hasActiveChapter),
+      )
       ..orderBy([
         (t) {
           final latestProgress = selectOnly(readingProgress)
