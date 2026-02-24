@@ -14,7 +14,11 @@ import 'package:fluvita/database/tables/volumes.dart';
 
 @DataClassName('ReadingProgressData')
 class ReadingProgress extends Table {
-  IntColumn get chapterId => integer().references(Chapters, #id)();
+  IntColumn get chapterId => integer().references(
+    Chapters,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   IntColumn get volumeId => integer().references(Volumes, #id)();
   IntColumn get seriesId => integer().references(Series, #id)();
   IntColumn get libraryId => integer().references(Libraries, #id)();

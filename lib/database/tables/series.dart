@@ -37,7 +37,11 @@ class Series extends Table {
 }
 
 class SeriesCovers extends Table {
-  IntColumn get seriesId => integer().references(Series, #id)();
+  IntColumn get seriesId => integer().references(
+    Series,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   BlobColumn get image => blob()();
 
   @override

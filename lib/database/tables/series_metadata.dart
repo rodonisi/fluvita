@@ -4,7 +4,11 @@ import 'package:fluvita/database/tables/series.dart';
 @DataClassName('SeriesMetadataData')
 class SeriesMetadata extends Table {
   IntColumn get id => integer()();
-  IntColumn get seriesId => integer().references(Series, #id)();
+  IntColumn get seriesId => integer().references(
+    Series,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   TextColumn get summary => text().nullable()();
   IntColumn get ageRating => integer().withDefault(const Constant(-1))();
   IntColumn get releaseYear => integer()();

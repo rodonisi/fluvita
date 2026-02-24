@@ -14,7 +14,11 @@ import 'package:fluvita/database/tables/chapters.dart';
 // }
 
 class DownloadedPages extends Table {
-  IntColumn get chapterId => integer().references(Chapters, #id)();
+  IntColumn get chapterId => integer().references(
+    Chapters,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   IntColumn get page => integer()();
   BlobColumn get data => blob()();
 

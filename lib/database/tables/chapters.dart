@@ -6,7 +6,11 @@ import 'package:fluvita/models/enums/format.dart';
 class Chapters extends Table {
   IntColumn get id => integer()();
   IntColumn get volumeId => integer().references(Volumes, #id)();
-  IntColumn get seriesId => integer().references(Series, #id)();
+  IntColumn get seriesId => integer().references(
+    Series,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   TextColumn get title => text().nullable()();
   TextColumn get description => text().nullable()();
   TextColumn get summary => text().nullable()();
@@ -38,7 +42,11 @@ class Chapters extends Table {
 }
 
 class ChapterCovers extends Table {
-  IntColumn get chapterId => integer().references(Chapters, #id)();
+  IntColumn get chapterId => integer().references(
+    Chapters,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   BlobColumn get image => blob()();
 
   @override
