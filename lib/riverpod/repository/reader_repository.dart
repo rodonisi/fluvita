@@ -57,7 +57,7 @@ class ReaderRepository {
   }
 
   /// Watch expected previous chapter
-  Stream<int?> watchPrevChapterId({
+  Stream<ChapterModel?> watchPrevChapter({
     required int seriesId,
     int? volumeId,
     required int chapterId,
@@ -68,11 +68,11 @@ class ReaderRepository {
           volumeId: volumeId,
           chapterId: chapterId,
         )
-        .map((chapter) => chapter?.id);
+        .map((c) => c != null ? ChapterModel.fromDatabaseModel(c) : null);
   }
 
   /// Watch expected next chapter
-  Stream<int?> watchNextChapterId({
+  Stream<ChapterModel?> watchNextChapter({
     required int seriesId,
     int? volumeId,
     required int chapterId,
@@ -83,7 +83,7 @@ class ReaderRepository {
           volumeId: volumeId,
           chapterId: chapterId,
         )
-        .map((chapter) => chapter?.id);
+        .map((c) => c != null ? ChapterModel.fromDatabaseModel(c) : null);
   }
 
   /// Save local progress reading progress, setting the entry as dirty.

@@ -71,10 +71,9 @@ class ReaderOverlay extends HookConsumerWidget {
               chapterId: chapterId,
             ).select((state) => state.currentPage),
             (previous, next) {
-              if (next <= 0 && prevChapter.asData?.value != null) {
+              if (next <= 0 && prevChapter.hasValue) {
                 showSnackbar.value = .previous;
-              } else if (next >= state.totalPages - 1 &&
-                  nextChapter.asData?.value != null) {
+              } else if (next >= state.totalPages - 1 && nextChapter.hasValue) {
                 showSnackbar.value = .next;
               } else {
                 showSnackbar.value = .none;
@@ -145,14 +144,14 @@ class ReaderOverlay extends HookConsumerWidget {
                   alignment: .bottomCenter,
                   child:
                       ChapterSnackbar(
-                            title: 'Move to previous chapter',
+                            title: 'Previous: ${prevChapter.value?.title}',
                             onNavigate: () {
                               log.d(
                                 'Navigating to prev chapter ${prevChapter.value}',
                               );
                               ReaderRoute(
                                 seriesId: seriesId,
-                                chapterId: prevChapter.value!,
+                                chapterId: prevChapter.value!.id,
                               ).replace(context);
                             },
                           )
@@ -168,14 +167,14 @@ class ReaderOverlay extends HookConsumerWidget {
                   alignment: .bottomCenter,
                   child:
                       ChapterSnackbar(
-                            title: 'Move to next chapter',
+                            title: 'Next: ${nextChapter.value?.title}',
                             onNavigate: () {
                               log.d(
                                 'Navigating to next chapter ${nextChapter.value}',
                               );
                               ReaderRoute(
                                 seriesId: seriesId,
-                                chapterId: nextChapter.value!,
+                                chapterId: nextChapter.value!.id,
                               ).replace(context);
                             },
                           )

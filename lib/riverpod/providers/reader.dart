@@ -59,7 +59,7 @@ Future<ProgressModel?> bookProgress(Ref ref, {required int chapterId}) async {
 }
 
 @riverpod
-Stream<int?> prevChapter(
+Stream<ChapterModel?> prevChapter(
   Ref ref, {
   int? seriesId,
   int? volumeId,
@@ -71,7 +71,7 @@ Stream<int?> prevChapter(
   }
   final repo = ref.watch(readerRepositoryProvider);
   yield* repo
-      .watchPrevChapterId(
+      .watchPrevChapter(
         seriesId: seriesId,
         volumeId: volumeId,
         chapterId: chapterId,
@@ -80,7 +80,7 @@ Stream<int?> prevChapter(
 }
 
 @riverpod
-Stream<int?> nextChapter(
+Stream<ChapterModel?> nextChapter(
   Ref ref, {
   int? seriesId,
   int? volumeId,
@@ -92,7 +92,7 @@ Stream<int?> nextChapter(
   }
   final repo = ref.watch(readerRepositoryProvider);
   yield* repo
-      .watchNextChapterId(
+      .watchNextChapter(
         seriesId: seriesId,
         volumeId: volumeId,
         chapterId: chapterId,
