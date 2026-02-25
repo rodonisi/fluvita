@@ -9,7 +9,7 @@ extension ChapterDtoMappings on ChapterDto {
   ReadingProgressCompanion toPartialReadingProgressCompanion() {
     return ReadingProgressCompanion(
       chapterId: Value(id!),
-      volumeId: Value(id!),
+      volumeId: Value(volumeId!),
       pagesRead: Value(pagesRead!),
       totalReads: Value(totalReads!),
       lastModified: Value.absentIfNull(lastReadingProgressUtc),
