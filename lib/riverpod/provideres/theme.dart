@@ -11,65 +11,34 @@ part 'theme.g.dart';
 
 final CardThemeData cardThemeData = const CardThemeData();
 
-class _LabelThumbShape extends RoundSliderThumbShape {
-  final _indicatorShape = const DropSliderValueIndicatorShape();
-
-  const _LabelThumbShape();
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset center, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    required bool isDiscrete,
-    required TextPainter labelPainter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required TextDirection textDirection,
-    required double value,
-    required double textScaleFactor,
-    required Size sizeWithOverflow,
-  }) {
-    super.paint(
-      context,
-      center,
-      activationAnimation: activationAnimation,
-      enableAnimation: enableAnimation,
-      sliderTheme: sliderTheme,
-      value: value,
-      textScaleFactor: textScaleFactor,
-      sizeWithOverflow: sizeWithOverflow,
-      isDiscrete: isDiscrete,
-      labelPainter: labelPainter,
-      parentBox: parentBox,
-      textDirection: textDirection,
-    );
-    _indicatorShape.paint(
-      context,
-      center,
-      activationAnimation: const AlwaysStoppedAnimation(1),
-      enableAnimation: enableAnimation,
-      labelPainter: labelPainter,
-      parentBox: parentBox,
-      sliderTheme: sliderTheme,
-      value: value,
-      textScaleFactor: 0.7,
-      sizeWithOverflow: sizeWithOverflow,
-      isDiscrete: isDiscrete,
-      textDirection: textDirection,
-    );
-  }
-}
-
 final _theme = MaterialTheme(
   Typography.material2021().black,
 );
 
+final _lightBorderSide = BorderSide(
+  color: _theme.light().colorScheme.outline,
+  width: 2.0,
+);
+
+final _darkBorderSide = BorderSide(
+  color: _theme.light().colorScheme.outline,
+  width: 2.0,
+);
+
 final _cardTheme = const CardThemeData(elevation: 0);
-final _sliderTheme = const SliderThemeData(
-  showValueIndicator: .never,
-  thumbShape: _LabelThumbShape(),
+
+final _outlinedLightCardTheme = _cardTheme.copyWith(
+  shape: RoundedRectangleBorder(
+    side: _lightBorderSide,
+    borderRadius: BorderRadius.circular(12.0),
+  ),
+);
+
+final _outlinedDarkCardTheme = _cardTheme.copyWith(
+  shape: RoundedRectangleBorder(
+    side: _darkBorderSide,
+    borderRadius: BorderRadius.circular(12.0),
+  ),
 );
 
 @freezed
@@ -77,26 +46,39 @@ sealed class ThemeModel with _$ThemeModel {
   const ThemeModel._();
   const factory ThemeModel({
     @Default(ThemeMode.system) ThemeMode mode,
+    @Default(false) bool outlined,
   }) = _ThemeModel;
 
   factory ThemeModel.fromJson(Map<String, Object?> json) =>
       _$ThemeModelFromJson(json);
 
-  ThemeData get lightTheme => _theme.light().copyWith(
+  ThemeData get _lightTheme => _theme.light().copyWith(
     cardTheme: _cardTheme,
-    sliderTheme: _sliderTheme.copyWith(
+    sliderTheme: SliderThemeData(
       inactiveTrackColor: _theme.light().colorScheme.onSurface.withAlpha(0x55),
       inactiveTickMarkColor: _theme.light().colorScheme.onSurface,
     ),
   );
 
-  ThemeData get darkTheme => _theme.dark().copyWith(
+  ThemeData get _outlinedLightTheme => _lightTheme.copyWith(
+    cardTheme: _outlinedLightCardTheme,
+  );
+
+  ThemeData get lightTheme => outlined ? _outlinedLightTheme : _lightTheme;
+
+  ThemeData get _darkTheme => _theme.dark().copyWith(
     cardTheme: _cardTheme,
-    sliderTheme: _sliderTheme.copyWith(
+    sliderTheme: SliderThemeData(
       inactiveTrackColor: _theme.dark().colorScheme.onSurface.withAlpha(0x55),
       inactiveTickMarkColor: _theme.dark().colorScheme.onSurface,
     ),
   );
+
+  ThemeData get _outlinedDarkTheme => _darkTheme.copyWith(
+    cardTheme: _outlinedDarkCardTheme,
+  );
+
+  ThemeData get darkTheme => outlined ? _outlinedDarkTheme : _darkTheme;
 }
 
 @riverpod
@@ -110,10 +92,14 @@ class Theme extends _$Theme {
   }
 
   void setMode(ThemeMode mode) {
-    state = ThemeModel(mode: mode);
+    state = state.copyWith(mode: mode);
+  }
+
+  void setOutlined(bool value) {
+    state = state.copyWith(outlined: value);
   }
 
   void reset() {
-    state = const ThemeModel(mode: ThemeMode.system);
+    state = const ThemeModel();
   }
 }

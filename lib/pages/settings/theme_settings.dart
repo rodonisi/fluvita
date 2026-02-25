@@ -64,6 +64,14 @@ class ThemeSettings extends ConsumerWidget {
                 },
               ),
             ),
+            ListTile(
+              title: const Text('Outlined Theme'),
+              trailing: Switch(
+                value: theme.outlined,
+                onChanged: (value) =>
+                    ref.read(themeProvider.notifier).setOutlined(value),
+              ),
+            ),
           ],
         ),
       ),
