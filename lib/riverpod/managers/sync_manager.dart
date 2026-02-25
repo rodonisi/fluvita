@@ -9,6 +9,7 @@ import 'package:fluvita/riverpod/repository/reader_repository.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
 import 'package:fluvita/riverpod/repository/volumes_repository.dart';
 import 'package:fluvita/riverpod/repository/want_to_read_repository.dart';
+import 'package:fluvita/utils/lifecycle.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -220,18 +221,8 @@ class SyncManager extends _$SyncManager {
   }
 
   void _listenAppLifecycle() {
-    final observer = _SyncLifecycleObserver(onResume: partialSync);
+    final observer = LifecycleOnResumeObserver(onResume: partialSync);
     WidgetsBinding.instance.addObserver(observer);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
-  }
-}
-
-class _SyncLifecycleObserver extends WidgetsBindingObserver {
-  final void Function() onResume;
-  _SyncLifecycleObserver({required this.onResume});
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState appState) {
-    if (appState == .resumed) onResume();
   }
 }

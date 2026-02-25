@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluvita/riverpod/providers/client.dart';
+import 'package:flutter/widgets.dart';
+import 'package:fluvita/utils/lifecycle.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'connectivity.g.dart';
@@ -12,6 +14,15 @@ Stream<bool> hasConnection(Ref ref) async* {
   final ping = ref.watch(pingProvider);
   final pingOk = ping.hasValue && ping.value!;
 
+  final observer = LifecycleOnResumeObserver(
+    onResume: () {
+      if (ref.mounted) ref.invalidate(pingProvider);
+    },
+  );
+
+  WidgetsBinding.instance.addObserver(observer);
+  ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
+
   final current = await Connectivity().checkConnectivity();
   final hasInterface = !current.contains(ConnectivityResult.none);
   yield hasInterface && pingOk;
@@ -19,7 +30,7 @@ Stream<bool> hasConnection(Ref ref) async* {
   await for (final results in Connectivity().onConnectivityChanged) {
     final online = !results.contains(ConnectivityResult.none);
 
-    if (online) ref.invalidate(pingProvider);
+    if (online && ref.mounted) ref.invalidate(pingProvider);
 
     yield online && pingOk;
   }
