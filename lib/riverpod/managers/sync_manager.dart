@@ -194,6 +194,8 @@ class SyncManager extends _$SyncManager {
       _runningPhases.remove(phase);
       if (_runningPhases.isEmpty) {
         state = const SyncState.idle();
+      } else {
+        state = SyncState.syncing(phase: _runningPhases.first);
       }
     }
   }
