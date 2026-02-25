@@ -22,63 +22,51 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
 
   /// Get series metadata for series [seriesId]
   Stream<SeriesMetadataWithRelations> watchSeriesMetadata(int seriesId) {
-    final query = select(seriesMetadata)
-      ..where((row) => row.seriesId.equals(seriesId));
-
-    return query.watchSingleOrNull().switchMap((metadata) async* {
-      if (metadata == null) {
-        yield SeriesMetadataWithRelations(
-          metadata: null,
-          writers: [],
-          genres: [],
-          tags: [],
-        );
-        return;
-      }
-
-      final writersQuery = select(people).join([
-        innerJoin(
-          seriesPeopleRoles,
-          seriesPeopleRoles.personId.equalsExp(people.id) &
-              seriesPeopleRoles.seriesMetadataId.equals(metadata.id),
-        ),
-      ]);
-
-      final genresQuery = select(genres).join([
-        innerJoin(
-          seriesGenres,
-          seriesGenres.genreId.equalsExp(genres.id) &
-              seriesGenres.seriesMetadataId.equals(metadata.id),
-        ),
-      ]);
-
-      final tagsQuery = select(tags).join([
-        innerJoin(
-          seriesTags,
-          seriesTags.tagId.equalsExp(tags.id) &
-              seriesTags.seriesMetadataId.equals(metadata.id),
-        ),
-      ]);
-
-      await for (final _ in query.watch()) {
-        final writersList = await writersQuery
-            .map((row) => row.readTable(people))
-            .get();
-        final genresList = await genresQuery
-            .map((row) => row.readTable(genres))
-            .get();
-        final tagsList = await tagsQuery
-            .map((row) => row.readTable(tags))
-            .get();
-
-        yield SeriesMetadataWithRelations(
-          metadata: metadata,
-          writers: writersList,
-          genres: genresList,
-          tags: tagsList,
-        );
-      }
-    });
+    return managers.seriesMetadata
+        .withReferences(
+          (prefetch) => prefetch(
+            seriesGenresRefs: true,
+            seriesPeopleRolesRefs: true,
+            seriesTagsRefs: true,
+          ),
+        )
+        .filter((f) => f.seriesId.id(seriesId))
+        .asyncMap(
+          (m) async {
+            final (metadata, refs) = m;
+            return SeriesMetadataWithRelations(
+              metadata: metadata,
+              writers: await Future.wait(
+                refs.seriesPeopleRolesRefs.prefetchedData?.map(
+                      (p) => managers.people
+                          .filter((f) => f.id(p.personId))
+                          .getSingle(),
+                    ) ??
+                    [],
+              ),
+              genres: await Future.wait(
+                refs.seriesGenresRefs.prefetchedData?.map(
+                      (g) => managers.genres
+                          .filter(
+                            (f) => f.id(g.genreId),
+                          )
+                          .getSingle(),
+                    ) ??
+                    [],
+              ),
+              tags: await Future.wait(
+                refs.seriesTagsRefs.prefetchedData?.map(
+                      (t) => managers.tags
+                          .filter((f) => f.id(t.tagId))
+                          .getSingle(),
+                    ) ??
+                    [],
+              ),
+            );
+          },
+        )
+        .watchSingleOrNull()
+        .whereNotNull();
   }
 
   /// Upsert batch of [SeriesMetadataCompanions]
