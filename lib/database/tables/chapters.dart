@@ -17,6 +17,8 @@ class Chapters extends Table {
   TextColumn get isbn => text().nullable()();
   TextColumn get format => textEnum<Format>()();
   TextColumn get language => text().nullable()();
+  RealColumn get minNumber => real()();
+  RealColumn get maxNumber => real()();
   RealColumn get sortOrder => real()();
   IntColumn get pages => integer()();
   IntColumn get wordCount => integer()();

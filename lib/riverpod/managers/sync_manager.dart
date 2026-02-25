@@ -64,6 +64,7 @@ class SyncManager extends _$SyncManager {
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
       _syncLibraries(),
+
       _syncProgress(),
     ]);
 

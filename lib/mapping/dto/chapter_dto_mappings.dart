@@ -28,6 +28,8 @@ extension ChapterDtoMappings on ChapterDto {
         format != null ? Format.fromDtoFormat(format!) : .unknown,
       ),
       language: Value.absentIfNull(language),
+      minNumber: Value(minNumber!),
+      maxNumber: Value(maxNumber!),
       sortOrder: Value.absentIfNull(sortOrder),
       pages: Value(pages!),
       wordCount: Value.absentIfNull(wordCount),

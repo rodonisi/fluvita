@@ -6,6 +6,7 @@ import 'package:fluvita/database/tables/series.dart';
 import 'package:fluvita/database/tables/volumes.dart';
 import 'package:fluvita/database/tables/chapters.dart';
 import 'package:fluvita/database/tables/want_to_read.dart';
+import 'package:fluvita/utils/data_constants.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -58,7 +59,13 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .filter((f) => f.seriesId.id(seriesId))
         .orderBy((o) => o.sortOrder.asc());
 
-    final chaptersStream = baseChaptersManager.watch();
+    final chaptersStream = baseChaptersManager
+        .filter(
+          (f) => f.minNumber.isBiggerThan(
+            DataConstants.singleVolumeChapterMinNumber,
+          ),
+        )
+        .watch();
 
     final specialsStream = baseChaptersManager
         .filter((f) => f.isSpecial.equals(true))
@@ -210,9 +217,9 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// series anymore.
   Future<void> upsertSeriesDetail(SeriesDetailCompanions entry) async {
     final cs = {
-      ...entry.chapters,
       ...entry.specials,
       ...entry.storyline,
+      ...entry.chapters,
     };
 
     final chapterIds = cs.map((c) => c.id.value);
