@@ -63,7 +63,7 @@ class VolumeCard extends HookConsumerWidget {
           coverImage: VolumeCoverImage(volumeId: volume.id),
           progress: progress,
           downloadStatusIcon: DownloadStatusIcon(
-            progress: progress,
+            progress: downloadProgress,
           ),
           onRead: () {
             if (volume.chapters.isNotEmpty) {
