@@ -283,13 +283,26 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// Upsert series details. Also deletes chapters and volumes not part of the
   /// series anymore.
   Future<void> upsertSeriesDetail(SeriesDetailCompanions entry) async {
-    final cs = {
-      ...entry.specials,
-      ...entry.storyline,
-      ...entry.chapters,
-    };
+    // Merge chapters, ORing isSpecial/isStoryline flags when the same chapter
+    // appears in multiple groups rather than letting the last spread win.
+    final csMap = <int, ChaptersCompanion>{};
+    for (final c in entry.chapters) {
+      csMap[c.id.value] = c;
+    }
+    for (final c in entry.storyline) {
+      final existing = csMap[c.id.value];
+      csMap[c.id.value] = existing != null
+          ? existing.copyWith(isStoryline: c.isStoryline)
+          : c;
+    }
+    for (final c in entry.specials) {
+      final existing = csMap[c.id.value];
+      csMap[c.id.value] = existing != null
+          ? existing.copyWith(isSpecial: c.isSpecial)
+          : c;
+    }
 
-    final chapterIds = cs.map((c) => c.id.value);
+    final chapterIds = csMap.keys;
     final volumeIds = entry.volumes.map((v) => v.volume.id.value);
 
     await transaction(() async {
@@ -304,7 +317,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           ))
           .go();
       await db.volumesDao.upsertVolumeBatch(entry.volumes);
-      await db.chaptersDao.upsertChapterBatch(cs);
+      await db.chaptersDao.upsertChapterBatch(csMap.values);
 
       final s = await (select(
         series,

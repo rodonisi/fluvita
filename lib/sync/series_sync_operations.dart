@@ -149,7 +149,7 @@ class SeriesSyncOperations {
 
     final dto = res.body!;
 
-    final storyline = (dto.specials ?? []).map(
+    final storyline = (dto.storylineChapters ?? []).map(
       (c) => c.toChapterCompanion().copyWith(
         seriesId: Value(seriesId),
         isStoryline: const Value(true),
