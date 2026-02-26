@@ -59,13 +59,12 @@ class SyncManager extends _$SyncManager {
   Future<void> fullSync() async {
     await _syncAllSeries();
     await Future.wait([
-      _syncAllSeriesDetails(),
       _syncOnDeck(),
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
       _syncLibraries(),
-
       _syncProgress(),
+      _syncAllSeriesDetails(),
     ]);
 
     await _syncCovers();
@@ -206,7 +205,7 @@ class SyncManager extends _$SyncManager {
 
       if (next.hasError) return;
 
-      if (prev == null || prev.value != next.value) fullSync();
+      if (prev?.value != next.value) fullSync();
     });
   }
 
