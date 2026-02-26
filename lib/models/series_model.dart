@@ -59,10 +59,6 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
       _$SeriesDetailModelFromJson(json);
 
   factory SeriesDetailModel.fromDatabaseModel(SeriesDetailWithRelations model) {
-    final volumeById = {
-      for (final v in model.volumes) v.volume.id: v,
-    };
-
     return SeriesDetailModel(
       storyline: model.storylineChapters
           .map(ChapterModel.fromDatabaseModel)

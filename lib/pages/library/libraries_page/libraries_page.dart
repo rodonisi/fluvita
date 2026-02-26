@@ -14,7 +14,9 @@ class LibraryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(syncManagerProvider.notifier).syncLibraries();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(syncManagerProvider.notifier).syncLibraries();
+    });
     return LoginGuard(
       child: SafeArea(
         child: Scaffold(
