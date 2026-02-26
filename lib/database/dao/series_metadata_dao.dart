@@ -34,34 +34,27 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
         .asyncMap(
           (m) async {
             final (metadata, refs) = m;
+            final writersIds =
+                refs.seriesPeopleRolesRefs.prefetchedData
+                    ?.where((p) => p.role == .writer)
+                    .map((p) => p.personId) ??
+                [];
+            final genresIds =
+                refs.seriesGenresRefs.prefetchedData?.map((e) => e.genreId) ??
+                [];
+            final tagIds =
+                refs.seriesTagsRefs.prefetchedData?.map((e) => e.tagId) ?? [];
+
             return SeriesMetadataWithRelations(
               metadata: metadata,
-              writers: await Future.wait(
-                refs.seriesPeopleRolesRefs.prefetchedData?.map(
-                      (p) => managers.people
-                          .filter((f) => f.id(p.personId))
-                          .getSingle(),
-                    ) ??
-                    [],
-              ),
-              genres: await Future.wait(
-                refs.seriesGenresRefs.prefetchedData?.map(
-                      (g) => managers.genres
-                          .filter(
-                            (f) => f.id(g.genreId),
-                          )
-                          .getSingle(),
-                    ) ??
-                    [],
-              ),
-              tags: await Future.wait(
-                refs.seriesTagsRefs.prefetchedData?.map(
-                      (t) => managers.tags
-                          .filter((f) => f.id(t.tagId))
-                          .getSingle(),
-                    ) ??
-                    [],
-              ),
+              writers: await managers.people
+                  .filter((f) => f.id.isIn(writersIds))
+                  .get(),
+
+              genres: await managers.genres
+                  .filter((f) => f.id.isIn(genresIds))
+                  .get(),
+              tags: await managers.tags.filter((f) => f.id.isIn(tagIds)).get(),
             );
           },
         )

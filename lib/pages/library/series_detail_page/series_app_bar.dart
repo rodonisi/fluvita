@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/pages/library/series_detail_page/series_info_background.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
@@ -67,7 +68,6 @@ class SeriesAppBar extends HookConsumerWidget {
             primaryColor: data.primaryColor,
             secondaryColor: data.secondaryColor,
           ),
-
           child: _SeriesInfo(seriesId: seriesId),
         );
       },
@@ -84,82 +84,92 @@ class _SeriesInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final series = ref.watch(seriesProvider(seriesId: seriesId));
-    final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
+    return Async(
+      asyncValue: series,
+      data: (series) => Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: LayoutConstants.largePadding,
+        ),
+        child: Column(
+          spacing: LayoutConstants.largePadding,
+          crossAxisAlignment: .start,
+          mainAxisAlignment: .start,
+          mainAxisSize: .min,
+          children: [
+            const SizedBox.square(dimension: kToolbarHeight),
+            Text(
+              series.name,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            Row(
+              spacing: LayoutConstants.largePadding,
+              children: [
+                SizedBox(
+                  height: 250,
+                  child: _Cover(seriesId: series.id),
+                ),
+                Expanded(
+                  child: _Metadata(
+                    series: series,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Metadata extends ConsumerWidget {
+  final SeriesModel series;
+  const _Metadata({
+    required this.series,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final metadata = ref.watch(seriesMetadataProvider(seriesId: series.id));
     return Async(
       asyncValue: metadata,
-      data: (metadata) => Async(
-        asyncValue: series,
-        data: (series) => Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: LayoutConstants.largePadding,
-          ),
-          child: Column(
-            spacing: LayoutConstants.largePadding,
-            crossAxisAlignment: .start,
-            mainAxisAlignment: .start,
-            mainAxisSize: .min,
+      data: (metadata) => Column(
+        crossAxisAlignment: .start,
+        spacing: LayoutConstants.largePadding,
+        children: [
+          Wrap(
+            spacing: LayoutConstants.mediumPadding,
+            runSpacing: LayoutConstants.mediumPadding,
+            alignment: .spaceBetween,
             children: [
-              const SizedBox.square(dimension: kToolbarHeight),
-              Text(
-                series.name,
-                style: Theme.of(context).textTheme.headlineMedium,
+              if ((series.wordCount ?? 0) > 0)
+                WordCount(wordCount: series.wordCount!),
+              Pages(pages: series.pages),
+              RemainingHours(
+                hours: series.avgHoursToRead,
               ),
-              Row(
-                spacing: LayoutConstants.largePadding,
-                children: [
-                  SizedBox(
-                    height: 250,
-                    child: _Cover(seriesId: series.id),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      spacing: LayoutConstants.largePadding,
-                      children: [
-                        Wrap(
-                          spacing: LayoutConstants.mediumPadding,
-                          runSpacing: LayoutConstants.mediumPadding,
-                          alignment: .spaceBetween,
-                          children: [
-                            if ((series.wordCount ?? 0) > 0)
-                              WordCount(wordCount: series.wordCount!),
-                            Pages(pages: series.pages),
-                            RemainingHours(
-                              hours: series.avgHoursToRead,
-                            ),
-                            if (metadata.releaseYear != null)
-                              ReleaseYear(
-                                releaseYear: metadata.releaseYear!,
-                              ),
-                          ],
-                        ),
-                        Wrap(
-                          spacing: LayoutConstants.mediumPadding,
-                          runSpacing: LayoutConstants.mediumPadding,
-                          alignment: .spaceBetween,
-                          children: [
-                            LimitedList(
-                              title: 'Writers',
-                              items: metadata.writers
-                                  .map((w) => w.name)
-                                  .toList(),
-                            ),
-                            LimitedList(
-                              title: 'Genres',
-                              items: metadata.genres
-                                  .map((a) => a.name)
-                                  .toList(),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              if (metadata.releaseYear != null)
+                ReleaseYear(
+                  releaseYear: metadata.releaseYear!,
+                ),
+            ],
+          ),
+          Wrap(
+            spacing: LayoutConstants.mediumPadding,
+            runSpacing: LayoutConstants.mediumPadding,
+            alignment: .spaceBetween,
+            children: [
+              LimitedList(
+                title: 'Writers',
+                items: metadata.writers.map((w) => w.name).toList(),
+              ),
+              LimitedList(
+                title: 'Genres',
+                items: metadata.genres.map((a) => a.name).toList(),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
