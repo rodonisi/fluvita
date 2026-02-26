@@ -75,22 +75,26 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .filter((f) => f.isStoryline.equals(true))
         .watch();
 
-    final unreadChaptersStream = allUnreadChapters(
+    final unreadChaptersStream = unreadChapters(
       seriesId: seriesId,
     ).watch();
 
-    return Rx.combineLatest5(
+    final unreadVolumesStream = unreadVolumes(seriesId: seriesId).watch();
+
+    return Rx.combineLatest6(
       volumesStream,
       chaptersStream,
       specialsStream,
       storylineStream,
       unreadChaptersStream,
-      (vList, cList, sList, slList, uList) => SeriesDetailWithRelations(
+      unreadVolumesStream,
+      (vList, cList, sList, slList, uList, uvList) => SeriesDetailWithRelations(
         volumes: vList,
         chapters: cList,
         storylineChapters: slList,
         specials: sList,
         unreadChapters: uList,
+        unreadVolumes: uvList,
       ),
     );
   }
@@ -124,21 +128,59 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   /// Get all unread chapters for series [seriesId].
   /// Unread chapters are all chapters with either no progress, or not completely read
-  MultiSelectable<Chapter> allUnreadChapters({required int seriesId}) {
-    final query = select(chapters).join([
-      leftOuterJoin(
-        readingProgress,
-        readingProgress.chapterId.equalsExp(chapters.id),
-      ),
-    ]);
-
-    query.where(
-      chapters.seriesId.equals(seriesId) &
-          (readingProgress.chapterId.isNull() |
-              readingProgress.pagesRead.isSmallerThan(chapters.pages)),
-    );
+  MultiSelectable<Chapter> unreadChapters({required int seriesId}) {
+    final query =
+        select(chapters).join([
+            leftOuterJoin(
+              readingProgress,
+              readingProgress.chapterId.equalsExp(chapters.id),
+            ),
+          ])
+          ..where(
+            chapters.minNumber.isBiggerThanValue(
+                  DataConstants.singleVolumeChapterMinNumber,
+                ) &
+                chapters.seriesId.equals(seriesId) &
+                (readingProgress.chapterId.isNull() |
+                    readingProgress.pagesRead.isSmallerThan(chapters.pages)),
+          )
+          ..orderBy([OrderingTerm.asc(chapters.sortOrder)]);
 
     return query.map((res) => res.readTable(chapters));
+  }
+
+  /// Get all unread volumes for series [seriesId].
+  /// Unread volumes are volumes with at least one chapter with either no progress,
+  /// or not completely read
+  MultiSelectable<VolumeWithRelations> unreadVolumes({required int seriesId}) {
+    final query =
+        select(volumes).join([
+            innerJoin(chapters, chapters.volumeId.equalsExp(volumes.id)),
+            leftOuterJoin(
+              readingProgress,
+              readingProgress.chapterId.equalsExp(chapters.id),
+            ),
+          ])
+          ..where(
+            volumes.seriesId.equals(seriesId) &
+                (readingProgress.chapterId.isNull() |
+                    readingProgress.pagesRead.isSmallerThan(chapters.pages)),
+          )
+          ..groupBy([volumes.id])
+          ..orderBy([OrderingTerm.asc(volumes.minNumber)]);
+
+    return query
+        .map((res) => res.readTable(volumes))
+        .asyncMap(
+          (v) async => VolumeWithRelations(
+            volume: v,
+            chapters: await managers.chapters
+                .filter(
+                  (f) => f.volumeId.id(v.id),
+                )
+                .get(),
+          ),
+        );
   }
 
   /// Watch series on deck
@@ -374,6 +416,7 @@ class SeriesDetailWithRelations {
   final List<Chapter> chapters;
   final List<Chapter> storylineChapters;
   final List<Chapter> unreadChapters;
+  final List<VolumeWithRelations> unreadVolumes;
 
   const SeriesDetailWithRelations({
     required this.volumes,
@@ -381,6 +424,7 @@ class SeriesDetailWithRelations {
     required this.chapters,
     required this.storylineChapters,
     required this.unreadChapters,
+    required this.unreadVolumes,
   });
 }
 

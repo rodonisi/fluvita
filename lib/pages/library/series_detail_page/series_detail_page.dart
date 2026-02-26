@@ -27,7 +27,9 @@ class SeriesDetailPage extends HookConsumerWidget {
 
           if (detailsData.unreadChapters.isNotEmpty) {
             tabs.add(
-              Tab(text: 'Unread (${detailsData.unreadChapters.length})'),
+              Tab(
+                text: 'Unread Chapters (${detailsData.unreadChapters.length})',
+              ),
             );
             views.add(
               ChapterGrid(
@@ -35,6 +37,15 @@ class SeriesDetailPage extends HookConsumerWidget {
                 chapters: detailsData.unreadChapters,
               ),
             );
+          }
+
+          if (detailsData.unreadVolumes.isNotEmpty) {
+            tabs.add(
+              Tab(
+                text: 'Unread Volumes (${detailsData.unreadVolumes.length})',
+              ),
+            );
+            views.add(_VolumeGrid(volumes: detailsData.unreadVolumes));
           }
 
           if (detailsData.storyline.isNotEmpty) {

@@ -52,12 +52,17 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
     required List<ChapterModel> chapters,
     required List<ChapterModel> specials,
     required List<ChapterModel> unreadChapters,
+    required List<VolumeModel> unreadVolumes,
   }) = _SeriesDetailModel;
 
   factory SeriesDetailModel.fromJson(Map<String, Object?> json) =>
       _$SeriesDetailModelFromJson(json);
 
   factory SeriesDetailModel.fromDatabaseModel(SeriesDetailWithRelations model) {
+    final volumeById = {
+      for (final v in model.volumes) v.volume.id: v,
+    };
+
     return SeriesDetailModel(
       storyline: model.storylineChapters
           .map(ChapterModel.fromDatabaseModel)
@@ -67,6 +72,9 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
       specials: model.specials.map(ChapterModel.fromDatabaseModel).toList(),
       unreadChapters: model.unreadChapters
           .map(ChapterModel.fromDatabaseModel)
+          .toList(),
+      unreadVolumes: model.unreadVolumes
+          .map(VolumeModel.fromDatabaseModel)
           .toList(),
     );
   }
