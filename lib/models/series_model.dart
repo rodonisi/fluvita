@@ -51,6 +51,7 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
     required List<VolumeModel> volumes,
     required List<ChapterModel> chapters,
     required List<ChapterModel> specials,
+    required List<ChapterModel> unreadChapters,
   }) = _SeriesDetailModel;
 
   factory SeriesDetailModel.fromJson(Map<String, Object?> json) =>
@@ -64,6 +65,9 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
       volumes: model.volumes.map(VolumeModel.fromDatabaseModel).toList(),
       chapters: model.chapters.map(ChapterModel.fromDatabaseModel).toList(),
       specials: model.specials.map(ChapterModel.fromDatabaseModel).toList(),
+      unreadChapters: model.unreadChapters
+          .map(ChapterModel.fromDatabaseModel)
+          .toList(),
     );
   }
 }

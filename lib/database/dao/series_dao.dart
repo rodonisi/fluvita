@@ -75,16 +75,22 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .filter((f) => f.isStoryline.equals(true))
         .watch();
 
-    return Rx.combineLatest4(
+    final unreadChaptersStream = allUnreadChapters(
+      seriesId: seriesId,
+    ).watch();
+
+    return Rx.combineLatest5(
       volumesStream,
       chaptersStream,
       specialsStream,
       storylineStream,
-      (vList, cList, sList, slList) => SeriesDetailWithRelations(
+      unreadChaptersStream,
+      (vList, cList, sList, slList, uList) => SeriesDetailWithRelations(
         volumes: vList,
         chapters: cList,
         storylineChapters: slList,
         specials: sList,
+        unreadChapters: uList,
       ),
     );
   }
@@ -114,6 +120,25 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// Get all chapters for series [seriesId]
   MultiSelectable<Chapter> allChapters({required int seriesId}) {
     return managers.chapters.filter((f) => f.seriesId.id(seriesId));
+  }
+
+  /// Get all unread chapters for series [seriesId].
+  /// Unread chapters are all chapters with either no progress, or not completely read
+  MultiSelectable<Chapter> allUnreadChapters({required int seriesId}) {
+    final query = select(chapters).join([
+      leftOuterJoin(
+        readingProgress,
+        readingProgress.chapterId.equalsExp(chapters.id),
+      ),
+    ]);
+
+    query.where(
+      chapters.seriesId.equals(seriesId) &
+          (readingProgress.chapterId.isNull() |
+              readingProgress.pagesRead.isSmallerThan(chapters.pages)),
+    );
+
+    return query.map((res) => res.readTable(chapters));
   }
 
   /// Watch series on deck
@@ -348,12 +373,14 @@ class SeriesDetailWithRelations {
   final List<Chapter> specials;
   final List<Chapter> chapters;
   final List<Chapter> storylineChapters;
+  final List<Chapter> unreadChapters;
 
   const SeriesDetailWithRelations({
     required this.volumes,
     required this.specials,
     required this.chapters,
     required this.storylineChapters,
+    required this.unreadChapters,
   });
 }
 
