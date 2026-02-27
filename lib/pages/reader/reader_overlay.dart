@@ -71,9 +71,10 @@ class ReaderOverlay extends HookConsumerWidget {
               chapterId: chapterId,
             ).select((state) => state.currentPage),
             (previous, next) {
-              if (next <= 0 && prevChapter.hasValue) {
+              if (next <= 0 && prevChapter.value != null) {
                 showSnackbar.value = .previous;
-              } else if (next >= state.totalPages - 1 && nextChapter.hasValue) {
+              } else if (next >= state.totalPages - 1 &&
+                  nextChapter.value != null) {
                 showSnackbar.value = .next;
               } else {
                 showSnackbar.value = .none;
