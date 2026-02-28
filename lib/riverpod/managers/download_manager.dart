@@ -32,7 +32,7 @@ sealed class DownloadManagerState with _$DownloadManagerState {
 @riverpod
 @JsonPersist()
 class DownloadManager extends _$DownloadManager {
-  static const int _concurrentDownloads = 5;
+  static const int _concurrentDownloads = 3;
 
   final Map<int, CancelableOperation<void>> _activeTasks = {};
 
