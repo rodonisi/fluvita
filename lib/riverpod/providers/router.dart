@@ -4,7 +4,7 @@ import 'package:fluvita/pages/download_queue/download_queue_page.dart';
 import 'package:fluvita/pages/library/volume_detail_page/volume_detail_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluvita/pages/home/home_page.dart';
-import 'package:fluvita/pages/library/libraries_page/libraries_page.dart';
+import 'package:fluvita/pages/library/menu_page/menu_page.dart';
 import 'package:fluvita/pages/library/series_detail_page/series_detail_page.dart';
 import 'package:fluvita/pages/library/series_page/series_page.dart';
 import 'package:fluvita/pages/library/want_to_read_page/want_to_read_page.dart';
@@ -111,8 +111,7 @@ class LibraryRoute extends GoRouteData with $LibraryRoute {
   const LibraryRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const LibraryPage();
+  Widget build(BuildContext context, GoRouterState state) => const MenuPage();
 }
 
 class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
