@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/riverpod/providers/connectivity.dart';
 import 'package:fluvita/riverpod/repository/download_repository.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
@@ -42,6 +43,7 @@ class DownloadManager extends _$DownloadManager {
     });
     _listenConnectivity();
     _listenAppLifecycle();
+    _listenSyncManager();
 
     await persist(ref.watch(storageProvider.future)).future;
 
@@ -124,7 +126,10 @@ class DownloadManager extends _$DownloadManager {
   }
 
   void _processQueue() {
-    if (ref.read(hasConnectionProvider).value != true) return;
+    if (ref.read(hasConnectionProvider).value != true ||
+        ref.read(syncManagerProvider) is SyncingState) {
+      return;
+    }
 
     while (_activeTasks.length < _concurrentDownloads &&
         (state.value?.downloadQueue.isNotEmpty ?? false)) {
@@ -176,7 +181,9 @@ class DownloadManager extends _$DownloadManager {
 
   Future<void> _clearIds(List<int> chapterIds) async {
     final current = await future;
-    final active = _activeTasks.keys.where((k) => chapterIds.contains(k)).toList();
+    final active = _activeTasks.keys
+        .where((k) => chapterIds.contains(k))
+        .toList();
     for (final k in active) {
       _activeTasks[k]!.cancel();
       _activeTasks.remove(k);
@@ -184,6 +191,16 @@ class DownloadManager extends _$DownloadManager {
     final newQueue = Set<int>.from(current.downloadQueue)
       ..removeAll(chapterIds);
     state = AsyncData(current.copyWith(downloadQueue: newQueue));
+  }
+
+  void _listenSyncManager() {
+    ref.listen(syncManagerProvider, (previous, next) async {
+      if (next is SyncingState && previous is! SyncingState) {
+        await _clearActiveTasks();
+      } else if (next is! SyncingState) {
+        _processQueue();
+      }
+    });
   }
 
   void _listenConnectivity() {
