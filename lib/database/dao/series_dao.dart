@@ -132,7 +132,9 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   /// Get all chapters for series [seriesId]
   MultiSelectable<Chapter> allChapters({required int seriesId}) {
-    return managers.chapters.filter((f) => f.seriesId.id(seriesId));
+    return managers.chapters
+        .filter((f) => f.seriesId.id(seriesId))
+        .orderBy((o) => o.sortOrder.asc());
   }
 
   /// Get all unread chapters for series [seriesId].
