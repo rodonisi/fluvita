@@ -5,7 +5,6 @@ import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
 import 'package:fluvita/riverpod/providers/series.dart';
 import 'package:fluvita/riverpod/providers/want_to_read.dart';
-import 'package:fluvita/riverpod/repository/download_repository.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/async_value.dart';
@@ -37,23 +36,9 @@ class SeriesCard extends HookConsumerWidget {
 
     final markReadProvider = markSeriesReadProvider(seriesId: seriesId);
 
-    final downloadProgress = ref
-        .watch(seriesDownloadProgressProvider(seriesId: seriesId))
-        .value;
-
-    final repo = ref.read(downloadRepositoryProvider);
-
-    void Function()? onDownloadSeries;
-    void Function()? onRemoveSeriesDownload;
-
-    if (downloadProgress != null && downloadProgress >= 1.0) {
-      onRemoveSeriesDownload = () async =>
-          await repo.deleteSeries(seriesId: seriesId);
-    } else {
-      onDownloadSeries = () async => await ref
-          .read(downloadManagerProvider.notifier)
-          .enqueueSeries(seriesId);
-    }
+    final downloadProgress =
+        ref.watch(seriesDownloadProgressProvider(seriesId: seriesId)).value ??
+        0.0;
 
     return Async(
       asyncValue: series,
@@ -74,8 +59,20 @@ class SeriesCard extends HookConsumerWidget {
                 await ref.read(wantToRead.notifier).remove();
               }
             : null,
-        onDownloadSeries: onDownloadSeries,
-        onRemoveSeriesDownload: onRemoveSeriesDownload,
+        onDownload: downloadProgress < 1.0
+            ? () async {
+                await ref
+                    .read(downloadManagerProvider.notifier)
+                    .enqueueSeries(seriesId);
+              }
+            : null,
+        onRemoveDownload: downloadProgress > 0.0
+            ? () async {
+                await ref
+                    .read(downloadManagerProvider.notifier)
+                    .deleteSeries(seriesId);
+              }
+            : null,
         child: CoverCard(
           title: series.name,
           icon: Icon(

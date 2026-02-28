@@ -3,7 +3,6 @@ import 'package:fluvita/riverpod/managers/download_manager.dart';
 import 'package:fluvita/riverpod/providers/chapter.dart';
 import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
-import 'package:fluvita/riverpod/repository/download_repository.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/async_value.dart';
@@ -39,20 +38,6 @@ class ChapterCard extends HookConsumerWidget {
         .watch(chapterDownloadProgressProvider(chapterId: chapterId))
         .value;
 
-    final repo = ref.read(downloadRepositoryProvider);
-
-    void Function()? onDownloadChapterAction;
-    void Function()? onRemoveDownloadAction;
-
-    if (isDownloaded) {
-      onRemoveDownloadAction = () => repo.deleteChapter(
-        chapterId: chapterId,
-      );
-    } else {
-      onDownloadChapterAction = () async =>
-          await ref.read(downloadManagerProvider.notifier).enqueue(chapterId);
-    }
-
     return Async(
       asyncValue: chapter,
       data: (chapter) => ActionsContextMenu(
@@ -62,8 +47,20 @@ class ChapterCard extends HookConsumerWidget {
         onMarkUnread: () async {
           await ref.read(markReadProvider.notifier).markUnread();
         },
-        onDownloadChapter: onDownloadChapterAction,
-        onRemoveDownload: onRemoveDownloadAction,
+        onDownload: !isDownloaded
+            ? () async {
+                await ref
+                    .read(downloadManagerProvider.notifier)
+                    .enqueue(chapterId);
+              }
+            : null,
+        onRemoveDownload: isDownloaded
+            ? () async {
+                await ref
+                    .read(downloadManagerProvider.notifier)
+                    .deleteChapter(chapterId);
+              }
+            : null,
         child: CoverCard(
           title: chapter.title,
           coverImage: ChapterCoverImage(chapterId: chapterId),

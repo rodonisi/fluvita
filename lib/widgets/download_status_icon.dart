@@ -41,7 +41,7 @@ class DownloadStatusIcon extends StatelessWidget {
         padding: LayoutConstants.smallEdgeInsets,
         child: Icon(
           LucideIcons.download,
-          color: Theme.of(context).colorScheme.tertiary,
+          color: Theme.of(context).colorScheme.secondary,
           size: 16,
         ),
       ),

@@ -8,12 +8,8 @@ class ActionsContextMenu extends StatelessWidget {
   final void Function()? onMarkUnread;
   final void Function()? onAddWantToRead;
   final void Function()? onRemoveWantToRead;
-  final void Function()? onDownloadChapter;
+  final void Function()? onDownload;
   final void Function()? onRemoveDownload;
-  final void Function()? onDownloadVolume;
-  final void Function()? onRemoveVolumeDownload;
-  final void Function()? onDownloadSeries;
-  final void Function()? onRemoveSeriesDownload;
   final Widget child;
 
   const ActionsContextMenu({
@@ -22,12 +18,8 @@ class ActionsContextMenu extends StatelessWidget {
     this.onMarkUnread,
     this.onAddWantToRead,
     this.onRemoveWantToRead,
-    this.onDownloadChapter,
+    this.onDownload,
     this.onRemoveDownload,
-    this.onDownloadVolume,
-    this.onRemoveVolumeDownload,
-    this.onDownloadSeries,
-    this.onRemoveSeriesDownload,
     required this.child,
   });
 
@@ -39,12 +31,8 @@ class ActionsContextMenu extends StatelessWidget {
         onMarkUnread: onMarkUnread,
         onAddWantToRead: onAddWantToRead,
         onRemoveWantToRead: onRemoveWantToRead,
-        onDownloadChapter: onDownloadChapter,
+        onDownload: onDownload,
         onRemoveDownload: onRemoveDownload,
-        onDownloadVolume: onDownloadVolume,
-        onRemoveVolumeDownload: onRemoveVolumeDownload,
-        onDownloadSeries: onDownloadSeries,
-        onRemoveSeriesDownload: onRemoveSeriesDownload,
       ),
       child: child,
     );
@@ -54,20 +42,16 @@ class ActionsContextMenu extends StatelessWidget {
 class ActionsMenuButton extends StatelessWidget {
   final void Function()? onMarkRead;
   final void Function()? onMarkUnread;
-  final void Function()? onDownloadVolume;
-  final void Function()? onRemoveVolumeDownload;
-  final void Function()? onDownloadSeries;
-  final void Function()? onRemoveSeriesDownload;
+  final void Function()? onDownload;
+  final void Function()? onRemoveDownload;
   final Widget child;
 
   const ActionsMenuButton({
     super.key,
     this.onMarkRead,
     this.onMarkUnread,
-    this.onDownloadVolume,
-    this.onRemoveVolumeDownload,
-    this.onDownloadSeries,
-    this.onRemoveSeriesDownload,
+    this.onDownload,
+    this.onRemoveDownload,
     required this.child,
   });
 
@@ -77,10 +61,8 @@ class ActionsMenuButton extends StatelessWidget {
       contextMenu: _getContextMenu(
         onMarkRead: onMarkRead,
         onMarkUnread: onMarkUnread,
-        onDownloadVolume: onDownloadVolume,
-        onRemoveVolumeDownload: onRemoveVolumeDownload,
-        onDownloadSeries: onDownloadSeries,
-        onRemoveSeriesDownload: onRemoveSeriesDownload,
+        onDownload: onDownload,
+        onRemoveDownload: onRemoveDownload,
       ),
       child: child,
     );
@@ -144,75 +126,86 @@ ContextMenu _getContextMenu({
   void Function()? onMarkUnread,
   void Function()? onAddWantToRead,
   void Function()? onRemoveWantToRead,
-  void Function()? onDownloadChapter,
+  void Function()? onDownload,
   void Function()? onRemoveDownload,
-  void Function()? onDownloadVolume,
-  void Function()? onRemoveVolumeDownload,
-  void Function()? onDownloadSeries,
-  void Function()? onRemoveSeriesDownload,
 }) {
   return ContextMenu(
     entries: [
-      if (onMarkRead != null)
-        MenuItem(
-          label: const Text('Mark Read'),
-          icon: const Icon(LucideIcons.bookCheck),
-          onSelected: (_) => onMarkRead(),
-        ),
-      if (onMarkUnread != null)
-        MenuItem(
-          label: const Text('Mark Unread'),
-          icon: const Icon(LucideIcons.bookX),
-          onSelected: (_) => onMarkUnread(),
-        ),
-      if (onAddWantToRead != null)
-        MenuItem(
-          label: const Text('Add to Want to Read'),
-          icon: const Icon(LucideIcons.star),
-          onSelected: (_) => onAddWantToRead(),
-        ),
-      if (onRemoveWantToRead != null)
-        MenuItem(
-          label: const Text('Remove from Want to Read'),
-          icon: const Icon(LucideIcons.starOff),
-          onSelected: (_) => onRemoveWantToRead(),
-        ),
-      if (onDownloadChapter != null)
-        MenuItem(
-          label: const Text('Download Chapter'),
-          icon: const Icon(LucideIcons.download),
-          onSelected: (_) => onDownloadChapter(),
-        ),
-      if (onRemoveDownload != null)
-        MenuItem(
-          label: const Text('Remove Download'),
-          icon: const Icon(LucideIcons.trash),
-          onSelected: (_) => onRemoveDownload(),
-        ),
-      if (onDownloadVolume != null)
-        MenuItem(
-          label: const Text('Download Volume'),
-          icon: const Icon(LucideIcons.download),
-          onSelected: (_) => onDownloadVolume(),
-        ),
-      if (onRemoveVolumeDownload != null)
-        MenuItem(
-          label: const Text('Remove Volume Download'),
-          icon: const Icon(LucideIcons.trash),
-          onSelected: (_) => onRemoveVolumeDownload(),
-        ),
-      if (onDownloadSeries != null)
-        MenuItem(
-          label: const Text('Download Series'),
-          icon: const Icon(LucideIcons.download),
-          onSelected: (_) => onDownloadSeries(),
-        ),
-      if (onRemoveSeriesDownload != null)
-        MenuItem(
-          label: const Text('Remove Series Download'),
-          icon: const Icon(LucideIcons.trash),
-          onSelected: (_) => onRemoveSeriesDownload(),
-        ),
+      ..._wantToReadEntries(
+        onAddWantToRead: onAddWantToRead,
+        onRemoveWantToRead: onRemoveWantToRead,
+      ),
+      ..._markReadEntries(
+        onMarkRead: onMarkRead,
+        onMarkUnread: onMarkUnread,
+      ),
+      ..._downloadEntries(
+        onDownload: onDownload,
+        onRemoveDownload: onRemoveDownload,
+      ),
     ],
   );
+}
+
+List<ContextMenuEntry> _wantToReadEntries({
+  void Function()? onAddWantToRead,
+  void Function()? onRemoveWantToRead,
+}) {
+  return [
+    if (onAddWantToRead != null)
+      MenuItem(
+        label: const Text('Add to Want to Read'),
+        icon: const Icon(LucideIcons.star),
+        onSelected: (_) => onAddWantToRead(),
+      ),
+    if (onRemoveWantToRead != null)
+      MenuItem(
+        label: const Text('Remove from Want to Read'),
+        icon: const Icon(LucideIcons.starOff),
+        onSelected: (_) => onRemoveWantToRead(),
+      ),
+    if (onAddWantToRead != null || onRemoveWantToRead != null)
+      const MenuDivider(),
+  ];
+}
+
+List<ContextMenuEntry> _markReadEntries({
+  void Function()? onMarkRead,
+  void Function()? onMarkUnread,
+}) {
+  return [
+    if (onMarkRead != null)
+      MenuItem(
+        label: const Text('Mark Read'),
+        icon: const Icon(LucideIcons.bookCheck),
+        onSelected: (_) => onMarkRead(),
+      ),
+    if (onMarkUnread != null)
+      MenuItem(
+        label: const Text('Mark Unread'),
+        icon: const Icon(LucideIcons.bookX),
+        onSelected: (_) => onMarkUnread(),
+      ),
+    if (onMarkRead != null || onMarkUnread != null) const MenuDivider(),
+  ];
+}
+
+List<ContextMenuEntry> _downloadEntries({
+  void Function()? onDownload,
+  void Function()? onRemoveDownload,
+}) {
+  return [
+    if (onDownload != null)
+      MenuItem(
+        label: const Text('Download'),
+        icon: const Icon(LucideIcons.download),
+        onSelected: (_) => onDownload(),
+      ),
+    if (onRemoveDownload != null)
+      MenuItem(
+        label: const Text('Remove Download'),
+        icon: const Icon(LucideIcons.trash2),
+        onSelected: (_) => onRemoveDownload(),
+      ),
+  ];
 }

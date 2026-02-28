@@ -99,6 +99,30 @@ class DownloadManager extends _$DownloadManager {
     state = AsyncData(current.copyWith(downloadQueue: {}));
   }
 
+  Future<void> deleteChapter(int chapterId) async {
+    await ref
+        .read(downloadRepositoryProvider)
+        .deleteChapter(chapterId: chapterId);
+  }
+
+  Future<void> deleteVolume(int volumeId) async {
+    final ids = await ref
+        .read(volumesRepositoryProvider)
+        .getChapterIds(volumeId: volumeId);
+
+    await _clearIds(ids);
+    await ref.read(downloadRepositoryProvider).deleteVolume(volumeId);
+  }
+
+  Future<void> deleteSeries(int seriesId) async {
+    final ids = await ref
+        .read(seriesRepositoryProvider)
+        .allChapterIds(seriesId: seriesId);
+
+    await _clearIds(ids);
+    await ref.read(downloadRepositoryProvider).deleteSeries(seriesId: seriesId);
+  }
+
   void _processQueue() {
     if (ref.read(hasConnectionProvider).value != true) return;
 
@@ -127,9 +151,11 @@ class DownloadManager extends _$DownloadManager {
     final repo = ref.read(downloadRepositoryProvider);
 
     final task = CancelableOperation.fromFuture(
-      repo.downloadChapter(chapterId: chapterId).timeout(
-        const Duration(minutes: 10),
-      ),
+      repo
+          .downloadChapter(chapterId: chapterId)
+          .timeout(
+            const Duration(minutes: 10),
+          ),
     );
 
     _activeTasks[chapterId] = task;
@@ -146,6 +172,18 @@ class DownloadManager extends _$DownloadManager {
       final newQueue = Set<int>.from(current.downloadQueue)..remove(chapterId);
       state = AsyncData(current.copyWith(downloadQueue: newQueue));
     }
+  }
+
+  Future<void> _clearIds(List<int> chapterIds) async {
+    final current = await future;
+    final active = _activeTasks.keys.where((k) => chapterIds.contains(k)).toList();
+    for (final k in active) {
+      _activeTasks[k]!.cancel();
+      _activeTasks.remove(k);
+    }
+    final newQueue = Set<int>.from(current.downloadQueue)
+      ..removeAll(chapterIds);
+    state = AsyncData(current.copyWith(downloadQueue: newQueue));
   }
 
   void _listenConnectivity() {

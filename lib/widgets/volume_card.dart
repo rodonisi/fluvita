@@ -4,7 +4,6 @@ import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
 import 'package:fluvita/riverpod/providers/volume.dart';
-import 'package:fluvita/riverpod/repository/download_repository.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/async_value.dart';
 import 'package:fluvita/widgets/cover_card.dart';
@@ -31,22 +30,9 @@ class VolumeCard extends HookConsumerWidget {
       volumeId: volumeId,
     );
 
-    final downloadProgress = ref
-        .watch(volumeDownloadProgressProvider(volumeId: volumeId))
-        .value;
-
-    final isDownloaded = downloadProgress != null && downloadProgress >= 1.0;
-
-    void Function()? onDownloadVolume;
-    void Function()? onRemoveVolumeDownload;
-
-    if (!isDownloaded) {
-      onDownloadVolume = () =>
-          ref.read(downloadManagerProvider.notifier).enqueueVolume(volumeId);
-    } else {
-      onRemoveVolumeDownload = () =>
-          ref.read(downloadRepositoryProvider).deleteVolume(volumeId);
-    }
+    final downloadProgress =
+        ref.watch(volumeDownloadProgressProvider(volumeId: volumeId)).value ??
+        0.0;
 
     return Async(
       asyncValue: volume,
@@ -57,8 +43,20 @@ class VolumeCard extends HookConsumerWidget {
         onMarkUnread: () async {
           await ref.read(markReadProvider.notifier).markUnread();
         },
-        onDownloadVolume: onDownloadVolume,
-        onRemoveVolumeDownload: onRemoveVolumeDownload,
+        onDownload: downloadProgress < 1.0
+            ? () async {
+                ref
+                    .read(downloadManagerProvider.notifier)
+                    .enqueueVolume(volumeId);
+              }
+            : null,
+        onRemoveDownload: downloadProgress > 0.0
+            ? () async {
+                ref
+                    .read(downloadManagerProvider.notifier)
+                    .deleteVolume(volumeId);
+              }
+            : null,
         child: CoverCard(
           title: volume.name,
           coverImage: VolumeCoverImage(volumeId: volume.id),

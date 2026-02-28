@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fluvita/models/series_model.dart';
 import 'package:fluvita/pages/library/series_detail_page/series_info_background.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
+import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
+import 'package:fluvita/riverpod/providers/series.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:fluvita/widgets/actions_menu.dart';
 import 'package:fluvita/widgets/adaptive_sliver_app_bar.dart';
-import 'package:fluvita/riverpod/providers/series.dart';
 import 'package:fluvita/widgets/async_value.dart';
 import 'package:fluvita/widgets/cover_card.dart';
 import 'package:fluvita/widgets/cover_image.dart';
@@ -27,6 +29,9 @@ class SeriesAppBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final series = ref.watch(seriesProvider(seriesId: seriesId));
+    final downloadProgress =
+        ref.watch(seriesDownloadProgressProvider(seriesId: seriesId)).value ??
+        0.0;
 
     return AsyncSliver(
       asyncValue: series,
@@ -37,7 +42,6 @@ class SeriesAppBar extends HookConsumerWidget {
           actions: [
             WantToReadToggle(seriesId: data.id),
             ActionsMenuButton(
-              child: const Icon(LucideIcons.ellipsisVertical),
               onMarkRead: () async {
                 await ref
                     .read(
@@ -62,6 +66,21 @@ class SeriesAppBar extends HookConsumerWidget {
                   seriesDetailProvider(seriesId: seriesId),
                 );
               },
+              onDownload: downloadProgress < 1.0
+                  ? () async {
+                      await ref
+                          .read(downloadManagerProvider.notifier)
+                          .enqueueSeries(seriesId);
+                    }
+                  : null,
+              onRemoveDownload: downloadProgress > 0.0
+                  ? () async {
+                      await ref
+                          .read(downloadManagerProvider.notifier)
+                          .deleteSeries(seriesId);
+                    }
+                  : null,
+              child: const Icon(LucideIcons.ellipsisVertical),
             ),
           ],
           background: SeriesInfoBackground(
