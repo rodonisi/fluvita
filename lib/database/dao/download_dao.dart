@@ -34,6 +34,13 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  /// Returns the number of pages currently stored for chapter [chapterId].
+  Future<int> downloadedPageCount({required int chapterId}) {
+    return managers.downloadedPages
+        .filter((f) => f.chapterId.id(chapterId))
+        .count();
+  }
+
   /// Returns download progress percentage for chapter [chapterId].
   SingleSelectable<double> dowloadPercent({required int chapterId}) {
     final countColumn = downloadedPages.chapterId.count();

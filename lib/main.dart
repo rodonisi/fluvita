@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
+import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/riverpod/providers/theme.dart';
 import 'package:fluvita/sync/background.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -34,6 +36,9 @@ class App extends ConsumerWidget {
   }
 }
 
+/// Keeps providers that need to be initialized at app startup alive.
+/// This ensures that they are not disposed when not in use, which can lead to
+/// issues if they are needed again later.
 class EagerProviders extends ConsumerWidget {
   final Widget child;
 
@@ -41,6 +46,9 @@ class EagerProviders extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(syncManagerProvider);
+    ref.watch(downloadManagerProvider);
+
     return child;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluvita/models/volume_model.dart';
+import 'package:fluvita/pages/download_queue/download_queue_page.dart';
 import 'package:fluvita/pages/library/volume_detail_page/volume_detail_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluvita/pages/home/home_page.dart';
@@ -53,6 +54,9 @@ GoRouter router(Ref ref) {
             ),
             TypedGoRoute<VolumeDetailRoute>(
               path: 'volume/:volumeId',
+            ),
+            TypedGoRoute<DownloadQueueRoute>(
+              path: 'download-queue',
             ),
           ],
         ),
@@ -163,6 +167,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsPage();
+}
+
+class DownloadQueueRoute extends GoRouteData with $DownloadQueueRoute {
+  const DownloadQueueRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DownloadQueuePage();
 }
 
 @TypedGoRoute<ReaderRoute>(path: '/reader/:seriesId')

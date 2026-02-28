@@ -35,6 +35,18 @@ class SeriesRepository {
         .map(SeriesModel.fromDatabaseModel);
   }
 
+  Future<List<int>> allChapterIds({required int seriesId}) async {
+    final chapters = await _db.seriesDao.allChapters(seriesId: seriesId).get();
+
+    return chapters.map((c) => c.id).toList();
+  }
+
+  Stream<SeriesModel> watchSeriesForChapter(int chapterId) {
+    return _db.seriesDao
+        .watchSeriesForChapter(chapterId)
+        .map(SeriesModel.fromDatabaseModel);
+  }
+
   /// Watch [SeriesMetadataModel] for series [seriesId]
   Stream<SeriesMetadataModel> watchSeriesMetadata(int seriesId) {
     return _db.seriesMetadataDao

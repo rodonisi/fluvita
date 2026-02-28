@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
 import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
@@ -41,7 +42,7 @@ class VolumeCard extends HookConsumerWidget {
 
     if (!isDownloaded) {
       onDownloadVolume = () =>
-          ref.read(downloadRepositoryProvider).downloadVolume(volumeId);
+          ref.read(downloadManagerProvider.notifier).enqueueVolume(volumeId);
     } else {
       onRemoveVolumeDownload = () =>
           ref.read(downloadRepositoryProvider).deleteVolume(volumeId);

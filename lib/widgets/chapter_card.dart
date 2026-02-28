@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
 import 'package:fluvita/riverpod/providers/chapter.dart';
 import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
@@ -48,9 +49,8 @@ class ChapterCard extends HookConsumerWidget {
         chapterId: chapterId,
       );
     } else {
-      onDownloadChapterAction = () => repo.downloadChapter(
-        chapterId: chapterId,
-      );
+      onDownloadChapterAction = () async =>
+          await ref.read(downloadManagerProvider.notifier).enqueue(chapterId);
     }
 
     return Async(

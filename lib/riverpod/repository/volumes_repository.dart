@@ -47,6 +47,12 @@ class VolumesRepository {
         .map((cover) => cover != null ? ImageModel(data: cover.image) : null);
   }
 
+  Future<List<int>> getChapterIds({required int volumeId}) async {
+    final volume = await _db.volumesDao.volume(volumeId).getSingle();
+
+    return volume.chapters.map((c) => c.id).toList();
+  }
+
   /// Fetch missing covers for all volumes
   Future<void> fetchMissingCovers() async {
     final missing = await _db.volumesDao.getMissingCovers();

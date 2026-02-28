@@ -13,6 +13,12 @@ Stream<SeriesModel> series(Ref ref, {required int seriesId}) async* {
 }
 
 @riverpod
+Stream<SeriesModel> seriesForChapter(Ref ref, {required int chapterId}) async* {
+  final repo = ref.watch(seriesRepositoryProvider);
+  yield* repo.watchSeriesForChapter(chapterId).distinct();
+}
+
+@riverpod
 Stream<double> seriesProgress(Ref ref, {required int seriesId}) async* {
   final repo = ref.watch(seriesRepositoryProvider);
   final series = repo.watchSeries(seriesId);

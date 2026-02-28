@@ -29,9 +29,18 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   Stream<SeriesData> watchSeries(int seriesId) {
     return managers.series
         .filter((s) => s.id(seriesId))
-        .watchSingleOrNull()
-        .whereNotNull()
-        .distinct();
+        .watchSingle(distinct: true);
+  }
+
+  Stream<SeriesData> watchSeriesForChapter(int chapterId) {
+    return managers.chapters
+        .withReferences()
+        .filter((f) => f.id(chapterId))
+        .asyncMap((res) async {
+          final (_, refs) = res;
+          return await refs.seriesId.getSingle(distinct: true);
+        })
+        .watchSingle();
   }
 
   /// Watch cover for series [seriesId]

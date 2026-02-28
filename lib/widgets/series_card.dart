@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
 import 'package:fluvita/riverpod/providers/download.dart';
 import 'package:fluvita/riverpod/providers/reader.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
@@ -46,9 +47,12 @@ class SeriesCard extends HookConsumerWidget {
     void Function()? onRemoveSeriesDownload;
 
     if (downloadProgress != null && downloadProgress >= 1.0) {
-      onRemoveSeriesDownload = () => repo.deleteSeries(seriesId: seriesId);
+      onRemoveSeriesDownload = () async =>
+          await repo.deleteSeries(seriesId: seriesId);
     } else {
-      onDownloadSeries = () => repo.downloadSeries(seriesId: seriesId);
+      onDownloadSeries = () async => await ref
+          .read(downloadManagerProvider.notifier)
+          .enqueueSeries(seriesId);
     }
 
     return Async(

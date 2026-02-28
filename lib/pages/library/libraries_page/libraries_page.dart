@@ -35,6 +35,17 @@ class LibraryPage extends ConsumerWidget {
               ),
               const SliverSection(title: 'Libraries'),
               const SliverLibraries(),
+              const SliverSection(title: 'Other'),
+              SliverPadding(
+                padding: LayoutConstants.mediumEdgeInsets,
+                sliver: SliverToBoxAdapter(
+                  child: AppListTile(
+                    title: 'Download Queue',
+                    icon: const Icon(LucideIcons.download),
+                    onTap: () => const DownloadQueueRoute().push(context),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
