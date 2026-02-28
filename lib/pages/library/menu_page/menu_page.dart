@@ -60,7 +60,7 @@ class MenuPage extends ConsumerWidget {
                               .animate(
                                 onPlay: (controller) => controller.repeat(),
                               )
-                              .rotate(duration: 1000.ms)
+                              .rotate(duration: 1500.ms)
                         : const Icon(LucideIcons.download),
                     onTap: () => const DownloadQueueRoute().push(context),
                   ),
