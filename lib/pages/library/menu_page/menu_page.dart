@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fluvita/pages/library/menu_page/sliver_libraries.dart';
 import 'package:fluvita/pages/library/menu_page/app_list_tile.dart';
 import 'package:fluvita/pages/library/menu_page/sliver_section.dart';
+import 'package:fluvita/riverpod/managers/download_manager.dart';
 import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:fluvita/widgets/login_guard.dart';
@@ -18,6 +20,13 @@ class MenuPage extends ConsumerWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(syncManagerProvider.notifier).syncLibraries();
     });
+
+    final isDownloading = ref.watch(
+      downloadManagerProvider.select(
+        (state) => state.value?.downloadQueue.isNotEmpty ?? false,
+      ),
+    );
+
     return LoginGuard(
       child: SafeArea(
         bottom: false,
@@ -46,7 +55,13 @@ class MenuPage extends ConsumerWidget {
                 sliver: SliverToBoxAdapter(
                   child: AppListTile(
                     title: 'Download Queue',
-                    icon: const Icon(LucideIcons.download),
+                    icon: isDownloading
+                        ? const Icon(LucideIcons.refreshCw)
+                              .animate(
+                                onPlay: (controller) => controller.repeat(),
+                              )
+                              .rotate(duration: 1000.ms)
+                        : const Icon(LucideIcons.download),
                     onTap: () => const DownloadQueueRoute().push(context),
                   ),
                 ),
