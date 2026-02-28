@@ -41,7 +41,7 @@ GoRouter router(Ref ref) {
     TypedStatefulShellBranch<LibraryBranch>(
       routes: [
         TypedGoRoute<LibraryRoute>(
-          path: '/library',
+          path: '/menu',
           routes: [
             TypedGoRoute<AllSeriesRoute>(
               path: 'all-series',
@@ -58,13 +58,11 @@ GoRouter router(Ref ref) {
             TypedGoRoute<DownloadQueueRoute>(
               path: 'download-queue',
             ),
+            TypedGoRoute<SettingsRoute>(
+              path: 'settings',
+            ),
           ],
         ),
-      ],
-    ),
-    TypedStatefulShellBranch<SettingsBranch>(
-      routes: [
-        TypedGoRoute<SettingsRoute>(path: '/settings'),
       ],
     ),
   ],
@@ -92,10 +90,6 @@ class WantToReadBranch extends StatefulShellBranchData {
 
 class LibraryBranch extends StatefulShellBranchData {
   const LibraryBranch();
-}
-
-class SettingsBranch extends StatefulShellBranchData {
-  const SettingsBranch();
 }
 
 class HomeRoute extends GoRouteData with $HomeRoute {

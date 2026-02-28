@@ -5,6 +5,7 @@ import 'package:fluvita/pages/library/libraries_page/sliver_section.dart';
 import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/utils/layout_constants.dart';
 import 'package:fluvita/widgets/login_guard.dart';
+import 'package:fluvita/widgets/sliver_bottom_padding.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:fluvita/riverpod/providers/router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -19,6 +20,7 @@ class LibraryPage extends ConsumerWidget {
     });
     return LoginGuard(
       child: SafeArea(
+        bottom: false,
         child: Scaffold(
           extendBody: true,
           body: CustomScrollView(
@@ -35,9 +37,12 @@ class LibraryPage extends ConsumerWidget {
               ),
               const SliverSection(title: 'Libraries'),
               const SliverLibraries(),
-              const SliverSection(title: 'Other'),
+              const SliverSection(title: 'More'),
               SliverPadding(
-                padding: LayoutConstants.mediumEdgeInsets,
+                padding: const EdgeInsetsGeometry.symmetric(
+                  vertical: LayoutConstants.smallerPadding,
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: AppListTile(
                     title: 'Download Queue',
@@ -46,6 +51,20 @@ class LibraryPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              SliverPadding(
+                padding: const EdgeInsetsGeometry.symmetric(
+                  vertical: LayoutConstants.smallerPadding,
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: AppListTile(
+                    title: 'Settings',
+                    icon: const Icon(LucideIcons.settings),
+                    onTap: () => const SettingsRoute().push(context),
+                  ),
+                ),
+              ),
+              const SliverBottomPadding(),
             ],
           ),
         ),

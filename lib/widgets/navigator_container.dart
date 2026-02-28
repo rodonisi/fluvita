@@ -119,11 +119,7 @@ class NavigatorContainer extends ConsumerWidget {
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.library),
-                  label: 'Libraries',
-                ),
-                NavigationDestination(
-                  icon: Icon(LucideIcons.settings),
-                  label: 'Settings',
+                  label: 'Menu',
                 ),
               ],
             ),
