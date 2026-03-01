@@ -39,11 +39,25 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
 
 @riverpod
 @JsonPersist()
-class EpubReaderSettings extends _$EpubReaderSettings {
+class DefaultEpubReaderSettings extends _$DefaultEpubReaderSettings {
   @override
   EpubReaderSettingsState build() {
     persist(ref.watch(storageProvider.future));
     return const EpubReaderSettingsState();
+  }
+
+  void setDefault(EpubReaderSettingsState newDefault) {
+    state = newDefault;
+  }
+}
+
+@riverpod
+@JsonPersist()
+class EpubReaderSettings extends _$EpubReaderSettings {
+  @override
+  EpubReaderSettingsState build({required int seriesId}) {
+    persist(ref.watch(storageProvider.future));
+    return ref.watch(defaultEpubReaderSettingsProvider);
   }
 
   void toggleReadDirection() {
@@ -102,6 +116,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
   }
 
   void reset() {
-    state = const EpubReaderSettingsState();
+    state = ref.read(defaultEpubReaderSettingsProvider);
+  }
+
+  void setDefault() {
+    ref.read(defaultEpubReaderSettingsProvider.notifier).setDefault(state);
   }
 }

@@ -18,7 +18,7 @@ class ImageReader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(imageReaderSettingsProvider);
+    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,

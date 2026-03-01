@@ -44,11 +44,25 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
 
 @riverpod
 @JsonPersist()
-class ImageReaderSettings extends _$ImageReaderSettings {
+class DefaultImageReaderSettings extends _$DefaultImageReaderSettings {
   @override
   ImageReaderSettingsState build() {
     persist(ref.watch(storageProvider.future));
     return const ImageReaderSettingsState();
+  }
+
+  void setDefault(ImageReaderSettingsState newDefault) {
+    state = newDefault;
+  }
+}
+
+@riverpod
+@JsonPersist()
+class ImageReaderSettings extends _$ImageReaderSettings {
+  @override
+  ImageReaderSettingsState build({required int seriesId}) {
+    persist(ref.watch(storageProvider.future));
+    return ref.watch(defaultImageReaderSettingsProvider);
   }
 
   void toggleScaleType() {
@@ -116,6 +130,10 @@ class ImageReaderSettings extends _$ImageReaderSettings {
   }
 
   void reset() {
-    state = const ImageReaderSettingsState();
+    state = ref.read(defaultImageReaderSettingsProvider);
+  }
+
+  void setDefault() {
+    ref.read(defaultImageReaderSettingsProvider.notifier).setDefault(state);
   }
 }

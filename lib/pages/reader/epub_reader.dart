@@ -48,6 +48,7 @@ class EpubReader extends HookConsumerWidget {
             },
             display: (data) => SingleChildScrollView(
               child: RenderContent(
+                seriesId: seriesId,
                 styles: data.page.styles,
                 html: data.subpage.outerHtml,
               ),
@@ -103,6 +104,7 @@ class MeasureContent extends ConsumerWidget {
                   mainAxisSize: .min,
                   children: [
                     RenderContent(
+                      seriesId: seriesId,
                       key: key,
                       styles: state.page.styles,
                       html: state.subpage.outerHtml,
@@ -123,14 +125,22 @@ class MeasureContent extends ConsumerWidget {
 }
 
 class RenderContent extends ConsumerWidget {
+  final int seriesId;
   final String html;
   final Map<String, Map<String, String>> styles;
 
-  const RenderContent({super.key, required this.html, required this.styles});
+  const RenderContent({
+    super.key,
+    required this.seriesId,
+    required this.html,
+    required this.styles,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final epubSettings = ref.watch(epubReaderSettingsProvider);
+    final epubSettings = ref.watch(
+      epubReaderSettingsProvider(seriesId: seriesId),
+    );
 
     return Align(
       alignment: Alignment.topCenter,

@@ -20,7 +20,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(imageReaderSettingsProvider);
+    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
     final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
 
     final navProvider = readerNavigationProvider(

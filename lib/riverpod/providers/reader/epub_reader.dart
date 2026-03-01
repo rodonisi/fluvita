@@ -72,7 +72,7 @@ class EpubReader extends _$EpubReader {
     required int chapterId,
   }) async {
     // force rerender on settings change
-    ref.listen(epubReaderSettingsProvider, (prev, next) {
+    ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
       ref.invalidateSelf(asReload: true);
     });
 

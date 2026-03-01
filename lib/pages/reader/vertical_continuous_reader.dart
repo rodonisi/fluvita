@@ -166,7 +166,9 @@ class _VerticalContinuousReaderState
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(imageReaderSettingsProvider);
+    final settings = ref.watch(
+      imageReaderSettingsProvider(seriesId: widget.seriesId),
+    );
 
     ref.listen(
       readerNavigationProvider(
@@ -209,7 +211,7 @@ class _VerticalContinuousReaderState
     );
 
     ref.listen(
-      imageReaderSettingsProvider.select(
+      imageReaderSettingsProvider(seriesId:widget.seriesId).select(
         (settings) => settings.verticalReaderPadding,
       ),
       (previous, next) {
