@@ -46,18 +46,6 @@ class SeriesSyncOperations {
     return res.body!.map((dto) => dto.toSeriesCompanion());
   }
 
-  Future<Iterable<SeriesCompanion>> getOnDeck() async {
-    final res = await _client.apiSeriesOnDeckPost();
-
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to load on deck: ${res.error}');
-    }
-
-    return res.body!.map(
-      (dto) => dto.toSeriesCompanion().copyWith(isOnDeck: const Value(true)),
-    );
-  }
-
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {
     final res = await _client.apiSeriesRecentlyAddedV2Post(
       body: FilterV2Dto(

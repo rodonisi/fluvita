@@ -10,7 +10,6 @@ String _phaseLabel(SyncPhase phase) => switch (phase) {
   .allSeries => 'Syncing series...',
   .seriesDetails => 'Syncing series details...',
   .libraries => 'Syncing libraries...',
-  .onDeck => 'Syncing on deck...',
   .recentlyAdded => 'Syncing recently added...',
   .recentlyUpdated => 'Syncing recently updated...',
   .progress => 'Syncing progress...',

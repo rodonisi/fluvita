@@ -27,8 +27,6 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
         });
   }
 
-
-
   /// Watch pages read for volume [volumeId]
   Stream<int?> watchPagesRead({required int volumeId}) {
     final pagesReadSum = readingProgress.pagesRead.sum();

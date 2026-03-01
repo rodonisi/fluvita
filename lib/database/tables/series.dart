@@ -17,7 +17,6 @@ class Series extends Table {
   TextColumn get primaryColor => text().nullable()();
   TextColumn get secondaryColor => text().nullable()();
 
-  BoolColumn get isOnDeck => boolean().withDefault(const Constant(false))();
   BoolColumn get isRecentlyAdded =>
       boolean().withDefault(const Constant(false))();
   BoolColumn get isRecentlyUpdated =>

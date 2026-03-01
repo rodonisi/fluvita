@@ -194,44 +194,50 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         );
   }
 
-  /// Watch series on deck
+  /// Watch series on deck.
+  ///
+  /// A series is on deck when:
+  /// - The user has read some pages but not all (partially read)
+  /// - AND either:
+  ///   - The last reading activity was within [DataConstants.onDeckProgressDays] days, OR
+  ///   - A chapter was added within [DataConstants.onDeckUpdateDays] days
+  ///
+  /// Ordered by most recent reading activity, then most recently updated.
   Stream<List<SeriesData>> watchOnDeck() {
-    final hasActiveChapter =
-        selectOnly(chapters).join([
-            leftOuterJoin(
+    final totalPagesRead = readingProgress.pagesRead.sum();
+    final latestReadDate = readingProgress.lastModified.max();
+
+    final cutoffProgress = DateTime.now().subtract(
+      const Duration(days: DataConstants.onDeckProgressDays),
+    );
+    final cutoffLastAdded = DateTime.now().subtract(
+      const Duration(days: DataConstants.onDeckUpdateDays),
+    );
+
+    final query =
+        select(series).join([
+            innerJoin(
               readingProgress,
-              readingProgress.chapterId.equalsExp(chapters.id),
+              readingProgress.seriesId.equalsExp(series.id),
             ),
           ])
-          ..addColumns([chapters.id])
-          ..where(
-            chapters.seriesId.equalsExp(series.id) &
-                (readingProgress.chapterId.isNull() |
-                    readingProgress.pagesRead.equals(0) |
-                    (readingProgress.pagesRead.isBiggerThan(const Constant(0)) &
-                        readingProgress.pagesRead.isSmallerThan(
-                          chapters.pages,
-                        ))),
+          ..addColumns([totalPagesRead, latestReadDate])
+          ..groupBy(
+            [series.id],
+            having:
+                totalPagesRead.isBiggerThanValue(0) &
+                totalPagesRead.isSmallerThan(series.pages) &
+                (latestReadDate.isBiggerOrEqualValue(cutoffProgress) |
+                    series.lastChapterAdded.isBiggerOrEqualValue(
+                      cutoffLastAdded,
+                    )),
           )
-          ..limit(1);
+          ..orderBy([
+            OrderingTerm.desc(latestReadDate),
+            OrderingTerm.desc(series.lastChapterAdded),
+          ]);
 
-    final query = select(series)
-      ..where(
-        (t) => t.isOnDeck.equals(true) & existsQuery(hasActiveChapter),
-      )
-      ..orderBy([
-        (t) {
-          final latestProgress = selectOnly(readingProgress)
-            ..addColumns([readingProgress.lastModified.max()])
-            ..where(readingProgress.seriesId.equalsExp(series.id));
-
-          return OrderingTerm.desc(
-            subqueryExpression<DateTime>(latestProgress),
-          );
-        },
-      ]);
-
-    return query.watch();
+    return query.map((row) => row.readTable(series)).watch();
   }
 
   /// Watch recently updated series
@@ -346,14 +352,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  /// Clear all on deck and upsert provided [entries]
-  Future<void> upsertOnDeck(Iterable<SeriesCompanion> entries) async {
-    await transaction(() async {
-      await clearOnDeck();
-      await upsertSeriesBatch(entries);
-    });
-  }
-
   /// Clear all recently updated and upsert provided [entries]
   Future<void> upsertRecentlyUpdated(Iterable<SeriesCompanion> entries) async {
     await transaction(() async {
@@ -405,13 +403,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// Upsert a series cover
   Future<void> upsertSeriesCover(SeriesCoversCompanion cover) async {
     await into(seriesCovers).insertOnConflictUpdate(cover);
-  }
-
-  /// Set all isOnDeck flags to false
-  Future<void> clearOnDeck() async {
-    await (update(series)..where((row) => row.isOnDeck)).write(
-      const SeriesCompanion(isOnDeck: Value(false)),
-    );
   }
 
   /// Set all isRecentlyUpdated flags to false

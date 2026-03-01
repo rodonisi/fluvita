@@ -21,7 +21,6 @@ enum SyncPhase {
   none,
   allSeries,
   seriesDetails,
-  onDeck,
   recentlyAdded,
   recentlyUpdated,
   libraries,
@@ -59,7 +58,6 @@ class SyncManager extends _$SyncManager {
   Future<void> fullSync() async {
     await _syncAllSeries();
     await Future.wait([
-      _syncOnDeck(),
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
       _syncLibraries(),
@@ -73,7 +71,6 @@ class SyncManager extends _$SyncManager {
   /// Sync on deck, updated, and new series, as well as progress
   Future<void> partialSync() async {
     await Future.wait([
-      _syncOnDeck(),
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
       _syncProgress(),
@@ -118,15 +115,6 @@ class SyncManager extends _$SyncManager {
 
       await librariesRepo.refreshLibraries();
       await wantToReadRepo.mergeWantToRead();
-    });
-  }
-
-  Future<void> _syncOnDeck() async {
-    await _runPhase(.onDeck, () async {
-      state = const SyncState.syncing(phase: .onDeck);
-      final seriesRepo = ref.read(seriesRepositoryProvider);
-
-      await seriesRepo.refreshOnDeck();
     });
   }
 

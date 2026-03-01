@@ -44,7 +44,7 @@ class PageSlider extends HookConsumerWidget {
       mainAxisAlignment: .spaceEvenly,
       children: [
         const SizedBox.square(dimension: LayoutConstants.mediumPadding),
-        Text('${navState.currentPage+1}'),
+        Text('${navState.currentPage + 1}'),
         Expanded(
           child: Slider(
             value: sliderValue.value,

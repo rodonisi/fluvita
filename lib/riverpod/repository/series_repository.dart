@@ -131,12 +131,6 @@ class SeriesRepository {
     await refreshSeriesDetails(series);
   }
 
-  /// Refresh series on deck
-  Future<void> refreshOnDeck() async {
-    final series = await _client.getOnDeck();
-    await _db.seriesDao.upsertOnDeck(series);
-  }
-
   /// Refresh recently added series. This also refreshes the respective series
   /// details
   Future<void> refreshRecentlyAdded() async {
