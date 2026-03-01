@@ -62,6 +62,22 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
         .whereNotNull();
   }
 
+  /// Get the list of series ids without metadata
+  Future<List<int>> getMissingSeriesIds() async {
+    final query =
+        select(series).join([
+          leftOuterJoin(
+            seriesMetadata,
+            seriesMetadata.seriesId.equalsExp(series.id),
+          ),
+        ])..where(
+          seriesMetadata.seriesId.isNull() |
+              seriesMetadata.lastUpdated.isSmallerThan(series.lastChapterAdded),
+        );
+
+    return await query.map((row) => row.readTable(series).id).get();
+  }
+
   /// Upsert batch of [SeriesMetadataCompanions]
   Future<void> upsertMetadataBatch(
     Iterable<SeriesMetadataCompanions> metadata,

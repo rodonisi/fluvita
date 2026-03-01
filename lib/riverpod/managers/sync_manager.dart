@@ -106,7 +106,7 @@ class SyncManager extends _$SyncManager {
       final bookRepo = ref.read(bookRepositoryProvider);
 
       await seriesRepo.refreshAllSeriesDetails();
-      await seriesRepo.refreshAllSeriesMetadata();
+      await seriesRepo.fetchMissingMetadata();
       await bookRepo.refreshMissingChaptersTocs();
     });
   }
@@ -136,6 +136,7 @@ class SyncManager extends _$SyncManager {
       final seriesRepo = ref.read(seriesRepositoryProvider);
 
       await seriesRepo.refreshRecentlyUpdated();
+      await seriesRepo.fetchMissingMetadata();
     });
   }
 
@@ -144,6 +145,7 @@ class SyncManager extends _$SyncManager {
       final seriesRepo = ref.read(seriesRepositoryProvider);
 
       await seriesRepo.refreshRecentlyAdded();
+      await seriesRepo.fetchMissingMetadata();
     });
   }
 

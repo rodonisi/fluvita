@@ -111,10 +111,9 @@ class SeriesRepository {
     await _db.seriesDao.upsertSeriesBatch(series);
   }
 
-  /// Refresh metadata for all series
-  Future<void> refreshAllSeriesMetadata() async {
-    final rows = await _db.seriesDao.allSeries().get();
-    final series = rows.map((s) => s.id).toList();
+  /// Fetch missing metadata for all series
+  Future<void> fetchMissingMetadata() async {
+    final series = await _db.seriesMetadataDao.getMissingSeriesIds();
 
     final metadata = <SeriesMetadataCompanions>[];
     for (final id in series) {

@@ -14,6 +14,9 @@ class SeriesMetadata extends Table {
   IntColumn get releaseYear => integer()();
   TextColumn get language => text()();
 
+  DateTimeColumn get lastUpdated =>
+      dateTime().withDefault(currentDateAndTime)();
+
   @override
   Set<Column<Object>>? get primaryKey => {id};
 
