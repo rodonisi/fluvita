@@ -410,10 +410,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_context_menu
-      sha256: e8f2cd13ef5e3320e35b27b3f7de278d9fc6b3f9c328cc16cd90784fb66d1054
+      sha256: "7040c03fb9cb2a113282d836edadf32b6cdff67cccdf3d158e7411ecc15d7712"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.2"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -772,10 +772,10 @@ packages:
     dependency: "direct main"
     description:
       name: lucide_icons_flutter
-      sha256: "67bc7cc05c3c03eee3405f88a0ca127efca03561db00e2e93cc0a46019c19a7b"
+      sha256: f9fc191c852901b7f8d0d5739166327bd71a0fc32ae32c1ba07501d16b966a1a
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.9"
+    version: "3.1.10"
   markdown:
     dependency: transitive
     description:
@@ -1028,10 +1028,10 @@ packages:
     dependency: transitive
     description:
       name: qs_dart
-      sha256: "0e46bec269e1c32befc20c6e7b809186f7463c98b16e685b11dc5a98bc14b8c8"
+      sha256: "9aa063958c51d9e82ba8833f7bcf23ebb5b57d9d842fcd3269c880c59a9ce79b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.7.0"
+    version: "1.7.2"
   recase:
     dependency: transitive
     description:
@@ -1517,14 +1517,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
-  weak_map:
-    dependency: transitive
-    description:
-      name: weak_map
-      sha256: "5f8e5d5ce57dc624db5fae814dd689ccae1f17f92b426e52f0a7cbe7f6f4ab97"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
   web:
     dependency: transitive
     description:
@@ -1569,10 +1561,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_android
-      sha256: eeeb3fcd5f0ff9f8446c9f4bbc18a99b809e40297528a3395597d03aafb9f510
+      sha256: "2a03df01df2fd30b075d1e7f24c28aee593f2e5d5ac4c3c4283c5eda63717b24"
       url: "https://pub.dev"
     source: hosted
-    version: "4.10.11"
+    version: "4.10.13"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
@@ -1585,10 +1577,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_wkwebview
-      sha256: "108bd85d0ff20bff1e8b52a040f5c19b6b9fc4a78fdf3160534ff5a11a82e267"
+      sha256: fc0af89d403e1c053f03d023d97550412fa79f35332e2939514c82e6fe633198
       url: "https://pub.dev"
     source: hosted
-    version: "3.23.7"
+    version: "3.23.8"
   win32:
     dependency: transitive
     description:
