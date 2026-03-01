@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:fluvita/riverpod/managers/sync_manager.dart';
 import 'package:fluvita/riverpod/providers/connectivity.dart';
+import 'package:fluvita/riverpod/providers/settings/download_settings.dart';
 import 'package:fluvita/riverpod/repository/download_repository.dart';
 import 'package:fluvita/riverpod/repository/series_repository.dart';
 import 'package:fluvita/riverpod/repository/storage_repository.dart';
@@ -12,6 +13,7 @@ import 'package:fluvita/utils/lifecycle.dart';
 import 'package:fluvita/utils/logging.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -32,14 +34,12 @@ sealed class DownloadManagerState with _$DownloadManagerState {
 @riverpod
 @JsonPersist()
 class DownloadManager extends _$DownloadManager {
-  static const int _concurrentDownloads = 3;
-
   final Map<int, CancelableOperation<void>> _activeTasks = {};
 
   @override
   Future<DownloadManagerState> build() async {
     listenSelf((previous, next) async {
-      _processQueue();
+      await _processQueue();
     });
     _listenConnectivity();
     _listenAppLifecycle();
@@ -125,13 +125,17 @@ class DownloadManager extends _$DownloadManager {
     await ref.read(downloadRepositoryProvider).deleteSeries(seriesId: seriesId);
   }
 
-  void _processQueue() {
+  Future<void> _processQueue() async {
     if (ref.read(hasConnectionProvider).value != true ||
         ref.read(syncManagerProvider) is SyncingState) {
       return;
     }
 
-    while (_activeTasks.length < _concurrentDownloads &&
+    final concurrentDownloads = (await ref.watch(
+      downloadSettingsProvider.future,
+    )).concurrentDownloads;
+
+    while (_activeTasks.length < concurrentDownloads &&
         (state.value?.downloadQueue.isNotEmpty ?? false)) {
       final nextId = state.value!.downloadQueue
           .where((i) => !_activeTasks.containsKey(i))
