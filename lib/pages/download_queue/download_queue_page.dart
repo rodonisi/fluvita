@@ -116,28 +116,31 @@ class DownloadQueueItem extends ConsumerWidget {
                 child: ChapterCoverImage(chapterId: chapterId),
               ),
             ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: .start,
-              spacing: LayoutConstants.smallPadding,
-              children: [
-                Async(
-                  asyncValue: series,
-                  data: (series) => Text(
-                    series.name,
-                    style: Theme.of(context).textTheme.titleMedium,
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: .start,
+                spacing: LayoutConstants.smallPadding,
+                children: [
+                  Async(
+                    asyncValue: series,
+                    data: (series) => Text(
+                      series.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      overflow: .ellipsis,
+                    ),
                   ),
-                ),
-                Async(
-                  asyncValue: chapter,
-                  data: (chapter) => Text(
-                    chapter.title,
-                    style: Theme.of(context).textTheme.titleSmall,
+                  Async(
+                    asyncValue: chapter,
+                    data: (chapter) => Text(
+                      chapter.title,
+                      style: Theme.of(context).textTheme.titleSmall,
+                      overflow: .ellipsis,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const Spacer(),
             SizedBox.square(
               dimension: LayoutConstants.mediumIcon,
               child: Async(
