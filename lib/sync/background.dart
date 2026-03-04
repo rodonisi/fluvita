@@ -52,10 +52,13 @@ Future<void> initializeBackgroundTask() async {
       _periodicTaskId,
       _periodicTaskId,
       frequency: 1.hours,
+      flexInterval: 1.hours,
       initialDelay: 5.minutes,
-
+      existingWorkPolicy: .keep,
+      backoffPolicy: .exponential,
       constraints: Constraints(
-        networkType: NetworkType.connected,
+        networkType: .connected,
+        requiresBatteryNotLow: true,
       ),
     );
   }
