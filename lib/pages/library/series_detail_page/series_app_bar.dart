@@ -206,6 +206,7 @@ class _Cover extends ConsumerWidget {
     final continuePoint = ref.watch(
       continuePointStreamProvider(seriesId: seriesId),
     );
+    final canRead = ref.watch(canReadSeriesProvider(seriesId)).value ?? false;
     final progress =
         ref
             .watch(
@@ -226,14 +227,16 @@ class _Cover extends ConsumerWidget {
             seriesId: seriesId,
             fit: BoxFit.cover,
           ),
-          onRead: () {
-            continuePoint.whenData((chapter) {
-              ReaderRoute(
-                seriesId: seriesId,
-                chapterId: chapter.id,
-              ).push(context);
-            });
-          },
+          onRead: canRead
+              ? () {
+                  continuePoint.whenData((chapter) {
+                    ReaderRoute(
+                      seriesId: seriesId,
+                      chapterId: chapter.id,
+                    ).push(context);
+                  });
+                }
+              : null,
         ),
       ),
     );
