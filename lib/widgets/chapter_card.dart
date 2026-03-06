@@ -34,6 +34,9 @@ class ChapterCard extends HookConsumerWidget {
         ref.watch(chapterDownloadedProvider(chapterId: chapterId)).value ??
         false;
 
+    final canRead =
+        ref.watch(canReadChapterProvider(chapterId)).value ?? false;
+
     final downloadProgress = ref
         .watch(chapterDownloadProgressProvider(chapterId: chapterId))
         .value;
@@ -68,12 +71,13 @@ class ChapterCard extends HookConsumerWidget {
           downloadStatusIcon: DownloadStatusIcon(
             progress: downloadProgress,
           ),
-          onRead: () {
+          onActionTap: () {
             ReaderRoute(
               seriesId: seriesId,
               chapterId: chapterId,
             ).push(context);
           },
+          actionDisabled: !canRead,
         ),
       ),
     );

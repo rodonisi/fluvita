@@ -64,14 +64,21 @@ class VolumeCard extends HookConsumerWidget {
           downloadStatusIcon: DownloadStatusIcon(
             progress: downloadProgress,
           ),
-          onRead: () {
-            if (volume.chapters.isNotEmpty) {
-              ReaderRoute(
-                seriesId: volume.seriesId,
-                chapterId: volume.chapters.first.id,
-              ).push(context);
-            }
-          },
+          actionDisabled:
+              !(ref
+                      .watch(
+                        canReadChapterProvider(volume.chapters.first.id),
+                      )
+                      .value ??
+                  false),
+          onActionTap: volume.chapters.isEmpty
+              ? null
+              : () {
+                  ReaderRoute(
+                    seriesId: volume.seriesId,
+                    chapterId: volume.chapters.first.id,
+                  ).push(context);
+                },
           onTap: () {
             VolumeDetailRoute(volume).push(context);
           },

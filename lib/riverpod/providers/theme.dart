@@ -58,6 +58,24 @@ sealed class ThemeModel with _$ThemeModel {
       inactiveTrackColor: _theme.light().colorScheme.onSurface.withAlpha(0x55),
       inactiveTickMarkColor: _theme.light().colorScheme.onSurface,
     ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return _theme.light().colorScheme.surfaceContainer.withValues(
+              alpha: 0.5,
+            );
+          }
+          return null;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return _theme.light().colorScheme.onSurface.withValues(alpha: 0.5);
+          }
+          return null;
+        }),
+      ),
+    ),
   );
 
   ThemeData get _outlinedLightTheme => _lightTheme.copyWith(
@@ -71,6 +89,24 @@ sealed class ThemeModel with _$ThemeModel {
     sliderTheme: SliderThemeData(
       inactiveTrackColor: _theme.dark().colorScheme.onSurface.withAlpha(0x55),
       inactiveTickMarkColor: _theme.dark().colorScheme.onSurface,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return _theme.dark().colorScheme.surfaceContainer.withValues(
+              alpha: 0.5,
+            );
+          }
+          return null;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return _theme.dark().colorScheme.onSurface.withValues(alpha: 0.5);
+          }
+          return null;
+        }),
+      ),
     ),
   );
 

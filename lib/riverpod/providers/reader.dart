@@ -8,7 +8,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'reader.g.dart';
 
 @riverpod
-/// Wheter the [seriesId] can be currently read in the current state.
+/// Whether [chapterId] can be read in the current state.
+/// Returns false if there is no connectivity and the chapter is not downloaded.
+Stream<bool> canReadChapter(Ref ref, int chapterId) {
+  final hasConnection = ref.watch(hasConnectionProvider).value ?? false;
+  final repo = ref.watch(downloadRepositoryProvider);
+  return repo
+      .watchIsChapterDownloaded(chapterId: chapterId)
+      .map((isDownloaded) => isDownloaded || hasConnection);
+}
+
+@riverpod
+/// Whether the [seriesId] can be read in the current state.
 /// Returns false if there is no connectivity and the continue point is
 /// not downloaded.
 Stream<bool> canReadSeries(Ref ref, int seriesId) {

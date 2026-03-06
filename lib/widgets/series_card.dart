@@ -94,13 +94,10 @@ class SeriesCard extends HookConsumerWidget {
               seriesId: seriesId,
             ).push(context);
           },
-          onRead: canRead
-              ? () {
-                  ReaderRoute(
-                    seriesId: seriesId,
-                  ).push(context);
-                }
-              : null,
+          onActionTap: () {
+            ReaderRoute(seriesId: seriesId).push(context);
+          },
+          actionDisabled: !canRead,
         ),
       ),
     );

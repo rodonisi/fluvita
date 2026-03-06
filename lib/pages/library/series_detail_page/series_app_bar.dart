@@ -222,21 +222,20 @@ class _Cover extends ConsumerWidget {
         data: (data) => CoverCard(
           title: data.title,
           actionLabel: 'Continue',
+          actionDisabled: !canRead,
           progress: progress,
           coverImage: SeriesCoverImage(
             seriesId: seriesId,
             fit: BoxFit.cover,
           ),
-          onRead: canRead
-              ? () {
-                  continuePoint.whenData((chapter) {
-                    ReaderRoute(
-                      seriesId: seriesId,
-                      chapterId: chapter.id,
-                    ).push(context);
-                  });
-                }
-              : null,
+          onActionTap: () {
+            continuePoint.whenData((chapter) {
+              ReaderRoute(
+                seriesId: seriesId,
+                chapterId: chapter.id,
+              ).push(context);
+            });
+          },
         ),
       ),
     );
