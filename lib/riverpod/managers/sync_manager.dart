@@ -57,24 +57,18 @@ class SyncManager extends _$SyncManager {
 
   /// Perform full sync with server
   Future<void> fullSync() async {
-    await _syncAllSeries();
-    await Future.wait([
-      _syncRecentlyUpdated(),
-      _syncRecentlyAdded(),
-      _syncLibraries(),
-      _syncProgress(),
-      _syncAllSeriesDetails(),
-      _syncMetadata(),
-    ]);
-
-    await _syncCovers();
+    await partialSync();
+    await _syncAllSeriesDetails();
   }
 
   /// Sync on deck, updated, and new series, as well as progress
   Future<void> partialSync() async {
+    await _syncAllSeries();
+
     await Future.wait([
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
+      _syncLibraries(),
       _syncProgress(),
       _syncMetadata(),
     ]);

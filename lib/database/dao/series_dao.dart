@@ -297,6 +297,20 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
+  /// Upsert series present or absent from the db and remove series not present
+  /// in [entries]
+  Future<void> alignSeries(Iterable<SeriesCompanion> entries) async {
+    final ids = entries.map((e) => e.id.value).toList();
+
+    await batch((batch) {
+      batch.deleteWhere(
+        series,
+        (s) => s.id.isNotIn(ids),
+      );
+      batch.insertAllOnConflictUpdate(series, entries);
+    });
+  }
+
   /// Upsert series details. Also deletes chapters and volumes not part of the
   /// series anymore.
   Future<void> upsertSeriesDetail(SeriesDetailCompanions entry) async {

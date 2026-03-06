@@ -105,10 +105,11 @@ class SeriesRepository {
     );
   }
 
-  /// Refresh all series, optionally filtering by [libraryId]
-  Future<void> refreshAllSeries({int? libraryId}) async {
-    final series = await _client.getAllSeries(libraryId: libraryId);
-    await _db.seriesDao.upsertSeriesBatch(series);
+  /// Refresh all series and align the local library to the remote.
+  /// Note: this deletes all series not present on the server anymore.
+  Future<void> refreshAllSeries() async {
+    final series = await _client.getAllSeries();
+    await _db.seriesDao.alignSeries(series);
   }
 
   /// Fetch missing metadata for all series
