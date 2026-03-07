@@ -1,6 +1,6 @@
-default_platform(:ios)
+default_platform(:mac)
 
-platform :ios do
+platform :mac do
   private_lane :load_asc_api_key do
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
@@ -11,7 +11,7 @@ platform :ios do
     )
   end
 
-  desc 'Build iOS app for TestFlight'
+  desc 'Build MacOS app for TestFlight'
   lane :build do |options|
     version = options[:version]
     build_number = options[:build_number]
@@ -32,7 +32,9 @@ platform :ios do
       export_method: 'app-store',
       configuration: 'Release',
       export_options: {
-        provisioningProfiles: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING]
+        provisioningProfiles: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING],
+        # Use the exact Common Name from your logs:
+        installer_cert_name: 'Mac Installer Distribution: Simon Rodoni (9LLQNF6L4W)'
       }
     )
   end
@@ -45,7 +47,9 @@ platform :ios do
     setup_ci
 
     match(
-      type: 'appstore'
+      type: 'appstore',
+      platform: 'macos',
+      additional_cert_types: ['mac_installer_distribution']
     )
 
     update_code_signing_settings(
