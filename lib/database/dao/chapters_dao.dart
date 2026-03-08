@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/progress.dart';
-import 'package:kover/utils/logging.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'chapters_dao.g.dart';
@@ -51,14 +50,6 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     query.where(chapterCovers.chapterId.isNull());
 
     return await query.map((row) => row.readTable(chapters).id).get();
-  }
-
-  /// Upsert a batch of chapters
-  Future<void> upsertChapterBatch(Iterable<ChaptersCompanion> entries) async {
-    log.d('upserting chapter batch with ${entries.length} entries');
-    await batch((batch) {
-      batch.insertAllOnConflictUpdate(chapters, entries);
-    });
   }
 
   /// Upsert a chapter cover

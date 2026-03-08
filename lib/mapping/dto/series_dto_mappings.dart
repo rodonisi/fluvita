@@ -23,7 +23,6 @@ extension SeriesDtoMappings on SeriesDto {
       isBlacklisted: Value.absentIfNull(isBlacklisted),
       created: Value.absentIfNull(created),
       lastChapterAdded: Value.absentIfNull(lastChapterAddedUtc),
-      lastSynced: Value(DateTime.timestamp()),
     );
   }
 }

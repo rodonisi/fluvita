@@ -28,7 +28,7 @@ class HomePageContent extends ConsumerWidget {
       bottom: false,
       child: RefreshIndicator(
         onRefresh: () async {
-          await ref.read(syncManagerProvider.notifier).partialSync();
+          await ref.read(syncManagerProvider.notifier).fullSync();
         },
         child: const CustomScrollView(
           slivers: [

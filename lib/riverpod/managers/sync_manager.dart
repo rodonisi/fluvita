@@ -57,12 +57,6 @@ class SyncManager extends _$SyncManager {
 
   /// Perform full sync with server
   Future<void> fullSync() async {
-    await partialSync();
-    await _syncAllSeriesDetails();
-  }
-
-  /// Sync on deck, updated, and new series, as well as progress
-  Future<void> partialSync() async {
     await _syncAllSeries();
 
     await Future.wait([
@@ -91,14 +85,7 @@ class SyncManager extends _$SyncManager {
       final seriesRepo = ref.read(seriesRepositoryProvider);
 
       await seriesRepo.refreshAllSeries();
-    });
-  }
-
-  Future<void> _syncAllSeriesDetails() async {
-    await _runPhase(.seriesDetails, () async {
-      final seriesRepo = ref.read(seriesRepositoryProvider);
-
-      await seriesRepo.refreshAllSeriesDetails();
+      await seriesRepo.fetchMissingMetadata();
     });
   }
 
@@ -210,14 +197,14 @@ class SyncManager extends _$SyncManager {
 
         // skip update on first event as we are syncing already
         if (prev != null && good && good != prev.value) {
-          partialSync();
+          fullSync();
         }
       });
     });
   }
 
   void _listenAppLifecycle() {
-    final observer = LifecycleOnResumeObserver(onResume: partialSync);
+    final observer = LifecycleOnResumeObserver(onResume: fullSync);
     WidgetsBinding.instance.addObserver(observer);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
   }
