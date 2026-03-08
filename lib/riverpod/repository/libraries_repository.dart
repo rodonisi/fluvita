@@ -45,6 +45,6 @@ class LibrariesRepository {
   /// Refresh all libraries
   Future<void> refreshLibraries() async {
     final libraries = await _client.getLibraries();
-    _db.librariesDao.mergeLibraries(libraries);
+    await _db.librariesDao.mergeLibraries(libraries);
   }
 }
