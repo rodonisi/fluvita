@@ -110,6 +110,21 @@ class SeriesRepository {
   Future<void> refreshAllSeries() async {
     final series = await _client.getAllSeries();
     await _db.seriesDao.mergeSeries(series);
+
+    final rows = await _db.seriesDao.allSeries().get();
+    final detailsToFetch = rows
+        .where(
+          (r) {
+            final companion = series.where((s) => s.id.value == r.id).single;
+
+            return r.lastSynced == null ||
+                (companion.lastChapterAdded.value != null &&
+                    r.lastSynced!.isBefore(companion.lastChapterAdded.value!));
+          },
+        )
+        .map((r) => r.id);
+
+    await refreshSeriesDetails(detailsToFetch);
   }
 
   /// Fetch missing metadata for all series
@@ -122,14 +137,6 @@ class SeriesRepository {
     }
 
     await _db.seriesMetadataDao.upsertMetadataBatch(metadata);
-  }
-
-  /// Refresh series details (chapters, volumes, etc) for all series
-  Future<void> refreshAllSeriesDetails() async {
-    final rows = await _db.seriesDao.allSeries().get();
-    final series = rows.map((s) => s.id).toList();
-
-    await refreshSeriesDetails(series);
   }
 
   /// Refresh recently added series. This also refreshes the respective series
@@ -152,7 +159,7 @@ class SeriesRepository {
   Future<void> refreshSeriesDetails(Iterable<int> seriesIds) async {
     for (final id in seriesIds) {
       final details = await _client.getSeriesDetail(id);
-      await _db.seriesDao.upsertSeriesDetail(
+      await _db.seriesDao.mergeSeriesDetails(
         details,
       );
     }

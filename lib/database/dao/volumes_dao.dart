@@ -3,7 +3,6 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/volumes.dart';
-import 'package:kover/utils/logging.dart';
 
 part 'volumes_dao.g.dart';
 
@@ -55,22 +54,6 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     query.where(volumeCovers.volumeId.isNull());
 
     return await query.map((row) => row.readTable(volumes).id).get();
-  }
-
-  /// Upsert a batch of [VolumeWithRelations], effectively upserting the volume,
-  /// as well as all its chapters.
-  Future<void> upsertVolumeBatch(
-    Iterable<VolumeWithChaptersCompanion> entries,
-  ) async {
-    log.d('upserting volumes batch with ${entries.length} entries');
-    await transaction(() async {
-      await batch((batch) {
-        batch.insertAllOnConflictUpdate(volumes, entries.map((e) => e.volume));
-      });
-      await db.chaptersDao.upsertChapterBatch(
-        entries.map((e) => e.chapters).expand((l) => l),
-      );
-    });
   }
 
   /// Upsert a volume cover

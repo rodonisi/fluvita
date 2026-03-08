@@ -311,11 +311,13 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  /// Upsert series details. Also deletes chapters and volumes not part of the
-  /// series anymore.
-  Future<void> upsertSeriesDetail(SeriesDetailCompanions entry) async {
-    // Merge chapters, ORing isSpecial/isStoryline flags when the same chapter
-    // appears in multiple groups rather than letting the last spread win.
+  /// Upsert series details in [entry] and delete chapters and volumes not part
+  /// of the series anymore
+  Future<void> mergeSeriesDetails(SeriesDetailCompanions entry) async {
+    final volumeChapters = entry.volumes
+        .map((v) => v.chapters)
+        .expand((cs) => cs);
+
     final csMap = <int, ChaptersCompanion>{};
     for (final c in entry.chapters) {
       csMap[c.id.value] = c;
@@ -332,23 +334,32 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           ? existing.copyWith(isSpecial: c.isSpecial)
           : c;
     }
+    for (final c in volumeChapters) {
+      final existing = csMap[c.id.value];
+      csMap[c.id.value] = existing != null
+          ? existing.copyWith(volumeId: c.volumeId)
+          : c;
+    }
 
     final chapterIds = csMap.keys;
     final volumeIds = entry.volumes.map((v) => v.volume.id.value);
 
     await transaction(() async {
-      await (delete(
-            chapters,
-          )..where(
-            (c) => c.seriesId.equals(entry.seriesId) & c.id.isNotIn(chapterIds),
-          ))
-          .go();
-      await (delete(volumes)..where(
-            (v) => v.seriesId.equals(entry.seriesId) & v.id.isNotIn(volumeIds),
-          ))
-          .go();
-      await db.volumesDao.upsertVolumeBatch(entry.volumes);
-      await db.chaptersDao.upsertChapterBatch(csMap.values);
+      await batch((batch) {
+        batch.deleteWhere(
+          chapters,
+          (t) => t.seriesId.equals(entry.seriesId) & t.id.isNotIn(chapterIds),
+        );
+        batch.insertAllOnConflictUpdate(chapters, csMap.values);
+        batch.deleteWhere(
+          volumes,
+          (t) => t.seriesId.equals(entry.seriesId) & t.id.isNotIn(volumeIds),
+        );
+        batch.insertAllOnConflictUpdate(
+          volumes,
+          entry.volumes.map((v) => v.volume),
+        );
+      });
 
       final s = await (select(
         series,
@@ -363,6 +374,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
 
       await db.readerDao.upsertCleanProgressBatch(progress);
+
+      await managers.series
+          .filter((f) => f.id(entry.seriesId))
+          .update((f) => f(lastSynced: Value(DateTime.timestamp())));
     });
   }
 
