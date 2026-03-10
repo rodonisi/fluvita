@@ -110,7 +110,7 @@ class EpubReader extends _$EpubReader {
       final loader = FontLoader(family.key);
       for (final font in family.value) {
         loader.addFont(
-          Future.value(ByteData.sublistView(Uint8List.fromList(font))),
+          Future.value(ByteData.sublistView(font)),
         );
       }
       await loader.load();

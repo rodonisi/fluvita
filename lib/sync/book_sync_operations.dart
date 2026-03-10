@@ -56,7 +56,7 @@ class BookSyncOperations {
   }) async {
     final frag = await _getPreprocessedPage(chapterId: chapterId, page: page);
     final styles = <String, Map<String, String>>{};
-    final fonts = <String, List<List<int>>>{};
+    final fonts = <String, List<Uint8List>>{};
 
     final stylesElements = frag.querySelectorAll('style');
 
@@ -118,7 +118,7 @@ class BookSyncOperations {
         n.attributes[HtmlConstants.scrollIdAttribute] = n.scrollId;
 
         if (n.localName == 'img') {
-          final src = 'https:${n.attributes['src']}';
+          final src = '${n.attributes['src']}';
           if (src.isNotEmpty) {
             final imageData = await _fetchData(src);
             if (imageData != null) {
@@ -135,7 +135,7 @@ class BookSyncOperations {
             return key is AttributeName && key.name == 'href';
           }).first;
 
-          final src = 'https:${attr.value}';
+          final src = attr.value;
           final imageData = await _fetchData(src);
           if (imageData != null) {
             final base64img = base64Encode(
@@ -178,11 +178,11 @@ class BookSyncOperations {
   }
 
   Future<({Uint8List bytes, String mimeType})?> _fetchData(
-    String imageUrl,
+    String url,
   ) async {
     try {
       final res = await _client.client.get(
-        Uri.parse(imageUrl),
+        Uri.parse(_resolveUrl(url)),
       );
 
       if (res.isSuccessful && res.bodyBytes.isNotEmpty) {
@@ -217,11 +217,14 @@ class BookSyncOperations {
     return stylesMap;
   }
 
-  Future<Map<String, List<List<int>>>> _parseFonts(String css) async {
-    final res = <String, List<List<int>>>{};
+  Future<Map<String, List<Uint8List>>> _parseFonts(String css) async {
+    final res = <String, List<Uint8List>>{};
     // 3. Regex to find @font-face blocks and extract values
     final fontFaceRegex = RegExp(r'@font-face\s*\{([^}]*)\}', multiLine: true);
-    final familyRegex = RegExp(r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''', caseSensitive: false);
+    final familyRegex = RegExp(
+      r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''',
+      caseSensitive: false,
+    );
     final srcRegex = RegExp(r'src:\s*url\([" "]?([^" ")]+)[" "]?\)');
 
     var matches = fontFaceRegex.allMatches(css);
@@ -229,21 +232,30 @@ class BookSyncOperations {
       String block = match.group(1) ?? "";
 
       final familyMatch = familyRegex.firstMatch(block);
-      String? family = familyMatch?.group(1) ?? familyMatch?.group(2) ?? familyMatch?.group(3)?.trim();
+      String? family =
+          familyMatch?.group(1) ??
+          familyMatch?.group(2) ??
+          familyMatch?.group(3)?.trim();
       String? url = srcRegex.firstMatch(block)?.group(1);
 
       log.d('Found Font: $family at $url');
+      if (family == null || url == null) continue;
 
-      final data = await _fetchData('https:$url');
+      final data = await _fetchData(url);
 
-      if (family == null || url == null || data == null || data.bytes.isEmpty) {
-        continue;
-      }
+      if (data == null || data.bytes.isEmpty) continue;
 
       res.putIfAbsent(family, () => []).add(data.bytes);
     }
 
     log.d('fetched ${res.length} fonts');
     return res;
+  }
+
+  String _resolveUrl(String url) {
+    if (url.startsWith('//')) {
+      return '${_client.client.baseUrl.scheme}:$url';
+    }
+    return url;
   }
 }
