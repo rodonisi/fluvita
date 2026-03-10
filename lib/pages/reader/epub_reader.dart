@@ -155,7 +155,7 @@ class RenderContent extends ConsumerWidget {
               final s = element.classes
                   .map((className) {
                     return styles.keys
-                        .where((selector) => selector.contains('.$className'))
+                        .where((selector) => RegExp(r'(?:^|\s)\.' + RegExp.escape(className) + r'(?:\s|:|\.|\{|$)').hasMatch(selector))
                         .map((e) => styles[e]);
                   })
                   .expand((e) => e)

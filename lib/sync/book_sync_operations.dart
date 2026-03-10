@@ -56,10 +56,13 @@ class BookSyncOperations {
   }) async {
     final frag = await _getPreprocessedPage(chapterId: chapterId, page: page);
     final styles = <String, Map<String, String>>{};
+    final fonts = <String, List<List<int>>>{};
 
-    final stylesElement = frag.querySelector('style');
-    if (stylesElement != null) {
+    final stylesElements = frag.querySelectorAll('style');
+
+    for (final stylesElement in stylesElements) {
       styles.addAll(_parseStyles(stylesElement.innerHtml));
+      fonts.addAll(await _parseFonts(stylesElement.innerHtml));
       stylesElement.remove();
     }
 
@@ -69,7 +72,7 @@ class BookSyncOperations {
 
     styles['a'] = {'text-decoration': 'none'};
 
-    return PageContent(root: frag, styles: styles);
+    return PageContent(root: frag, styles: styles, fonts: fonts);
   }
 
   static Iterable<BookChaptersTableCompanion> _flattenChapters(
@@ -117,7 +120,7 @@ class BookSyncOperations {
         if (n.localName == 'img') {
           final src = 'https:${n.attributes['src']}';
           if (src.isNotEmpty) {
-            final imageData = await _fetchImageData(src);
+            final imageData = await _fetchData(src);
             if (imageData != null) {
               final base64img = base64Encode(imageData.bytes);
               n.attributes['src'] =
@@ -133,7 +136,7 @@ class BookSyncOperations {
           }).first;
 
           final src = 'https:${attr.value}';
-          final imageData = await _fetchImageData(src);
+          final imageData = await _fetchData(src);
           if (imageData != null) {
             final base64img = base64Encode(
               imageData.bytes,
@@ -174,13 +177,12 @@ class BookSyncOperations {
     return doc;
   }
 
-  Future<({Uint8List bytes, String mimeType})?> _fetchImageData(
+  Future<({Uint8List bytes, String mimeType})?> _fetchData(
     String imageUrl,
   ) async {
     try {
       final res = await _client.client.get(
         Uri.parse(imageUrl),
-        headers: {'Accept': 'image/*'},
       );
 
       if (res.isSuccessful && res.bodyBytes.isNotEmpty) {
@@ -194,7 +196,7 @@ class BookSyncOperations {
     return null;
   }
 
-  Map<String, Map<String, String>> _parseStyles(String css) {
+  static Map<String, Map<String, String>> _parseStyles(String css) {
     final Map<String, Map<String, String>> stylesMap = {};
     final RegExp ruleRegExp = RegExp(r'([^{]+)\{([^}]+)\}');
     final RegExp propRegExp = RegExp(r'([^:]+):([^;]+);?');
@@ -213,5 +215,35 @@ class BookSyncOperations {
       stylesMap[selector] = propsMap;
     }
     return stylesMap;
+  }
+
+  Future<Map<String, List<List<int>>>> _parseFonts(String css) async {
+    final res = <String, List<List<int>>>{};
+    // 3. Regex to find @font-face blocks and extract values
+    final fontFaceRegex = RegExp(r'@font-face\s*\{([^}]*)\}', multiLine: true);
+    final familyRegex = RegExp(r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''', caseSensitive: false);
+    final srcRegex = RegExp(r'src:\s*url\([" "]?([^" ")]+)[" "]?\)');
+
+    var matches = fontFaceRegex.allMatches(css);
+    for (var match in matches) {
+      String block = match.group(1) ?? "";
+
+      final familyMatch = familyRegex.firstMatch(block);
+      String? family = familyMatch?.group(1) ?? familyMatch?.group(2) ?? familyMatch?.group(3)?.trim();
+      String? url = srcRegex.firstMatch(block)?.group(1);
+
+      log.d('Found Font: $family at $url');
+
+      final data = await _fetchData('https:$url');
+
+      if (family == null || url == null || data == null || data.bytes.isEmpty) {
+        continue;
+      }
+
+      res.putIfAbsent(family, () => []).add(data.bytes);
+    }
+
+    log.d('fetched ${res.length} fonts');
+    return res;
   }
 }
