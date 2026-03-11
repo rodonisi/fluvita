@@ -158,26 +158,31 @@ class RenderContent extends ConsumerWidget {
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(epubSettings.marginSize),
-          child: SelectionArea(
-            child: HtmlWidget(
-              html,
-              buildAsync: false,
-              enableCaching: true,
-              customStylesBuilder: (element) {
-                final s = element.classes
-                    .expand((className) => classStyles[className] ?? [])
-                    .fold<Map<String, String>>({}, (acc, map) {
-                      acc.addAll(map);
-                      return acc;
-                    });
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: SelectionArea(
+              child: HtmlWidget(
+                html,
+                buildAsync: false,
+                enableCaching: true,
+                customStylesBuilder: (element) {
+                  final s = element.classes
+                      .expand((className) => classStyles[className] ?? [])
+                      .fold<Map<String, String>>({}, (acc, map) {
+                        acc.addAll(map);
+                        return acc;
+                      });
 
-                s.addAll(styles[element.localName] ?? {});
+                  s.addAll(styles[element.localName] ?? {});
 
-                return s;
-              },
-              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: epubSettings.fontSize,
-                height: epubSettings.lineHeight,
+                  return s;
+                },
+                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: epubSettings.fontSize,
+                  height: epubSettings.lineHeight,
+                ),
               ),
             ),
           ),
