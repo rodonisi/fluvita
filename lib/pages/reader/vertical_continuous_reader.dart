@@ -125,6 +125,10 @@ class _VerticalContinuousReaderState
       key: ValueKey(index),
       child: Consumer(
         builder: (context, ref, _) {
+          final imageCacheWidth =
+              (MediaQuery.of(context).size.width *
+                      MediaQuery.of(context).devicePixelRatio)
+                  .toInt();
           // Outside the visible window and height already known: swap the
           // decoded bitmap for a same-height coloured placeholder so the
           // image is not kept in memory.
@@ -152,7 +156,7 @@ class _VerticalContinuousReaderState
                 data: (data) => Image.memory(
                   data.data,
                   fit: BoxFit.fitWidth,
-                  cacheWidth: MediaQuery.of(context).size.width.toInt(),
+                  cacheWidth: imageCacheWidth,
                 ),
               ),
             );
@@ -170,7 +174,7 @@ class _VerticalContinuousReaderState
               child: Image.memory(
                 data.data,
                 fit: BoxFit.fitWidth,
-                cacheWidth: MediaQuery.of(context).size.width.toInt(),
+                cacheWidth: imageCacheWidth,
               ),
             ),
             loading: () {
