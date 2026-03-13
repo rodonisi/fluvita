@@ -203,6 +203,47 @@ class BookSyncOperations {
 
     return visitor.resultMap;
   }
+
+  Future<Map<String, List<Uint8List>>> _parseFonts(String css) async {
+    final res = <String, List<Uint8List>>{};
+    final fontFaceRegex = RegExp(r'@font-face\s*\{([^}]*)\}', multiLine: true);
+    final familyRegex = RegExp(
+      r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''',
+      caseSensitive: false,
+    );
+    final srcRegex = RegExp(r'src:\s*url\([" "]?([^" ")]+)[" "]?\)');
+
+    var matches = fontFaceRegex.allMatches(css);
+    for (var match in matches) {
+      String block = match.group(1) ?? "";
+
+      final familyMatch = familyRegex.firstMatch(block);
+      String? family =
+          familyMatch?.group(1) ??
+          familyMatch?.group(2) ??
+          familyMatch?.group(3)?.trim();
+      String? url = srcRegex.firstMatch(block)?.group(1);
+
+      log.d('Found Font: $family at $url');
+      if (family == null || url == null) continue;
+
+      final data = await _fetchData(url);
+
+      if (data == null || data.bytes.isEmpty) continue;
+
+      res.putIfAbsent(family, () => []).add(data.bytes);
+    }
+
+    log.d('fetched ${res.length} fonts');
+    return res;
+  }
+
+  String _resolveUrl(String url) {
+    if (url.startsWith('//')) {
+      return '${_client.client.baseUrl.scheme}:$url';
+    }
+    return url;
+  }
 }
 
 class _CssToMapVisitor extends Visitor {
@@ -268,46 +309,5 @@ class _CssToMapVisitor extends Visitor {
       resultMap[selector]![node.property] = value;
     }
     super.visitDeclaration(node);
-  }
-
-  Future<Map<String, List<Uint8List>>> _parseFonts(String css) async {
-    final res = <String, List<Uint8List>>{};
-    final fontFaceRegex = RegExp(r'@font-face\s*\{([^}]*)\}', multiLine: true);
-    final familyRegex = RegExp(
-      r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''',
-      caseSensitive: false,
-    );
-    final srcRegex = RegExp(r'src:\s*url\([" "]?([^" ")]+)[" "]?\)');
-
-    var matches = fontFaceRegex.allMatches(css);
-    for (var match in matches) {
-      String block = match.group(1) ?? "";
-
-      final familyMatch = familyRegex.firstMatch(block);
-      String? family =
-          familyMatch?.group(1) ??
-          familyMatch?.group(2) ??
-          familyMatch?.group(3)?.trim();
-      String? url = srcRegex.firstMatch(block)?.group(1);
-
-      log.d('Found Font: $family at $url');
-      if (family == null || url == null) continue;
-
-      final data = await _fetchData(url);
-
-      if (data == null || data.bytes.isEmpty) continue;
-
-      res.putIfAbsent(family, () => []).add(data.bytes);
-    }
-
-    log.d('fetched ${res.length} fonts');
-    return res;
-  }
-
-  String _resolveUrl(String url) {
-    if (url.startsWith('//')) {
-      return '${_client.client.baseUrl.scheme}:$url';
-    }
-    return url;
   }
 }

@@ -142,17 +142,6 @@ class RenderContent extends ConsumerWidget {
       epubReaderSettingsProvider(seriesId: seriesId),
     );
 
-    final selectorClassRegex = RegExp(
-      r'\.([a-zA-Z0-9_-]+)(?:\s|:|\.|\{|$)[^.]*$',
-    );
-    final Map<String, List<Map<String, String>>> classStyles = {};
-    for (final entry in styles.entries) {
-      final match = selectorClassRegex.firstMatch(entry.key);
-      if (match != null) {
-        classStyles.putIfAbsent(match.group(1)!, () => []).add(entry.value);
-      }
-    }
-
     return Align(
       alignment: Alignment.topCenter,
       child: SafeArea(
@@ -168,14 +157,13 @@ class RenderContent extends ConsumerWidget {
                 buildAsync: false,
                 enableCaching: true,
                 customStylesBuilder: (element) {
-                  final s = element.classes
-                      .expand((className) => classStyles[className] ?? [])
-                      .fold<Map<String, String>>({}, (acc, map) {
-                        acc.addAll(map);
-                        return acc;
-                      });
+                  final s = Map<String, String>.from(
+                    styles[element.localName] ?? {},
+                  );
 
-                  s.addAll(styles[element.localName] ?? {});
+                  for (final className in element.classes) {
+                    s.addAll(styles['.$className'] ?? {});
+                  }
 
                   return s;
                 },
