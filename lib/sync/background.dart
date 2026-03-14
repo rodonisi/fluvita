@@ -4,6 +4,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
+import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:workmanager/workmanager.dart';
@@ -26,7 +27,18 @@ void callbackDispatcher() {
       final syncOps = ReaderSyncOperations(
         client: Openapi.create(client: chopper),
       );
-      final repo = ReaderRepository(db, syncOps);
+
+      final seriesOps = SeriesSyncOperations(
+        client: Openapi.create(client: chopper),
+        apiKey: settings.apiKey!,
+      );
+
+      final repo = ReaderRepository(
+        db: db,
+        readerClient: syncOps,
+        seriesClient: seriesOps,
+      );
+      await repo.refreshOutdatedProgress();
       await repo.mergeProgress();
 
       log.d('succesfully merged progress');

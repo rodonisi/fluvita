@@ -19,31 +19,17 @@ class SeriesSyncOperations {
        _apiKey = apiKey;
 
   Future<Iterable<SeriesCompanion>> getAllSeries({int? libraryId}) async {
-    final res = await _client.apiSeriesV2Post(
-      body: FilterV2Dto(
-        id: 0,
-        combination: FilterV2DtoCombination.value_0.value,
-        sortOptions: SortOptions(
-          sortField: SortOptionsSortField.value_1.value,
-          isAscending: false,
-        ),
-        limitTo: 0,
-        statements: [
-          if (libraryId != null)
-            FilterStatementDto(
-              comparison: FilterStatementDtoComparison.value_0.value,
-              field: FilterStatementDtoField.value_19.value,
-              value: libraryId.toString(),
-            ),
-        ],
-      ),
+    final res = await _fetchAllSeries(libraryId: libraryId);
+
+    return res.map((dto) => dto.toSeriesCompanion());
+  }
+
+  Future<Map<int, DateTime>> getLastReadForSeries() async {
+    final res = await _fetchAllSeries();
+
+    return Map.fromEntries(
+      res.map((entry) => MapEntry(entry.id!, entry.latestReadDate!)),
     );
-
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to load series: ${res.error}');
-    }
-
-    return res.body!.map((dto) => dto.toSeriesCompanion());
   }
 
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {
@@ -177,5 +163,32 @@ class SeriesSyncOperations {
       volumes: volumes,
       progress: progress,
     );
+  }
+
+  Future<List<SeriesDto>> _fetchAllSeries({int? libraryId}) async {
+    final res = await _client.apiSeriesV2Post(
+      body: FilterV2Dto(
+        id: 0,
+        combination: FilterV2DtoCombination.value_0.value,
+        sortOptions: SortOptions(
+          sortField: SortOptionsSortField.value_1.value,
+          isAscending: false,
+        ),
+        limitTo: 0,
+        statements: [
+          if (libraryId != null)
+            FilterStatementDto(
+              comparison: FilterStatementDtoComparison.value_0.value,
+              field: FilterStatementDtoField.value_19.value,
+              value: libraryId.toString(),
+            ),
+        ],
+      ),
+    );
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load series: ${res.error}');
+    }
+    return res.body!;
   }
 }

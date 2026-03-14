@@ -69,6 +69,39 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return await managers.readingProgress.filter((f) => f.dirty(true)).get();
   }
 
+  /// Get last read date for all chapters of series [seriesId]
+  Future<Map<int, DateTime>> getLastReadDateForSeriesChapters({
+    required int seriesId,
+  }) async {
+    final result = await managers.readingProgress
+        .filter((f) => f.seriesId.id(seriesId))
+        .orderBy((o) => o.lastModified.desc())
+        .get();
+
+    return {
+      for (final entry in result) entry.chapterId: entry.lastModified,
+    };
+  }
+
+  /// Get last read date per series for all series that have progress entries
+  Future<Map<int, DateTime>> getLastReadDatePerSeries() async {
+    final result =
+        await (selectOnly(readingProgress)
+              ..addColumns([
+                readingProgress.seriesId,
+                readingProgress.lastModified.max(),
+              ])
+              ..groupBy([readingProgress.seriesId]))
+            .get();
+
+    return {
+      for (final row in result)
+        row.read(readingProgress.seriesId)!: row.read(
+          readingProgress.lastModified.max(),
+        )!,
+    };
+  }
+
   /// Upsert progress entry. Returns the inserted or updated entry
   Future<ReadingProgressData> upsertProgress(
     ReadingProgressCompanion entry,
