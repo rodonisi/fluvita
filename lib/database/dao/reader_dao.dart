@@ -69,6 +69,38 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return await managers.readingProgress.filter((f) => f.dirty(true)).get();
   }
 
+  /// Get last read date for all chapters of series [seriesId]
+  Future<Map<int, DateTime>> getLastReadDateForSeriesChapters({
+    required int seriesId,
+  }) async {
+    final result = await managers.readingProgress
+        .filter((f) => f.seriesId.id(seriesId))
+        .get();
+
+    return {
+      for (final entry in result) entry.chapterId: entry.lastModified,
+    };
+  }
+
+  /// Get last read date per series for all series that have progress entries
+  Future<Map<int, DateTime>> getLastReadDatePerSeries() async {
+    final result =
+        await (selectOnly(readingProgress)
+              ..addColumns([
+                readingProgress.seriesId,
+                readingProgress.lastModified.max(),
+              ])
+              ..groupBy([readingProgress.seriesId]))
+            .get();
+
+    return {
+      for (final row in result)
+        row.read(readingProgress.seriesId)!: row.read(
+          readingProgress.lastModified.max(),
+        )!,
+    };
+  }
+
   /// Upsert progress entry. Returns the inserted or updated entry
   Future<ReadingProgressData> upsertProgress(
     ReadingProgressCompanion entry,
@@ -85,7 +117,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Merge a progress batch. Updates all entries that are last modified at the
   /// same time or before the existing dirty progress entry
   Future<void> mergeProgressBatch(
-    List<ReadingProgressCompanion> incomingList,
+    Iterable<ReadingProgressCompanion> incomingList,
   ) async {
     final ids = incomingList.map((p) => p.chapterId.value).toList();
     final localRecords = await (select(
@@ -108,6 +140,13 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
         b.insertAllOnConflictUpdate(readingProgress, toUpdate);
       });
     }
+  }
+
+  /// Clear dirty flag for all progress entries for the given [chapterIds]
+  Future<void> clearDirtyFlags(Iterable<int> chapterIds) async {
+    await managers.readingProgress
+        .filter((f) => f.chapterId.id.isIn(chapterIds))
+        .update((u) => u(dirty: const Value(false)));
   }
 
   /// Upsert chapter progress batch only where the existing progress is not

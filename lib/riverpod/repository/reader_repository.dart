@@ -3,8 +3,10 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
+import 'package:kover/riverpod/providers/settings/settings.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
+import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,15 +16,31 @@ part 'reader_repository.g.dart';
 ReaderRepository readerRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final client = ReaderSyncOperations(client: restClient);
-  return ReaderRepository(db, client);
+  final apiKey = ref.watch(apiKeyProvider);
+  final readerClient = ReaderSyncOperations(client: restClient);
+  final seriesClient = SeriesSyncOperations(
+    client: restClient,
+    apiKey: apiKey ?? '',
+  );
+  return ReaderRepository(
+    db: db,
+    readerClient: readerClient,
+    seriesClient: seriesClient,
+  );
 }
 
 class ReaderRepository {
   final AppDatabase _db;
-  final ReaderSyncOperations _client;
+  final ReaderSyncOperations _readerClient;
+  final SeriesSyncOperations _seriesClient;
 
-  ReaderRepository(this._db, this._client);
+  ReaderRepository({
+    required AppDatabase db,
+    required ReaderSyncOperations readerClient,
+    required SeriesSyncOperations seriesClient,
+  }) : _db = db,
+       _readerClient = readerClient,
+       _seriesClient = seriesClient;
 
   /// Get continue point for [seriesId]
   Future<ChapterModel> getContinuePoint({required int seriesId}) async {
@@ -103,30 +121,40 @@ class ReaderRepository {
     );
 
     try {
-      await _client.sendProgress(prog);
+      await _readerClient.sendProgress(prog);
     } catch (e) {
       log.e('could not send progress', error: e);
     }
   }
 
-  /// Refresh complete progress for continue points. Does not update dirty
-  /// entries.
-  Future<void> refreshContinuePointsAndProgress() async {
-    final series = await _db.seriesDao.allSeries().get();
-    final updates = await Future.wait(
-      series.map((s) async {
-        final continuePoint = await _client.getContinuePoint(s.id);
-        final progress = await _client.getProgress(
-          continuePoint,
-        );
+  /// Refresh complete progress for all series that have newer reading progress
+  /// than local
+  Future<void> refreshOutdatedProgress() async {
+    final batch = <ReadingProgressCompanion>[];
+    final remoteLastRead = await _seriesClient.getLastReadForSeries();
+    final localLastRead = await _db.readerDao.getLastReadDatePerSeries();
 
-        return (continuePoint: continuePoint, progress: progress);
-      }),
-    );
+    final newer = remoteLastRead.entries.where((e) {
+      final local = localLastRead[e.key];
+      return local == null || e.value.isAfter(local);
+    });
 
-    await _db.readerDao.upsertCleanProgressBatch(
-      updates.map((u) => u.progress),
-    );
+    for (final toUpdate in newer) {
+      final chaptersLastRead = await _db.readerDao
+          .getLastReadDateForSeriesChapters(seriesId: toUpdate.key);
+
+      final outdated = chaptersLastRead.entries.where(
+        (e) => toUpdate.value.isAfter(e.value),
+      );
+
+      final progress = await Future.wait(
+        outdated.map((c) async => await _readerClient.getProgress(c.key)),
+      );
+
+      batch.addAll(progress);
+    }
+
+    await _db.readerDao.mergeProgressBatch(batch);
   }
 
   /// Synchronize all dirty progress entries by sending them to the backend,
@@ -137,13 +165,21 @@ class ReaderRepository {
 
     log.d('processing ${dirty.length} progress entries');
 
-    final updatedProgress = <ReadingProgressCompanion>[];
-    for (final d in dirty) {
-      await _client.sendProgress(d);
-      updatedProgress.add(await _client.getProgress(d.chapterId));
-    }
+    final remoteProgress = <ReadingProgressCompanion>[];
 
-    await _db.readerDao.mergeProgressBatch(updatedProgress);
+    await Future.wait(
+      dirty.map((d) async {
+        await _readerClient.sendProgress(d);
+      }),
+    );
+    await Future.wait(
+      dirty.map((d) async {
+        remoteProgress.add(await _readerClient.getProgress(d.chapterId));
+      }),
+    );
+
+    await _db.readerDao.mergeProgressBatch(remoteProgress);
+    await _db.readerDao.clearDirtyFlags(dirty.map((e) => e.chapterId));
   }
 
   /// Mark [seriesId] as read. This will set the progress for all chapters

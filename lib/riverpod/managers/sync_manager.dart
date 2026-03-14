@@ -132,7 +132,7 @@ class SyncManager extends _$SyncManager {
     await _runPhase(.progress, () async {
       final readerRepo = ref.read(readerRepositoryProvider);
 
-      await readerRepo.refreshContinuePointsAndProgress();
+      await readerRepo.refreshOutdatedProgress();
       await readerRepo.mergeProgress();
     });
   }
