@@ -169,12 +169,12 @@ class ReaderRepository {
 
     await Future.wait(
       dirty.map((d) async {
-        remoteProgress.add(await _readerClient.getProgress(d.chapterId));
+        await _readerClient.sendProgress(d);
       }),
     );
     await Future.wait(
       dirty.map((d) async {
-        await _readerClient.sendProgress(d);
+        remoteProgress.add(await _readerClient.getProgress(d.chapterId));
       }),
     );
 

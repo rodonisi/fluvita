@@ -75,7 +75,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   }) async {
     final result = await managers.readingProgress
         .filter((f) => f.seriesId.id(seriesId))
-        .orderBy((o) => o.lastModified.desc())
         .get();
 
     return {
