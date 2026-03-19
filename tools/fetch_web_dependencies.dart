@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 
@@ -50,4 +52,3 @@ void main() async {
   }
   print('Update complete!');
 }
-
