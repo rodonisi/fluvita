@@ -231,16 +231,13 @@ class BookSyncOperations {
 }
 
 class _FontFaceVisitor extends Visitor {
-  // family name → all src URLs collected across all @font-face blocks
   final Map<String, List<String>> fontMap = {};
 
-  bool _inFontFace = false;
   String? _currentFamily;
   List<String> _currentUrls = [];
 
   @override
   void visitFontFaceDirective(FontFaceDirective node) {
-    _inFontFace = true;
     _currentFamily = null;
     _currentUrls = [];
 
@@ -249,14 +246,10 @@ class _FontFaceVisitor extends Visitor {
     if (_currentFamily != null && _currentUrls.isNotEmpty) {
       fontMap.putIfAbsent(_currentFamily!, () => []).addAll(_currentUrls);
     }
-
-    _inFontFace = false;
   }
 
   @override
   void visitDeclaration(Declaration node) {
-    if (!_inFontFace) return;
-
     final property = node.property.toLowerCase();
 
     final expr = node.expression;
