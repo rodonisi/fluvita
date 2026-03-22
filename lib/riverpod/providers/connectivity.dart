@@ -9,8 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'connectivity.g.dart';
 
-@Riverpod(keepAlive: true)
 /// Returns wheter a connection to the server can be established.
+@Riverpod(keepAlive: true)
 Stream<bool> hasConnection(Ref ref) async* {
   final ping = ref.watch(pingProvider).value ?? false;
 

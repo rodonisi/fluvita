@@ -144,14 +144,12 @@ class SeriesRepository {
   }
 
   /// Refresh recently added series.
-  /// details
   Future<void> refreshRecentlyAdded() async {
     final series = await _client.getRecentlyAdded();
     await _db.seriesDao.upsertRecentlyAdded(series);
   }
 
   /// Refresh recently updated series.
-  /// details
   Future<void> refreshRecentlyUpdated() async {
     final series = await _client.getRecentlyUpdated();
     await _db.seriesDao.upsertRecentlyUpdated(series);
