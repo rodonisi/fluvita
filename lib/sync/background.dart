@@ -1,7 +1,6 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
@@ -15,6 +14,7 @@ import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/libraries_sync_operations.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
+import 'package:kover/sync/sync_engine.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/sync/want_to_read_sync_operations.dart';
 import 'package:kover/utils/logging.dart';
