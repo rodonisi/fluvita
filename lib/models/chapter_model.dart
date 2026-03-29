@@ -25,7 +25,7 @@ sealed class ChapterModel with _$ChapterModel {
     return ChapterModel(
       id: table.id,
       volumeId: table.volumeId,
-      title: _cleanedTitle(table.title ?? table.titleName) ?? 'Untitled',
+      title: _cleanedTitle(table.titleName ?? table.title) ?? 'Untitled',
       pages: table.pages,
       format: table.format,
     );
