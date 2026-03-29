@@ -16,6 +16,7 @@ sealed class ChapterModel with _$ChapterModel {
     required String title,
     required int pages,
     Format? format,
+    String? summary,
   }) = _ChapterModel;
 
   factory ChapterModel.fromJson(Map<String, Object?> json) =>
@@ -28,6 +29,7 @@ sealed class ChapterModel with _$ChapterModel {
       title: _cleanedTitle(table.titleName ?? table.title) ?? 'Untitled',
       pages: table.pages,
       format: table.format,
+      summary: table.summary,
     );
   }
 

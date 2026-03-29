@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
+import 'package:kover/pages/library/series_detail_page/series_app_bar.dart';
 import 'package:kover/pages/library/series_detail_page/series_info_background.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/volume.dart';
@@ -25,7 +26,16 @@ class VolumeAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AdaptiveSliverAppBar(
-      title: volume.name,
+      title: CoverAppBarTitle(
+        cover: VolumeCoverImage(
+          fit: .cover,
+          volumeId: volume.id,
+        ),
+        title: Text(
+          volume.name,
+          overflow: .fade,
+        ),
+      ),
       bottom: bottom,
       background: SeriesInfoBackground(
         primaryColor: volume.primaryColor,
@@ -130,15 +140,13 @@ class _Cover extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progress = ref
-        .watch(volumeProgressProvider(volumeId: volume.id))
-        .value;
-
     return AspectRatio(
       aspectRatio: LayoutConstants.coverAspectRatio,
-      child: CoverCard(
-        progress: progress,
-        coverImage: VolumeCoverImage(
+      child: ClipRRect(
+        borderRadius: BorderRadiusGeometry.circular(
+          LayoutConstants.mediumBorderRadius,
+        ),
+        child: VolumeCoverImage(
           volumeId: volume.id,
           fit: BoxFit.cover,
         ),

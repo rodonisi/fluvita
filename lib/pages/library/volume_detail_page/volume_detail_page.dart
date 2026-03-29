@@ -1,96 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
+import 'package:kover/pages/library/menu_page/app_list_tile.dart';
+import 'package:kover/pages/library/series_detail_page/chapters_page.dart';
 import 'package:kover/pages/library/series_detail_page/series_app_bar.dart';
+import 'package:kover/pages/library/series_detail_page/series_detail_page.dart';
 import 'package:kover/pages/library/volume_detail_page/volume_app_bar.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/chapter_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 
 class VolumeDetailPage extends HookConsumerWidget {
-  final VolumeModel volume;
+  final int volumeId;
 
   const VolumeDetailPage({
     super.key,
-    required this.volume,
+    required this.volumeId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final volume =
-        ref
-            .watch(volumeProvider(volumeId: this.volume.id))
-            .value
-            ?.copyWith(name: this.volume.name) ??
-        this.volume;
+    final volume = ref.watch(volumeProvider(volumeId: volumeId)).value;
+    final progress = ref
+        .watch(volumeProgressProvider(volumeId: volumeId))
+        .value;
 
-    final tabs = <Widget>[];
-    final views = <Widget>[];
-
-    if (volume.chapters.isNotEmpty) {
-      tabs.add(Tab(text: 'Chapters (${volume.chapters.length})'));
-      views.add(
-        ChapterGrid(seriesId: volume.seriesId, chapters: volume.chapters),
-      );
-    }
-
-    if (tabs.isEmpty) {
-      return CustomScrollView(
-        slivers: [
-          SeriesAppBar(
-            seriesId: volume.seriesId,
-          ),
-          const SliverFillRemaining(
-            child: Center(child: Text('No content available')),
-          ),
-        ],
-      );
-    }
+    if (volume == null) return SizedBox.shrink();
 
     return Scaffold(
-      body: DefaultTabController(
-        length: tabs.length,
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-                sliver: VolumeAppBar(
-                  volume: volume,
-                  bottom: TabBar(
-                    isScrollable: true,
-                    tabAlignment: .start,
-                    tabs: tabs,
-                  ),
-                ),
+      body: CustomScrollView(
+        slivers: [
+          VolumeAppBar(
+            volume: volume,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(4.0),
+              child: LinearProgressIndicator(
+                value: progress,
               ),
-            ];
-          },
-          body: TabBarView(
-            children: views.map((view) {
-              return Builder(
-                builder: (context) {
-                  return CustomScrollView(
-                    slivers: [
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                          context,
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.all(8.0),
-                        sliver: view,
-                      ),
-                      const SliverBottomPadding(),
-                    ],
-                  );
-                },
-              );
-            }).toList(),
+            ),
           ),
-        ),
+          SliverPadding(
+            padding: EdgeInsets.only(
+              top: LayoutConstants.mediumPadding,
+              right: LayoutConstants.mediumPadding,
+              left: LayoutConstants.mediumPadding,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Summary(
+                    summary: volume.chapters.first.summary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsetsGeometry.symmetric(
+              horizontal: LayoutConstants.mediumPadding,
+              vertical: LayoutConstants.smallPadding,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                'Chapters',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: LayoutConstants.mediumPadding,
+            ),
+            sliver: ChaptersGrid(
+              seriesId: volume.seriesId,
+              chapters: volume.chapters,
+            ),
+          ),
+
+          SliverBottomPadding(),
+        ],
       ),
     );
   }

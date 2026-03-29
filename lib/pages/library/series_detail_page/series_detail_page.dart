@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
+import 'package:kover/pages/library/menu_page/app_list_tile.dart';
 import 'package:kover/pages/library/series_detail_page/series_app_bar.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
+import 'package:kover/utils/extensions/string.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/adaptive_sliver_grid.dart';
 import 'package:kover/widgets/async_value.dart';
-import 'package:kover/widgets/chapter_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:kover/widgets/volume_card.dart';
 
@@ -17,120 +24,57 @@ class SeriesDetailPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final details = ref.watch(seriesDetailProvider(seriesId: seriesId));
+    final summary = ref.watch(
+      seriesMetadataProvider(seriesId: seriesId).select(
+        (value) => value.asData?.value.summary,
+      ),
+    );
 
     return Scaffold(
       body: Async(
         asyncValue: details,
         data: (detailsData) {
-          final tabs = <Widget>[];
-          final views = <Widget>[];
-
-          if (detailsData.unreadChapters.isNotEmpty) {
-            tabs.add(
-              Tab(
-                text: 'Unread Chapters (${detailsData.unreadChapters.length})',
-              ),
-            );
-            views.add(
-              ChapterGrid(
-                seriesId: seriesId,
-                chapters: detailsData.unreadChapters,
-              ),
-            );
-          }
-
-          if (detailsData.unreadVolumes.isNotEmpty) {
-            tabs.add(
-              Tab(
-                text: 'Unread Volumes (${detailsData.unreadVolumes.length})',
-              ),
-            );
-            views.add(_VolumeGrid(volumes: detailsData.unreadVolumes));
-          }
-
-          if (detailsData.storyline.isNotEmpty) {
-            tabs.add(Tab(text: 'Storyline (${detailsData.storyline.length})'));
-            views.add(
-              ChapterGrid(seriesId: seriesId, chapters: detailsData.storyline),
-            );
-          }
-
-          if (detailsData.volumes.isNotEmpty) {
-            tabs.add(Tab(text: 'Volumes (${detailsData.volumes.length})'));
-            views.add(_VolumeGrid(volumes: detailsData.volumes));
-          }
-
-          if (detailsData.chapters.isNotEmpty) {
-            tabs.add(Tab(text: 'Chapters (${detailsData.chapters.length})'));
-            views.add(
-              ChapterGrid(seriesId: seriesId, chapters: detailsData.chapters),
-            );
-          }
-
-          if (detailsData.specials.isNotEmpty) {
-            tabs.add(Tab(text: 'Specials (${detailsData.specials.length})'));
-            views.add(
-              ChapterGrid(seriesId: seriesId, chapters: detailsData.specials),
-            );
-          }
-
-          if (tabs.isEmpty) {
-            return CustomScrollView(
-              slivers: [
-                SeriesAppBar(
-                  seriesId: seriesId,
+          return CustomScrollView(
+            slivers: [
+              SeriesAppBar(seriesId: seriesId),
+              SliverPadding(
+                padding: const EdgeInsetsGeometry.only(
+                  top: LayoutConstants.mediumPadding,
+                  left: LayoutConstants.mediumPadding,
+                  right: LayoutConstants.mediumPadding,
                 ),
-                const SliverFillRemaining(
-                  child: Center(child: Text('No content available')),
-                ),
-              ],
-            );
-          }
-
-          return DefaultTabController(
-            length: tabs.length,
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverOverlapAbsorber(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                      context,
-                    ),
-                    sliver: SeriesAppBar(
-                      seriesId: seriesId,
-                      bottom: TabBar(
-                        isScrollable: true,
-                        tabAlignment: .start,
-                        tabs: tabs,
-                      ),
-                    ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    spacing: LayoutConstants.smallPadding,
+                    crossAxisAlignment: .start,
+                    children: [
+                      if (detailsData.storyline.isNotEmpty)
+                        AppListTile(
+                          title: 'Storyline',
+                          onTap: () => StorylineRoute(
+                            seriesId: seriesId,
+                          ).push(context),
+                        ),
+                      if (detailsData.volumes.isNotEmpty)
+                        AppListTile(
+                          title: 'Volumes (${detailsData.volumes.length})',
+                          onTap: () =>
+                              VolumesRoute(seriesId: seriesId).push(context),
+                        ),
+                      if (detailsData.chapters.isNotEmpty)
+                        AppListTile(
+                          title: 'Chapters (${detailsData.chapters.length})',
+                          onTap: () =>
+                              ChaptersRoute(seriesId: seriesId).push(context),
+                        ),
+                      Summary(summary: summary),
+                      Genres(seriesId: seriesId),
+                    ],
                   ),
-                ];
-              },
-              body: TabBarView(
-                children: views.map((view) {
-                  return Builder(
-                    builder: (context) {
-                      return CustomScrollView(
-                        slivers: [
-                          SliverOverlapInjector(
-                            handle:
-                                NestedScrollView.sliverOverlapAbsorberHandleFor(
-                                  context,
-                                ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.all(8.0),
-                            sliver: view,
-                          ),
-                          const SliverBottomPadding(),
-                        ],
-                      );
-                    },
-                  );
-                }).toList(),
+                ),
               ),
-            ),
+              const SliverBottomPadding(),
+            ],
           );
         },
         loading: () => CustomScrollView(
@@ -148,19 +92,148 @@ class SeriesDetailPage extends HookConsumerWidget {
   }
 }
 
-class _VolumeGrid extends StatelessWidget {
-  final List<VolumeModel> volumes;
+class Summary extends HookConsumerWidget {
+  final String? summary;
 
-  const _VolumeGrid({required this.volumes});
+  const Summary({
+    super.key,
+    required this.summary,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final collapsed = useState(true);
+
+    if (summary == null || summary!.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      mainAxisSize: .min,
+      spacing: LayoutConstants.smallPadding,
+      children: [
+        Row(
+          mainAxisAlignment: .spaceBetween,
+          crossAxisAlignment: .center,
+          children: [
+            Text(
+              'Summary',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            TextButton(
+              onPressed: () => collapsed.value = !collapsed.value,
+              child: Text(
+                collapsed.value ? 'Show More' : 'Show Less',
+              ),
+            ),
+          ],
+        ),
+        _SummaryContent(summary: summary!, collapsed: collapsed.value),
+      ],
+    );
+  }
+}
+
+class _SummaryContent extends HookWidget {
+  final String summary;
+  final bool collapsed;
+
+  const _SummaryContent({
+    required this.summary,
+    required this.collapsed,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveSliverGrid(
-      itemCount: volumes.length,
-      builder: (context, index) {
-        final volume = volumes[index];
-        return VolumeCard(volumeId: volume.id);
-      },
+    // if (!collapsed) {
+    //   return HtmlWidget(summary);
+    // }
+    final height = useMemoized(() => collapsed ? 100.0 : double.infinity, [
+      collapsed,
+    ]);
+
+    final contentWidget = summary.isHtml()
+        ? Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+            ),
+            child: HtmlWidget(summary),
+          )
+        : Markdown(
+            padding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+            ),
+            data: summary,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+          );
+
+    return AnimatedSize(
+      duration: 100.ms,
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: height),
+        child: collapsed
+            ? ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: [0.7, 0.95],
+                  ).createShader(bounds);
+                },
+                blendMode: .dstIn,
+                child: contentWidget,
+              )
+            : contentWidget,
+      ),
+    );
+  }
+}
+
+class Genres extends ConsumerWidget {
+  final int seriesId;
+  const Genres({
+    super.key,
+    required this.seriesId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
+    final theme = Theme.of(context);
+    return Async(
+      asyncValue: metadata,
+      data: (metadata) => Column(
+        crossAxisAlignment: .start,
+        spacing: LayoutConstants.smallPadding,
+        children: [
+          Text(
+            'Tags',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          Wrap(
+            spacing: LayoutConstants.mediumPadding,
+            runSpacing: LayoutConstants.mediumPadding,
+            alignment: .start,
+            children: metadata.genres
+                .map(
+                  (g) => Chip(
+                    backgroundColor: theme.colorScheme.tertiaryContainer,
+                    label: Text(
+                      g.name,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 }

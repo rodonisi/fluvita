@@ -80,7 +80,10 @@ class VolumeCard extends HookConsumerWidget {
                   ).push(context);
                 },
           onTap: () {
-            VolumeDetailRoute(volume).push(context);
+            VolumeDetailRoute(
+              seriesId: volume.seriesId,
+              volumeId: volume.id,
+            ).push(context);
           },
         ),
       ),
