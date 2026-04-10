@@ -99,7 +99,8 @@ class EpubReflow extends _$EpubReflow {
   }
 
   Future<void> addElement() async {
-    if (_processingRender) return;
+    final current = await future;
+    if (_processingRender || current.status == .done) return;
 
     try {
       _processingRender = true;
@@ -135,6 +136,8 @@ class EpubReflow extends _$EpubReflow {
 
   Future<void> overflow() async {
     final current = await future;
+
+    if (current.status == .done) return;
 
     log.d('overflow detected');
 
@@ -239,14 +242,20 @@ class EpubNavigation extends _$EpubNavigation {
             page: data.page,
           ).future,
         );
-
+        try {
         final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
 
         await ref
             .read(
-              readerProvider(seriesId: seriesId, chapterId: chapterId).notifier,
+                readerProvider(
+                  seriesId: seriesId,
+                  chapterId: chapterId,
+                ).notifier,
             )
             .saveProgress(page: data.page, scrollId: scrollId);
+        } catch (e) {
+          log.e('Error saving progress: $e');
+        }
       });
     });
   }
