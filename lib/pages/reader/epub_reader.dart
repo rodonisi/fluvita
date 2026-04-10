@@ -194,10 +194,12 @@ class _Page extends HookConsumerWidget {
                             );
                           }
 
-                          return _RenderContent(
-                            seriesId: seriesId,
-                            html: reflowState.subpages[index].outerHtml,
-                            styles: reflowState.page.styles,
+                          return SingleChildScrollView(
+                            child: _RenderContent(
+                              seriesId: seriesId,
+                              html: reflowState.subpages[index].outerHtml,
+                              styles: reflowState.page.styles,
+                            ),
                           );
                         },
                       );
@@ -238,7 +240,7 @@ class _MeasureContent extends ConsumerWidget {
           await WidgetsBinding.instance.endOfFrame;
           final renderBox =
               key.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox == null) {
+          if (renderBox == null || !renderBox.hasSize) {
             return;
           }
 
@@ -290,37 +292,27 @@ class _RenderContent extends ConsumerWidget {
 
     return Async(
       asyncValue: epubSettings,
-      data: (epubSettings) => Align(
-        alignment: Alignment.topCenter,
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(epubSettings.marginSize),
-            child: GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-              },
-              child: SelectionArea(
-                child: HtmlWidget(
-                  html,
-                  buildAsync: false,
-                  enableCaching: true,
-                  customStylesBuilder: (element) {
-                    final s = Map<String, String>.from(
-                      styles[element.localName] ?? {},
-                    );
+      data: (epubSettings) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(epubSettings.marginSize),
+          child: HtmlWidget(
+            html,
+            buildAsync: false,
+            enableCaching: true,
+            customStylesBuilder: (element) {
+              final s = Map<String, String>.from(
+                styles[element.localName] ?? {},
+              );
 
-                    for (final className in element.classes) {
-                      s.addAll(styles['.$className'] ?? {});
-                    }
+              for (final className in element.classes) {
+                s.addAll(styles['.$className'] ?? {});
+              }
 
-                    return s;
-                  },
-                  textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: epubSettings.fontSize,
-                    height: epubSettings.lineHeight,
-                  ),
-                ),
-              ),
+              return s;
+            },
+            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: epubSettings.fontSize,
+              height: epubSettings.lineHeight,
             ),
           ),
         ),
