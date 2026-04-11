@@ -49,6 +49,11 @@ final _progressIndicatorTheme = const ProgressIndicatorThemeData(
   ),
 );
 
+final _navigationBarTheme = const NavigationBarThemeData(
+  height: 64.0,
+  labelBehavior: .alwaysHide,
+);
+
 @freezed
 sealed class ThemeModel with _$ThemeModel {
   const ThemeModel._();
@@ -85,6 +90,7 @@ sealed class ThemeModel with _$ThemeModel {
       ),
     ),
     progressIndicatorTheme: _progressIndicatorTheme,
+    navigationBarTheme: _navigationBarTheme,
   );
 
   ThemeData get _outlinedLightTheme => _lightTheme.copyWith(
@@ -118,6 +124,7 @@ sealed class ThemeModel with _$ThemeModel {
       ),
     ),
     progressIndicatorTheme: _progressIndicatorTheme,
+    navigationBarTheme: _navigationBarTheme,
   );
 
   ThemeData get _outlinedDarkTheme => _darkTheme.copyWith(
