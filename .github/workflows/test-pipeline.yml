@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: kover-macos
-          path: build/macos/Build/Products/Release/kover.app
+          path: build/macos/Build/Products/Release/Kover.app
 
   # build-and-deploy-google-play:
   #   name: Build & Deploy Google Play
@@ -230,8 +230,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: kover-android
-          path: build/app/outputs/bundle/release/app-release.apk
-
+          path: build/app/outputs/flutter-apk/app-release.apk
   # build-web:
   #   name: Build Web
   #   needs: version
