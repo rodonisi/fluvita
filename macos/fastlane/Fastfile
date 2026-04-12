@@ -56,7 +56,7 @@ platform :mac do
       use_automatic_signing: false,
       path: 'Runner.xcodeproj',
       code_sign_identity: 'Apple Distribution',
-      profile_name: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING]['com.rodonisi.kover'],
+      profile_name: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING]['com.rodonisi.kover']
     )
 
     build(
@@ -64,10 +64,10 @@ platform :mac do
       build_number: build_number
     )
 
-    load_asc_api_key
-    upload_to_testflight(
-      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
-      skip_waiting_for_build_processing: true
-    )
+    # load_asc_api_key
+    # upload_to_testflight(
+    #   api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+    #   skip_waiting_for_build_processing: true
+    # )
   end
 end

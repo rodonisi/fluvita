@@ -1,0 +1,294 @@
+name: Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      build_number: ${{ steps.version.outputs.BUILD_NUMBER }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get semantic version
+        id: versioning
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          bump_each_commit: false
+          bump_each_commit_patch_pattern: "fix"
+          minor_pattern: "feat"
+          major_pattern: "feat!"
+          version_format: "${major}.${minor}.${patch}"
+          tag_prefix: ""
+
+      - name: Set version and build number
+        id: version
+        run: |
+          echo "VERSION=${{ steps.versioning.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+  # build-and-deploy-ios:
+  #   name: Build & Deploy iOS
+  #   needs: version
+  #   runs-on: macos-26
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Get FVM Configuration
+  #       uses: kuhnroyal/flutter-fvm-config-action@v3
+  #       id: fvm-config-action
+  #
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+  #         channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+  #         cache: true
+  #
+  #     - name: Install dependencies
+  #       run: |
+  #         flutter pub get
+  #         flutter build ios --config-only
+  #
+  #     - name: Codegen
+  #       run: |
+  #         dart run build_runner build --delete-conflicting-outputs
+  #
+  #     - name: Build and Publish Testflight
+  #       run: |
+  #         cd ios
+  #         fastlane beta version:${{ needs.version.outputs.version }} build_number:${{ needs.version.outputs.build_number }} > /dev/null 2>&1 || (echo "Fastlane failed" && exit 1)
+  #       env:
+  #         APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+  #         APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+  #         APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+  #         MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+  #         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+  #         MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+
+  build-and-deploy-macos:
+    name: Build & Deploy MacOS
+    needs: version
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get FVM Configuration
+        uses: kuhnroyal/flutter-fvm-config-action@v3
+        id: fvm-config-action
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter build macos --config-only
+
+      - name: Codegen
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build and Publish Testflight
+        run: |
+          cd macos
+          fastlane beta version:${{ needs.version.outputs.version }} build_number:${{ needs.version.outputs.build_number }} > /dev/null 2>&1 || (echo "Fastlane failed" && exit 1)
+        env:
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kover-macos
+          path: build/macos/Build/Products/Release/kover.app
+
+  # build-and-deploy-google-play:
+  #   name: Build & Deploy Google Play
+  #   needs: version
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: "read"
+  #     id-token: "write"
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Get FVM Configuration
+  #       uses: kuhnroyal/flutter-fvm-config-action@v3
+  #       id: fvm-config-action
+  #
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+  #         channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+  #         cache: true
+  #
+  #     - name: Authenticate with Google Play
+  #       uses: "google-github-actions/auth@v3"
+  #       with:
+  #         project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+  #         workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER }}
+  #         service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+  #         create_credentials_file: true
+  #
+  #     - name: Decode Keystore
+  #       run: echo "${{ secrets.GOOGLE_PLAY_KEYSTORE }}" | base64 --decode > android/app/upload-keystore.jks
+  #
+  #     - name: Codegen
+  #       run: |
+  #         dart run build_runner build --delete-conflicting-outputs
+  #
+  #     - name: Build
+  #       run: |
+  #         flutter build appbundle --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
+  #       env:
+  #         KEYSTORE_PATH: "upload-keystore.jks"
+  #         KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
+  #         KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
+  #         KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
+  #
+  #     # - name: Publish Google Play
+  #     #   run: |
+  #     #     cd android
+  #     #     fastlane beta
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: kover.aab
+  #         path: build/app/outputs/bundle/release/app-release.aab
+
+  build-and-deploy-apk:
+    name: Build & Deploy Google Play
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get FVM Configuration
+        uses: kuhnroyal/flutter-fvm-config-action@v3
+        id: fvm-config-action
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+          cache: true
+
+      # - name: Authenticate with Google Play
+      #   uses: "google-github-actions/auth@v3"
+      #   with:
+      #     project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+      #     workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+      #     create_credentials_file: true
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.GOOGLE_PLAY_KEYSTORE }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Codegen
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build
+        run: |
+          flutter build apk --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
+        env:
+          KEYSTORE_PATH: "upload-keystore.jks"
+          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kover-android
+          path: build/app/outputs/bundle/release/app-release.apk
+
+  # build-web:
+  #   name: Build Web
+  #   needs: version
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Get FVM Configuration
+  #       uses: kuhnroyal/flutter-fvm-config-action@v3
+  #       id: fvm-config-action
+  #
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+  #         channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+  #         cache: true
+  #
+  #     - name: Install dependencies
+  #       run: flutter pub get
+  #
+  #     - name: Fetch web dependencies
+  #       run: dart run tools/fetch_web_dependencies.dart
+  #
+  #     - name: Codegen
+  #       run: |
+  #         dart run build_runner build --delete-conflicting-outputs
+  #
+  #     - name: Build web
+  #       run: |
+  #         flutter build web \
+  #           --release \
+  #           --base-href /kover/ \
+  #           --build-name ${{ needs.version.outputs.version }} \
+  #           --build-number ${{ needs.version.outputs.build_number }} \
+  #           --wasm
+  #
+  #     - name: Upload GitHub Pages artifact
+  #       uses: actions/upload-pages-artifact@v4.0.0
+  #       with:
+  #         path: build/web
+  #
+  # deploy-web:
+  #   name: Deploy Web
+  #   needs: build-web
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     pages: write # to deploy to Pages
+  #     id-token: write # to verify the deployment originates from an appropriate source
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #
+  #   steps:
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4
