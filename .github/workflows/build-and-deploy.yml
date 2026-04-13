@@ -15,13 +15,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Get semantic version
         id: versioning
-        uses: PaulHatch/semantic-version@v5.4.0
+        uses: PaulHatch/semantic-version@v6.0.2
         with:
           bump_each_commit: false
           bump_each_commit_patch_pattern: "fix"
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get FVM Configuration
         uses: kuhnroyal/flutter-fvm-config-action@v3
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get FVM Configuration
         uses: kuhnroyal/flutter-fvm-config-action@v3
@@ -128,7 +128,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get FVM Configuration
         uses: kuhnroyal/flutter-fvm-config-action@v3
@@ -177,7 +177,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get FVM Configuration
         uses: kuhnroyal/flutter-fvm-config-action@v3
@@ -210,7 +210,7 @@ jobs:
             --wasm
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4.0.0
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/web
 
@@ -229,4 +229,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
