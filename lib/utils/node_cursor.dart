@@ -1,5 +1,4 @@
 import 'package:html/dom.dart';
-import 'package:kover/utils/logging.dart';
 
 /// Iterates through the children of the given node, filling a clone of the root every time the iterator is moved
 /// forward
@@ -12,10 +11,17 @@ class NodeCursor {
   /// Iterator over the children of the root provided during initialization
   final Iterator<Node> iterator;
 
+  Node? reprocess;
+
   /// Recursive child cursor if a child requires splitting
   NodeCursor? childCursor;
 
-  bool hasNext = true;
+  bool get exhausted => _exhausted;
+
+  bool _exhausted = false;
+
+  bool get _isLeaf =>
+      root.localName != null && _leafTags.contains(root.localName);
 
   NodeCursor({
     required Element root,
@@ -24,26 +30,30 @@ class NodeCursor {
 
   /// Moves the iterator forward and adds the element to the root node. Returns the root node as filled so far.
   Node? next() {
-    if (childCursor != null) {
-      final childNext = childCursor!.next();
-      if (childNext != null) {
-        root.children.last.replaceWith(childNext);
-        return root;
+    if (_exhausted || _isLeaf) {
+      return null;
+    }
+
+    final childNode = childCursor?.next();
+    if (childNode != null) {
+      if (root.children.isEmpty) {
+        root.append(childNode);
+      } else {
+        root.children.last.replaceWith(childNode);
       }
-      childCursor = null;
+      return root;
+    }
+
+    childCursor = null;
+
+    if (reprocess != null) {
+      root.append(reprocess!);
+      reprocess = null;
       return root;
     }
 
     if (!iterator.moveNext()) {
-      hasNext = false;
-      log.d(
-        'iterator exhausted, hasNext=false, current root has ${root.children.length}',
-      );
-      if (root.children.isNotEmpty) {
-        final lastChunk = root.clone(true);
-        root.children.clear();
-        return lastChunk;
-      }
+      _exhausted = true;
       return null;
     }
 
@@ -51,75 +61,48 @@ class NodeCursor {
     return root;
   }
 
-  /// Returns whether the current iterator position can be split. This is the case if the current node is an element
-  /// with children that would result in a non-empty page after splitting.
-  bool canSplit() {
-    // If we are splitting inside a child, we can split only if:
-    // 1) there is already something before the current top-level node, or
-    // 2) the child itself can split.
-    if (childCursor != null) {
-      return root.children.length > 1 || childCursor!.canSplit();
-    }
-
-    // Split between siblings (before current node) if page already has previous content.
-    if (root.children.length > 1) {
-      return true;
-    }
-
-    if (!hasNext) {
-      return false;
-    }
-
-    // Otherwise we can split only inside current node.
-    final current = iterator.current;
-    return current is Element &&
-        !_leafTags.contains(current.localName) &&
-        current.children.isNotEmpty;
-  }
-
   /// Return the root node up to and not including the current iterator position. The root children are cleared and the
   /// next page is started.
-  Node split() {
-    if (childCursor != null && root.children.isNotEmpty) {
-      root.children.last.replaceWith(childCursor!.split());
-      if (childCursor != null && !childCursor!.hasNext) {
-        childCursor = null;
-      }
-    } else {
-      if (childCursor != null) {
-        // childCursor exists but root is empty, discard inconsistent child
-        childCursor = null;
-      }
-      if (root.children.isNotEmpty) {
-        root.children.removeLast();
-      }
+  Node commitSplit() {
+    final childSplit = childCursor?.commitSplit();
+
+    if (childSplit != null) {
+      // Partial content fit inside the child — keep it in this subpage.
+      root.children.last.replaceWith(childSplit);
+    } else if (root.children.length > 1) {
+      reprocess = root.children.removeLast();
     }
 
-    final subpage = root.clone(true);
+    final committed = root.clone(true);
+
     root.children.clear();
 
-    if (hasNext) {
-      root.append(iterator.current.clone(true));
-    }
-
-    return subpage;
+    return committed;
   }
 
   /// Tries to split the current cursor position. If a split happened already for this page, false is returned.
   bool splitChild() {
+    if (_isLeaf || _exhausted) {
+      return false;
+    }
+
     if (childCursor != null) {
       return childCursor!.splitChild();
     }
 
-    if (!hasNext) return false;
-
     final current = iterator.current;
-    if (current is Element &&
-        current.localName != 'p' &&
-        current.children.isNotEmpty) {
-      childCursor = NodeCursor(root: current);
+    if (_canSplit(current)) {
+      childCursor = NodeCursor(root: current as Element);
 
       return true;
+    }
+
+    return false;
+  }
+
+  static bool _canSplit(Node node) {
+    if (node is Element) {
+      return node.localName != null && !_leafTags.contains(node.localName);
     }
 
     return false;
