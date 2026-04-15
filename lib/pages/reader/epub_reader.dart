@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:html/dom.dart';
 import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
@@ -231,6 +232,7 @@ class _MeasureContent extends HookConsumerWidget {
       page: page,
     );
     final reflow = ref.watch(provider);
+    final imageCache = useState(CachedImageFactory());
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -238,14 +240,15 @@ class _MeasureContent extends HookConsumerWidget {
           await WidgetsBinding.instance.endOfFrame;
           final renderBox =
               key.value.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox == null || !renderBox.hasSize) {
+          if (renderBox == null) {
             return;
           }
 
-          if (renderBox.size.height > constraints.maxHeight) {
-            await ref.read(provider.notifier).overflow();
-          } else {
+          if (!renderBox.hasSize ||
+              renderBox.size.height <= constraints.maxHeight) {
             await ref.read(provider.notifier).addElement();
+          } else {
+            await ref.read(provider.notifier).overflow();
           }
         });
 
@@ -259,7 +262,8 @@ class _MeasureContent extends HookConsumerWidget {
                   seriesId: seriesId,
                   key: key.value,
                   styles: data.page.styles,
-                  html: data.buffer.outerHtml,
+                  html: (data.buffer ?? DocumentFragment()).outerHtml,
+                  imageCache: imageCache.value,
                 ),
               ],
             ),
@@ -274,12 +278,14 @@ class _RenderContent extends ConsumerWidget {
   final int seriesId;
   final String html;
   final Map<String, Map<String, String>> styles;
+  final CachedImageFactory? imageCache;
 
   const _RenderContent({
     super.key,
     required this.seriesId,
     required this.html,
     required this.styles,
+    this.imageCache,
   });
 
   @override
@@ -297,7 +303,7 @@ class _RenderContent extends ConsumerWidget {
             html,
             buildAsync: false,
             enableCaching: true,
-            factoryBuilder: () => CachedImageFactory(context),
+            factoryBuilder: () => imageCache ?? CachedImageFactory(),
             customStylesBuilder: (element) {
               final s = Map<String, String>.from(
                 styles[element.localName] ?? {},

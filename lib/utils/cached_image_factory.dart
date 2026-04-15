@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class CachedImageFactory extends WidgetFactory {
-  final BuildContext context;
+  // final BuildContext context;
+  final Map<int, MemoryImage> _cache = {};
 
-  CachedImageFactory(this.context);
+  CachedImageFactory();
 
   @override
   Widget? buildImageWidget(
@@ -17,10 +18,13 @@ class CachedImageFactory extends WidgetFactory {
       return super.buildImageWidget(meta, src);
     }
 
-    final provider = MemoryImage(bytes);
-    precacheImage(provider, context);
+    final hash = Object.hash(src.url, src.url.length);
+
+    final provider = _cache[hash] ??= MemoryImage(bytes);
+    //precacheImage(provider, context);
 
     return Image(
+      key: ValueKey(hash),
       image: provider,
       gaplessPlayback: true,
       fit: .fill,

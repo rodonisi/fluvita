@@ -27,7 +27,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 
   const factory EpubReflowState({
     required PageContent page,
-    required DocumentFragment buffer,
+    @Default(null) DocumentFragment? buffer,
     @Default(EpubReflowStatus.measuring) EpubReflowStatus status,
     @Default(null) String? scrollId,
     @Default(null) int? resumeSubpage,
@@ -38,6 +38,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 @riverpod
 class EpubReflow extends _$EpubReflow {
   bool _processingRender = false;
+  bool _processingOverflow = false;
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
   // first build and cleared as soon as we reach a Display state, so that
@@ -94,27 +95,39 @@ class EpubReflow extends _$EpubReflow {
     return EpubReflowState(
       page: pageContent,
       scrollId: _resumeScrollId,
-      buffer: DocumentFragment(),
     );
   }
 
-  Future<void> addElement() async {
+  Future<void> addElement({bool force = false}) async {
     final current = await future;
-    if (_processingRender || current.status == .done) return;
+    if (!force && (_processingRender || current.status == .done)) return;
 
     try {
       _processingRender = true;
 
       final current = await future;
+      if (page == 0)
+        log.d(
+          'adding element to reflow, force: $force, buffer is null: ${current.buffer == null}, subpages: ${current.subpages.length}, processingRender: $_processingRender',
+        );
 
       final next = _cursor.next();
 
       if (next == null) {
-        log.d('no next element, all elements measured');
+        if (page == 0)
+          log.d(
+            'no next element, all elements measured, buffer: ${current.buffer != null}, subpages: ${current.subpages.length}',
+          );
         final newSubpages = [
           ...current.subpages,
-          if (current.buffer.hasChildNodes()) current.buffer,
+          ?current.buffer,
         ];
+
+        if (newSubpages.isEmpty) {
+          log.d('no content to render, add empty page');
+          newSubpages.add(DocumentFragment());
+        }
+
         state = AsyncData(
           current.copyWith(
             subpages: newSubpages,
@@ -123,6 +136,11 @@ class EpubReflow extends _$EpubReflow {
         );
         return;
       }
+
+      if (page == 0)
+        log.d(
+          'added element to buffer ${next.toString()}, subpages: ${current.subpages.length}',
+        );
 
       state = AsyncData(
         current.copyWith(
@@ -135,69 +153,53 @@ class EpubReflow extends _$EpubReflow {
   }
 
   Future<void> overflow() async {
-    final current = await future;
+    _processingRender = true;
+    try {
+      if (page == 0)
+        log.d('checking for overflow, processingRender: $_processingRender');
+      _processingRender = true;
+      final current = await future;
 
-    if (current.status == .done) return;
+      if (current.status == .done) return;
 
-    log.d('overflow detected');
+      if (page == 0) log.d('overflow detected');
 
-    if (_cursor.splitChild()) {
-      log.d('splitting child node for overflow');
-      await addElement();
-      return;
-    }
-
-    if (!_cursor.canSplit()) {
-      final newSubpages = [
-        ...current.subpages,
-        if (current.buffer.hasChildNodes()) current.buffer,
-      ];
-      state = AsyncData(
-        current.copyWith(
-          subpages: newSubpages,
-          status: .done,
-        ),
-      );
-      return;
-    }
-
-    final newSubpageNode = _cursor.split();
-    if (!newSubpageNode.hasChildNodes()) {
-      log.d('split resulted in an empty page, re-measuring');
-
-      state = AsyncData(
-        current.copyWith(
-          buffer: DocumentFragment(),
-        ),
-      );
-      return;
-    }
-
-    final fragment = DocumentFragment()..append(newSubpageNode);
-    final newSubpages = [...current.subpages, fragment];
-    var newState = current.copyWith(
-      subpages: newSubpages,
-      buffer: DocumentFragment(),
-    );
-
-    if (current.scrollId != null) {
-      final resumePoint = fragment.querySelector(
-        '[${HtmlConstants.scrollIdAttribute}="${current.scrollId}"]',
-      );
-      if (resumePoint != null && resumePoint.hasChildNodes()) {
-        log.d(
-          'found resume point with scrollId: ${current.scrollId}',
-        );
-
-        resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
-        newState = newState.copyWith(
-          scrollId: null,
-          resumeSubpage: newSubpages.length - 1,
-        );
+      if (_cursor.splitChild()) {
+        log.d('splitting child node for overflow');
+        await addElement(force: true);
+        return;
       }
-    }
 
-    state = AsyncData(newState);
+      final newSubpageNode = _cursor.commitSplit();
+
+      final fragment = DocumentFragment()..append(newSubpageNode);
+      final newSubpages = [...current.subpages, fragment];
+      var newState = current.copyWith(
+        subpages: newSubpages,
+        buffer: null,
+      );
+
+      if (current.scrollId != null) {
+        final resumePoint = fragment.querySelector(
+          '[${HtmlConstants.scrollIdAttribute}="${current.scrollId}"]',
+        );
+        if (resumePoint != null && resumePoint.hasChildNodes()) {
+          log.d(
+            'found resume point with scrollId: ${current.scrollId}',
+          );
+
+          resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
+          newState = newState.copyWith(
+            scrollId: null,
+            resumeSubpage: newSubpages.length - 1,
+          );
+        }
+      }
+
+      state = AsyncData(newState);
+    } finally {
+      _processingRender = false;
+    }
   }
 }
 
