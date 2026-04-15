@@ -104,8 +104,6 @@ class EpubReflow extends _$EpubReflow {
     try {
       _processingRender = true;
 
-      final current = await future;
-
       final next = _cursor.next();
 
       if (next == null) {

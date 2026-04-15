@@ -55,9 +55,6 @@ class NodeCursor {
 
     if (!iterator.moveNext()) {
       _exhausted = true;
-      log.d(
-        'iterator exhausted, hasNext=false, current root has ${root.children.length}',
-      );
       return null;
     }
 
