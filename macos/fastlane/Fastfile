@@ -67,7 +67,8 @@ platform :mac do
     load_asc_api_key
     upload_to_testflight(
       api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
-      skip_waiting_for_build_processing: true
+      skip_waiting_for_build_processing: false,
+      changelog: 'Updates'
     )
   end
 end
