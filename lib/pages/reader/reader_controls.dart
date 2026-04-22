@@ -6,6 +6,7 @@ import 'package:kover/pages/reader/page_slider.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;
@@ -50,13 +51,44 @@ class ReaderControls extends HookConsumerWidget {
                         .jumpToPage(page),
                   ),
                 ),
-                if (format == .epub) EpubReaderControls(seriesId: seriesId),
-                if (format == .archive) ImageReaderControls(seriesId: seriesId),
+                if (format == .epub)
+                  ReaderSettingsButton(
+                    child: EpubReaderSettingsBottomSheet(seriesId: seriesId),
+                  ),
+                if (format == .archive)
+                  ReaderSettingsButton(
+                    child: ImageReaderSettingsBottomSheet(seriesId: seriesId),
+                  ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class ReaderSettingsButton extends StatelessWidget {
+  final Widget child;
+  const ReaderSettingsButton({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(LucideIcons.slidersHorizontal),
+      tooltip: 'Reader Settings',
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          isScrollControlled: true,
+          useSafeArea: true,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          builder: (context) => child,
+        );
+      },
     );
   }
 }

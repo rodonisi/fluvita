@@ -9,31 +9,9 @@ import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class EpubReaderControls extends ConsumerWidget {
+class EpubReaderSettingsBottomSheet extends ConsumerWidget {
   final int seriesId;
-  const EpubReaderControls({super.key, required this.seriesId});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      icon: const Icon(LucideIcons.slidersHorizontal),
-      tooltip: 'Reader Settings',
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          showDragHandle: true,
-          isScrollControlled: true,
-          builder: (context) => _ReaderSettingsBottomSheet(
-            seriesId: seriesId,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ReaderSettingsBottomSheet extends ConsumerWidget {
-  final int seriesId;
-  const _ReaderSettingsBottomSheet({required this.seriesId});
+  const EpubReaderSettingsBottomSheet({super.key, required this.seriesId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

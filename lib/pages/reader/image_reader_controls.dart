@@ -8,32 +8,10 @@ import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class ImageReaderControls extends ConsumerWidget {
-  final int seriesId;
-  const ImageReaderControls({super.key, required this.seriesId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      icon: const Icon(LucideIcons.slidersHorizontal),
-      tooltip: 'Reader Settings',
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          showDragHandle: true,
-          isScrollControlled: true,
-          builder: (context) =>
-              _ImageReaderSettingsBottomSheet(seriesId: seriesId),
-        );
-      },
-    );
-  }
-}
-
-class _ImageReaderSettingsBottomSheet extends ConsumerWidget {
+class ImageReaderSettingsBottomSheet extends ConsumerWidget {
   final int seriesId;
 
-  const _ImageReaderSettingsBottomSheet({required this.seriesId});
+  const ImageReaderSettingsBottomSheet({super.key, required this.seriesId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
