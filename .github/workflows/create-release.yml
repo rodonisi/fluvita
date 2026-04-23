@@ -152,6 +152,10 @@ jobs:
     name: Promote Google Play Alpha
     needs: get-release-body
     runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
