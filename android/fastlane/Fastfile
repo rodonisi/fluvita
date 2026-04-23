@@ -27,7 +27,39 @@ platform :android do
 
     upload_to_play_store(
       aab: '../build/app/outputs/bundle/release/app-release.aab',
+      track: 'internal'
+    )
+  end
+
+  desc 'Promote latest build to alpha track'
+  lane :promote_alpha do
+    changelog = ENV['CHANGELOG'] || 'Updates'
+
+    setup_ci
+
+    codes = google_play_track_version_codes(
+      track: 'internal'
+    )
+
+    version_code = codes.max
+
+    changelog_dir = 'metadata/android/en-US/changelogs'
+
+    FileUtils.mkdir_p(changelog_dir)
+
+    File.write("#{changelog_dir}/default.txt", changelog)
+    File.write("#{changelog_dir}/#{version_code}.txt", changelog)
+
+    upload_to_play_store(
       track: 'internal',
+      version_code: version_code,
+      track_promote_to: 'alpha',
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
     )
   end
 end
