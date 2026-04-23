@@ -32,6 +32,26 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .watchSingle(distinct: true);
   }
 
+  /// Search series by [query]. Optionally filter by [libraryId]
+  Future<List<SeriesData>> searchSeries(
+    String query, {
+    int? libraryId,
+  }) async {
+    final q = managers.series.filter(
+      (s) =>
+          s.name.contains(query) |
+          s.originalName.contains(query) |
+          s.localizedName.contains(query) |
+          s.sortName.contains(query),
+    );
+
+    if (libraryId != null) {
+      q.filter((s) => s.libraryId.id(libraryId));
+    }
+
+    return await q.get();
+  }
+
   Stream<SeriesData> watchSeriesForChapter(int chapterId) {
     return managers.chapters
         .withReferences()

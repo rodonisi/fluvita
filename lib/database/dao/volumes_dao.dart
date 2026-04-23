@@ -26,6 +26,30 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
         });
   }
 
+  /// Search volumes by [query]. Optionally filter by [seriesId]
+  Future<List<VolumeWithRelations>> searchVolumes(
+    String query, {
+    int? seriesId,
+  }) async {
+    final q = managers.volumes
+        .withReferences(
+          (prefetch) => prefetch(chaptersRefs: true),
+        )
+        .filter((f) => f.name.contains(query));
+
+    if (seriesId != null) {
+      q.filter((f) => f.seriesId.id(seriesId));
+    }
+
+    return await q.map((result) {
+      final (vol, refs) = result;
+      return VolumeWithRelations(
+        volume: vol,
+        chapters: refs.chaptersRefs.prefetchedData ?? [],
+      );
+    }).get();
+  }
+
   /// Watch pages read for volume [volumeId]
   Stream<int?> watchPagesRead({required int volumeId}) {
     final pagesReadSum = readingProgress.pagesRead.sum();
