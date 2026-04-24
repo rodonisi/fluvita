@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+class FilterInputField extends HookWidget {
+  const FilterInputField({
+    super.key,
+    required this.controller,
+  });
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    useListenable(controller);
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: 'Filter',
+        prefixIcon: const Icon(LucideIcons.search),
+        suffixIcon: controller.text.isNotEmpty
+            ? IconButton(
+                onPressed: () {
+                  controller.clear();
+                },
+                icon: const Icon(LucideIcons.x),
+              )
+            : null,
+      ),
+    );
+  }
+}

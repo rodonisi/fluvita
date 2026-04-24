@@ -41,9 +41,7 @@ class CredentialsSettings extends HookConsumerWidget {
                   enabled: loginStatus != .loading,
                   controller: urlController,
                   decoration: const InputDecoration(
-                    isDense: true,
                     labelText: 'Base URL',
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 TextField(
@@ -51,9 +49,7 @@ class CredentialsSettings extends HookConsumerWidget {
                   enabled: loginStatus != .loading,
                   controller: apiKeyController,
                   decoration: InputDecoration(
-                    isDense: true,
                     labelText: 'API Key',
-                    border: const OutlineInputBorder(),
                     suffixIcon: Padding(
                       padding: const EdgeInsetsGeometry.symmetric(
                         horizontal: LayoutConstants.smallPadding,
