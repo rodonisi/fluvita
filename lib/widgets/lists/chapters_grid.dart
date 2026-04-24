@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kover/models/chapter_model.dart';
-import 'package:kover/widgets/adaptive_sliver_grid.dart';
-import 'package:kover/widgets/chapter_card.dart';
+import 'package:kover/widgets/cards/chapter_card.dart';
+import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
 
 class ChaptersGrid extends StatelessWidget {
   final int seriesId;

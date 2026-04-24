@@ -7,9 +7,9 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/widgets/actions_menu.dart';
 import 'package:kover/widgets/async_value.dart';
-import 'package:kover/widgets/cover_card.dart';
-import 'package:kover/widgets/cover_image.dart';
-import 'package:kover/widgets/download_status_icon.dart';
+import 'package:kover/widgets/cards/cover_card.dart';
+import 'package:kover/widgets/cards/cover_image.dart';
+import 'package:kover/widgets/cards/download_status_icon.dart';
 
 class VolumeCard extends HookConsumerWidget {
   const VolumeCard({

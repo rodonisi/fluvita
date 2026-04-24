@@ -6,8 +6,8 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/details/summary.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
-import 'package:kover/widgets/summary.dart';
 
 class SeriesDetailPage extends HookConsumerWidget {
   final int seriesId;

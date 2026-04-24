@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/chapters_grid.dart';
+import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 

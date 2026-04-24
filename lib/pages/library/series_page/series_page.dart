@@ -4,7 +4,7 @@ import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
-import 'package:kover/widgets/series_sliver_grid.dart';
+import 'package:kover/widgets/lists/series_sliver_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 
 class AllSeriesPage extends StatelessWidget {

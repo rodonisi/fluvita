@@ -9,9 +9,9 @@ import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_menu.dart';
 import 'package:kover/widgets/async_value.dart';
-import 'package:kover/widgets/cover_card.dart';
-import 'package:kover/widgets/cover_image.dart';
-import 'package:kover/widgets/download_status_icon.dart';
+import 'package:kover/widgets/cards/cover_card.dart';
+import 'package:kover/widgets/cards/cover_image.dart';
+import 'package:kover/widgets/cards/download_status_icon.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SeriesCard extends HookConsumerWidget {

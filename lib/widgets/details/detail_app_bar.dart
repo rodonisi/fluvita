@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/series_detail_page/series_info_background.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/adaptive_sliver_app_bar.dart';
+import 'package:kover/widgets/lists/adaptive_sliver_app_bar.dart';
 
 class DetailAppBar extends HookConsumerWidget {
   final String title;
