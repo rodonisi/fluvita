@@ -8,6 +8,7 @@ import 'package:kover/mapping/dto/series_dto_mappings.dart';
 import 'package:kover/mapping/dto/series_metadata_dto_mappings.dart';
 import 'package:kover/mapping/dto/volume_dto_mappings.dart';
 import 'package:kover/utils/extensions/date_time.dart';
+import 'package:kover/utils/logging.dart';
 
 class SeriesSyncOperations {
   final Openapi _client;
@@ -89,14 +90,15 @@ class SeriesSyncOperations {
     return res.body!.toSeriesCompanion();
   }
 
-  Future<SeriesCoversCompanion> getSeriesCover(int seriesId) async {
+  Future<SeriesCoversCompanion?> getSeriesCover(int seriesId) async {
     final res = await _client.apiImageSeriesCoverGet(
       seriesId: seriesId,
       apiKey: _apiKey,
     );
 
     if (!res.isSuccessful) {
-      throw Exception('Failed to load series cover: ${res.error}');
+      log.e('Failed to download series cover', error: res.error);
+      return null;
     }
 
     return SeriesCoversCompanion(

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/chapter_dto_mappings.dart';
+import 'package:kover/utils/logging.dart';
 
 class ChapterSyncOperations {
   final Openapi _client;
@@ -25,14 +26,15 @@ class ChapterSyncOperations {
   }
 
   /// Fetch chapter cover for [chapterId]
-  Future<ChapterCoversCompanion> getChapterCover(int chapterId) async {
+  Future<ChapterCoversCompanion?> getChapterCover(int chapterId) async {
     final res = await _client.apiImageChapterCoverGet(
       chapterId: chapterId,
       apiKey: _apiKey,
     );
 
     if (!res.isSuccessful) {
-      throw Exception('Failed to load chapter cover: ${res.error}');
+      log.e('Failed to download chapter cover', error: res.error);
+      return null;
     }
 
     return ChapterCoversCompanion(

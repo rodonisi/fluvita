@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/utils/logging.dart';
 
 class VolumeSyncOperations {
   final Openapi _client;
@@ -13,14 +14,15 @@ class VolumeSyncOperations {
        _apiKey = apiKey;
 
   /// Get cover for volume [volumeId]
-  Future<VolumeCoversCompanion> getVolumeCover(int volumeId) async {
+  Future<VolumeCoversCompanion?> getVolumeCover(int volumeId) async {
     final res = await _client.apiImageVolumeCoverGet(
       volumeId: volumeId,
       apiKey: _apiKey,
     );
 
     if (!res.isSuccessful) {
-      throw Exception('Failed to load volume cover: ${res.error}');
+      log.e('Failed to download volume cover', error: res.error);
+      return null;
     }
 
     return VolumeCoversCompanion(
