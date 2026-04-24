@@ -195,6 +195,9 @@ class SeriesRepository {
     final missingIds = await _db.seriesDao.getMissingCovers();
     for (final id in missingIds) {
       final seriesCover = await _client.getSeriesCover(id);
+
+      if (seriesCover == null) continue;
+
       await _db.seriesDao.upsertSeriesCover(seriesCover);
     }
   }
@@ -202,12 +205,18 @@ class SeriesRepository {
   /// Refresh all covers for series [seriesId], including volume and chapter covers.
   Future<void> refreshCovers({required int seriesId}) async {
     final seriesCover = await _client.getSeriesCover(seriesId);
+
+    if (seriesCover == null) return;
+
     await _db.seriesDao.upsertSeriesCover(seriesCover);
     final details = await _client.getSeriesDetail(seriesId);
     final volumeIds = details.volumes.map((v) => v.volume.id.value).toList();
 
     for (final volumeId in volumeIds) {
       final volumeCover = await _volumeClient.getVolumeCover(volumeId);
+
+      if (volumeCover == null) continue;
+
       await _db.volumesDao.upsertVolumeCover(volumeCover);
     }
 
@@ -218,6 +227,9 @@ class SeriesRepository {
 
     for (final chapterId in chapterIds) {
       final chapterCover = await _chapterClient.getChapterCover(chapterId);
+
+      if (chapterCover == null) continue;
+
       await _db.chaptersDao.upsertChapterCover(chapterCover);
     }
   }

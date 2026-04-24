@@ -58,6 +58,9 @@ class VolumesRepository {
     final missing = await _db.volumesDao.getMissingCovers();
     for (final id in missing) {
       final volumeCover = await _client.getVolumeCover(id);
+
+      if (volumeCover == null) continue;
+
       await _db.volumesDao.upsertVolumeCover(volumeCover);
     }
   }

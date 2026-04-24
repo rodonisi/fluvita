@@ -56,6 +56,9 @@ class ChaptersRepository {
     final missing = await _db.chaptersDao.getMissingCovers();
     for (final id in missing) {
       final chapterCover = await _client.getChapterCover(id);
+
+      if (chapterCover == null) continue;
+
       await _db.chaptersDao.upsertChapterCover(chapterCover);
     }
   }
