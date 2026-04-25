@@ -28,15 +28,22 @@ class VolumesPage extends HookConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
+          keyboardDismissBehavior: .onDrag,
           slivers: [
             SliverAppBar.large(
               title: const Text('Volumes'),
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: LayoutConstants.smallPadding,
+              ),
               actions: [
                 ContextMenuButton(
                   menu: _getMenu(hideRead, sortDirection),
-                  icon: const Icon(LucideIcons.listFilter),
+                  icon: Icon(
+                    sortDirection.value == .ascending
+                        ? LucideIcons.arrowDownNarrowWide
+                        : LucideIcons.arrowDownWideNarrow,
+                  ),
                 ),
-                const SizedBox.square(dimension: LayoutConstants.mediumPadding),
               ],
             ),
             SliverPadding(
