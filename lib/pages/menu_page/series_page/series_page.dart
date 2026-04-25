@@ -54,13 +54,21 @@ class SeriesPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final series = ref.watch(allSeriesProvider(libraryId: libraryId));
     final controller = useTextEditingController();
+
+    final allSeries = ref.watch(allSeriesProvider(libraryId: libraryId));
+    final query = ref.watch(
+      searchSeriesProvider(controller.text, libraryId: libraryId),
+    );
+
+    useListenable(controller);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(title: Text(title)),
+          SliverAppBar.large(
+            title: Text(title),
+          ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(
               horizontal: LayoutConstants.mediumPadding,
@@ -70,22 +78,12 @@ class SeriesPage extends HookConsumerWidget {
             ),
           ),
           AsyncSliver(
-            asyncValue: series,
+            asyncValue: allSeries,
             data: (data) {
-              return HookBuilder(
-                builder: (context) {
-                  final filteredData = useListenableSelector(controller, () {
-                    final text = controller.text;
-                    if (text.isEmpty) return data;
-
-                    return data
-                        .where(
-                          (series) => series.name.toLowerCase().contains(
-                            text.toLowerCase(),
-                          ),
-                        )
-                        .toList();
-                  });
+              return AsyncSliver(
+                asyncValue: query,
+                data: (search) {
+                  final filteredData = controller.text.isEmpty ? data : search;
                   return SliverPadding(
                     padding: LayoutConstants.smallEdgeInsets,
                     sliver: SeriesSliverGrid(
