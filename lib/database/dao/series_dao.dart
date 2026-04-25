@@ -58,19 +58,19 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       if (orderByName)
         (table) => OrderingTerm(
           expression: table.sortName,
-          mode: ascending ? OrderingMode.asc : OrderingMode.desc,
+          mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyAdded)
         (table) => OrderingTerm(
           expression: table.created,
-          mode: ascending ? OrderingMode.asc : OrderingMode.desc,
+          mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyUpdated)
         (table) => OrderingTerm(
           expression: table.lastChapterAdded,
-          mode: ascending ? OrderingMode.asc : OrderingMode.desc,
+          mode: ascending ? .asc : .desc,
         ),
     ]);
 
