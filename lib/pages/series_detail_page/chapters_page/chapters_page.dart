@@ -48,7 +48,11 @@ class ChaptersPage extends HookConsumerWidget {
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
-        icon: const Icon(LucideIcons.listFilter),
+        icon: Icon(
+          sortDirection.value == .ascending
+              ? LucideIcons.arrowDownNarrowWide
+              : LucideIcons.arrowDownWideNarrow,
+        ),
         menu: _getMenu(hideRead: hideRead, sortDirection: sortDirection),
       ),
     );
@@ -79,7 +83,11 @@ class StorylinePage extends HookConsumerWidget {
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
-        icon: const Icon(LucideIcons.listFilter),
+        icon: Icon(
+          sortDirection.value == .ascending
+              ? LucideIcons.arrowDownNarrowWide
+              : LucideIcons.arrowDownWideNarrow,
+        ),
         menu: _getMenu(sortDirection: sortDirection),
       ),
     );
@@ -110,7 +118,11 @@ class SpecialsPage extends HookConsumerWidget {
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
-        icon: const Icon(LucideIcons.listFilter),
+        icon: Icon(
+          sortDirection.value == .ascending
+              ? LucideIcons.arrowDownNarrowWide
+              : LucideIcons.arrowDownWideNarrow,
+        ),
         menu: _getMenu(sortDirection: sortDirection),
       ),
     );
@@ -148,12 +160,15 @@ class _ChaptersPage extends HookConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
+          keyboardDismissBehavior: .onDrag,
           slivers: [
             SliverAppBar.large(
               title: Text(title),
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: LayoutConstants.smallPadding,
+              ),
               actions: [
                 ?action,
-                const SizedBox.square(dimension: LayoutConstants.mediumPadding),
               ],
             ),
             SliverPadding(

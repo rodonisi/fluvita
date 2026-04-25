@@ -87,9 +87,13 @@ class SeriesPage extends HookConsumerWidget {
 
     return Scaffold(
       body: CustomScrollView(
+        keyboardDismissBehavior: .onDrag,
         slivers: [
           SliverAppBar.large(
             title: Text(title),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+            ),
             actions: [
               ContextMenuButton(
                 icon: Icon(
@@ -98,9 +102,6 @@ class SeriesPage extends HookConsumerWidget {
                       : LucideIcons.arrowDownWideNarrow,
                 ),
                 menu: _menu(sortOption, sortDirection),
-              ),
-              const SizedBox.square(
-                dimension: LayoutConstants.smallPadding,
               ),
             ],
           ),
