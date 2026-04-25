@@ -7,6 +7,7 @@ import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
+import 'package:kover/widgets/lists/cover_list_entry.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -102,65 +103,25 @@ class DownloadQueueItem extends ConsumerWidget {
     final progress = ref.watch(
       chapterDownloadProgressProvider(chapterId: chapterId),
     );
-    return Card.filled(
-      clipBehavior: .hardEdge,
-      child: Padding(
-        padding: LayoutConstants.smallEdgeInsets,
-        child: Row(
-          spacing: LayoutConstants.mediumPadding,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(LayoutConstants.smallPadding),
-              child: SizedBox(
-                height: LayoutConstants.largestIcon,
-                child: ChapterCoverImage(chapterId: chapterId),
-              ),
-            ),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: .start,
-                spacing: LayoutConstants.smallPadding,
-                children: [
-                  Async(
-                    asyncValue: series,
-                    data: (series) => Text(
-                      series.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      overflow: .ellipsis,
-                    ),
-                  ),
-                  Async(
-                    asyncValue: chapter,
-                    data: (chapter) => Text(
-                      chapter.title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                      overflow: .ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox.square(
-              dimension: LayoutConstants.mediumIcon,
-              child: Async(
-                asyncValue: progress,
-                data: (progress) => CircularProgressIndicator(
-                  value: progress,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () async {
-                await ref
-                    .read(downloadManagerProvider.notifier)
-                    .cancel(chapterId);
-              },
-              icon: const Icon(LucideIcons.trash2),
-            ),
-          ],
-        ),
-      ),
+
+    return Async(
+      asyncValue: chapter,
+      data: (data) {
+        return CoverListEntry(
+          cover: ChapterCoverImage(chapterId: chapterId),
+          title: data.title,
+          subtitle: series.value?.name,
+          progress: progress.value,
+          trailing: IconButton(
+            onPressed: () async {
+              await ref
+                  .read(downloadManagerProvider.notifier)
+                  .cancel(chapterId);
+            },
+            icon: const Icon(LucideIcons.trash2),
+          ),
+        );
+      },
     );
   }
 }

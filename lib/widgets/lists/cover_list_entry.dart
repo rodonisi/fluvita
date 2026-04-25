@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CoverListEntry extends ConsumerWidget {
   final String title;
@@ -70,7 +69,7 @@ class CoverListEntry extends ConsumerWidget {
                   value: progress,
                 ),
               ),
-              const Icon(LucideIcons.chevronRight),
+              ?trailing,
             ],
           ),
         ),
