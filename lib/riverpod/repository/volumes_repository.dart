@@ -35,6 +35,21 @@ class VolumesRepository {
         .map(VolumeModel.fromDatabaseModel);
   }
 
+  /// Search volumes by [query]. Optionally filter by [seriesId]
+  Future<List<VolumeModel>> searchVolumes(
+    String query, {
+    int? seriesId,
+  }) async {
+    if (query.isEmpty) return [];
+
+    final results = await _db.volumesDao.searchVolumes(
+      query,
+      seriesId: seriesId,
+    );
+
+    return results.map(VolumeModel.fromDatabaseModel).toList();
+  }
+
   /// Watch total number of pages read for volume [volumeId]
   Stream<int> watchPagesRead({required int volumeId}) {
     return _db.volumesDao.watchPagesRead(volumeId: volumeId).map((n) => n ?? 0);

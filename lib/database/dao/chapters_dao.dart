@@ -20,6 +20,35 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
         .whereNotNull();
   }
 
+  /// Search chapters by [query]. Optionally filter by [volumeId] and/or [seriesId]
+  Future<List<Chapter>> searchChapters(
+    String query, {
+    int? volumeId,
+    int? seriesId,
+  }) {
+    final q = managers.chapters.filter(
+      (f) => f.titleName.contains(query) | f.titleName.contains(query),
+    );
+
+    if (volumeId != null) {
+      q.filter((f) => f.volumeId.id(volumeId));
+    }
+
+    if (seriesId != null) {
+      q.filter((f) => f.seriesId.id(seriesId));
+    }
+
+    q.orderBy(
+      (o) =>
+          o.sortOrder.asc() &
+          o.seriesId.id.asc() &
+          o.titleName.asc() &
+          o.title.asc(),
+    );
+
+    return q.get();
+  }
+
   /// Watch pages read for chapter [chapterId]
   Stream<int?> watchPagesRead({required int chapterId}) {
     final query = selectOnly(readingProgress)

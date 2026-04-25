@@ -13,6 +13,19 @@ Stream<VolumeModel> volume(Ref ref, {required int volumeId}) async* {
 }
 
 @riverpod
+Future<List<VolumeModel>> searchVolumes(
+  Ref ref,
+  String query, {
+  int? seriesId,
+}) {
+  final repo = ref.watch(volumesRepositoryProvider);
+  return repo.searchVolumes(
+    query,
+    seriesId: seriesId,
+  );
+}
+
+@riverpod
 Stream<double> volumeProgress(Ref ref, {required int volumeId}) async* {
   final repo = ref.watch(volumesRepositoryProvider);
   final volume = repo.watchVolume(volumeId);

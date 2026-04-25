@@ -13,6 +13,19 @@ Stream<SeriesModel> series(Ref ref, {required int seriesId}) async* {
 }
 
 @riverpod
+Future<List<SeriesModel>> searchSeries(
+  Ref ref,
+  String query, {
+  int? libraryId,
+}) {
+  final repo = ref.watch(seriesRepositoryProvider);
+  return repo.searchSeries(
+    query,
+    libraryId: libraryId,
+  );
+}
+
+@riverpod
 Stream<SeriesModel> seriesForChapter(Ref ref, {required int chapterId}) async* {
   final repo = ref.watch(seriesRepositoryProvider);
   yield* repo.watchSeriesForChapter(chapterId).distinct();

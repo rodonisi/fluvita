@@ -60,6 +60,23 @@ class SeriesRepository {
         .map(SeriesModel.fromDatabaseModel);
   }
 
+  /// Search series by [query]. Optionally filter by [libraryId]
+  Future<List<SeriesModel>> searchSeries(
+    String query, {
+    int? libraryId,
+  }) async {
+    if (query.isEmpty) {
+      return [];
+    }
+
+    final result = await _db.seriesDao.searchSeries(
+      query,
+      libraryId: libraryId,
+    );
+
+    return result.map(SeriesModel.fromDatabaseModel).toList();
+  }
+
   Future<List<int>> allChapterIds({required int seriesId}) async {
     final chapters = await _db.seriesDao.allChapters(seriesId: seriesId).get();
 

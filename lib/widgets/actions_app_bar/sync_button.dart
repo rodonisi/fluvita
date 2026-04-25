@@ -6,69 +6,8 @@ import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-String _phaseLabel(SyncPhase phase) {
-  return phase.when(
-    allSeries: () => 'Syncing all series',
-    seriesDetails: () => 'Syncing series details',
-    metadata: () => 'Syncing metadata',
-    recentlyAdded: () => 'Syncing recently added',
-    recentlyUpdated: () => 'Syncing recently updated',
-    libraries: () => 'Syncing libraries',
-    progress: () => 'Syncing progress',
-    covers: () => 'Syncing covers',
-    refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
-  );
-}
-
-class ActionsAppBar extends StatelessWidget {
-  const ActionsAppBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SliverAppBar(
-      pinned: true,
-      backgroundColor: Colors.transparent,
-      scrolledUnderElevation: 0,
-      actions: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: LayoutConstants.smallPadding,
-          ),
-          child: _ActionsBar(),
-        ),
-      ],
-    );
-  }
-}
-
-class _ActionsBar extends ConsumerWidget {
-  const _ActionsBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card.filled(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.all(
-          Radius.circular(LayoutConstants.mediumPadding),
-        ),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.all(LayoutConstants.smallerPadding),
-        child: Row(
-          spacing: LayoutConstants.smallPadding,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SyncButton(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SyncButton extends HookConsumerWidget {
-  const _SyncButton();
+class SyncButton extends HookConsumerWidget {
+  const SyncButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,7 +47,7 @@ class _SyncButton extends HookConsumerWidget {
         offset: const Offset(0, LayoutConstants.smallerPadding),
         child: const Align(
           alignment: Alignment.topRight,
-          child: _SyncMenuOverlay(),
+          child: SyncMenuOverlay(),
         ),
       ),
       child: CompositedTransformTarget(
@@ -141,8 +80,8 @@ class _SyncButton extends HookConsumerWidget {
   }
 }
 
-class _SyncMenuOverlay extends ConsumerWidget {
-  const _SyncMenuOverlay();
+class SyncMenuOverlay extends ConsumerWidget {
+  const SyncMenuOverlay({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -191,4 +130,18 @@ class _SyncMenuOverlay extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _phaseLabel(SyncPhase phase) {
+  return phase.when(
+    allSeries: () => 'Syncing all series',
+    seriesDetails: () => 'Syncing series details',
+    metadata: () => 'Syncing metadata',
+    recentlyAdded: () => 'Syncing recently added',
+    recentlyUpdated: () => 'Syncing recently updated',
+    libraries: () => 'Syncing libraries',
+    progress: () => 'Syncing progress',
+    covers: () => 'Syncing covers',
+    refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
+  );
 }

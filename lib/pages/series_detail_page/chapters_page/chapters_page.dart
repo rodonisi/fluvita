@@ -4,7 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/chapters_grid.dart';
+import 'package:kover/widgets/details/filter_input_field.dart';
+import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -107,6 +108,18 @@ class _ChaptersPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = useTextEditingController();
+    final filteredChapters = useListenableSelector(controller, () {
+      final filter = controller.text;
+      if (filter.isEmpty) return chapters;
+      return chapters
+          .where(
+            (chapter) =>
+                chapter.title.toLowerCase().contains(filter.toLowerCase()),
+          )
+          .toList();
+    });
+
     return Scaffold(
       extendBody: true,
       body: SafeArea(
@@ -118,10 +131,18 @@ class _ChaptersPage extends HookConsumerWidget {
               actions: [?hideReadToggle],
             ),
             SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: LayoutConstants.mediumPadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: FilterInputField(controller: controller),
+              ),
+            ),
+            SliverPadding(
               padding: LayoutConstants.smallEdgeInsets,
               sliver: ChaptersGrid(
                 seriesId: seriesId,
-                chapters: chapters,
+                chapters: filteredChapters,
               ),
             ),
             const SliverBottomPadding(),

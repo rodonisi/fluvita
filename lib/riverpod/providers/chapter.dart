@@ -16,6 +16,21 @@ Stream<ChapterModel> chapter(
 }
 
 @riverpod
+Future<List<ChapterModel>> searchChapters(
+  Ref ref,
+  String query, {
+  int? volumeId,
+  int? seriesId,
+}) {
+  final repo = ref.watch(chaptersRepositoryProvider);
+  return repo.searchChapters(
+    query,
+    volumeId: volumeId,
+    seriesId: seriesId,
+  );
+}
+
+@riverpod
 Stream<double> chapterProgress(Ref ref, {required int chapterId}) async* {
   final repo = ref.watch(chaptersRepositoryProvider);
   final chapter = repo.watchChapter(chapterId: chapterId);

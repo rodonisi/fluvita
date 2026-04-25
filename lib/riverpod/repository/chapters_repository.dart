@@ -37,6 +37,23 @@ class ChaptersRepository {
         .map(ChapterModel.fromDatabaseModel);
   }
 
+  /// Search chapters by [query]. Optionally filter by [volumeId] and/or [seriesId]
+  Future<List<ChapterModel>> searchChapters(
+    String query, {
+    int? volumeId,
+    int? seriesId,
+  }) async {
+    if (query.isEmpty) return [];
+
+    final results = await _db.chaptersDao.searchChapters(
+      query,
+      volumeId: volumeId,
+      seriesId: seriesId,
+    );
+
+    return results.map(ChapterModel.fromDatabaseModel).toList();
+  }
+
   /// Watch the number of pages read for [chapterId]
   Stream<int> watchPagesRead({required int chapterId}) {
     return _db.chaptersDao

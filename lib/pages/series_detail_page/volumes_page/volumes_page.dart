@@ -3,9 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/adaptive_sliver_grid.dart';
+import 'package:kover/widgets/cards/volume_card.dart';
+import 'package:kover/widgets/details/filter_input_field.dart';
+import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
-import 'package:kover/widgets/volume_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class VolumesPage extends HookConsumerWidget {
@@ -15,6 +16,8 @@ class VolumesPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hideRead = useState(false);
+    final controller = useTextEditingController();
+    useListenable(controller);
 
     return Scaffold(
       extendBody: true,
@@ -35,8 +38,20 @@ class VolumesPage extends HookConsumerWidget {
               ],
             ),
             SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: LayoutConstants.mediumPadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: FilterInputField(controller: controller),
+              ),
+            ),
+            SliverPadding(
               padding: LayoutConstants.smallEdgeInsets,
-              sliver: _VolumeGrid(seriesId: seriesId, hideRead: hideRead.value),
+              sliver: _VolumeGrid(
+                seriesId: seriesId,
+                hideRead: hideRead.value,
+                filter: controller.text,
+              ),
             ),
             const SliverBottomPadding(),
           ],
@@ -46,11 +61,16 @@ class VolumesPage extends HookConsumerWidget {
   }
 }
 
-class _VolumeGrid extends ConsumerWidget {
+class _VolumeGrid extends HookConsumerWidget {
   final int seriesId;
   final bool hideRead;
+  final String? filter;
 
-  const _VolumeGrid({required this.seriesId, this.hideRead = false});
+  const _VolumeGrid({
+    required this.seriesId,
+    this.hideRead = false,
+    this.filter,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,10 +84,18 @@ class _VolumeGrid extends ConsumerWidget {
       ),
     );
 
+    final filteredVolumes = (filter == null || filter!.isEmpty)
+        ? volumes
+        : volumes
+              .where(
+                (v) => v.name.toLowerCase().contains(filter!.toLowerCase()),
+              )
+              .toList();
+
     return AdaptiveSliverGrid(
-      itemCount: volumes.length,
+      itemCount: filteredVolumes.length,
       builder: (context, index) {
-        final volume = volumes[index];
+        final volume = filteredVolumes[index];
         return VolumeCard(volumeId: volume.id);
       },
     );

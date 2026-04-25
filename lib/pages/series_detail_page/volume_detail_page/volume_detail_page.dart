@@ -3,9 +3,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/chapters_grid.dart';
+import 'package:kover/widgets/details/summary.dart';
+import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
-import 'package:kover/widgets/summary.dart';
 
 class VolumeDetailPage extends ConsumerWidget {
   final int volumeId;
