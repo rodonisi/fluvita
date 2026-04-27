@@ -51,12 +51,6 @@ sealed class ChapterModel with _$ChapterModel {
       return table.titleName ?? 'Single Volume';
     }
 
-    if (table.titleName != null &&
-        table.titleName!.trim().isNotEmpty &&
-        table.titleName!.startsWith(table.title ?? '')) {
-      return table.titleName!;
-    }
-
     final titles = {
       table.title,
       table.titleName,
@@ -68,6 +62,10 @@ sealed class ChapterModel with _$ChapterModel {
         .image || .archive => 'Chapter ${table.minNumber.toInt()}',
         _ => 'Untitled',
       };
+    }
+
+    if (titles.length > 1 && table.titleName!.startsWith(table.title!)) {
+      return table.titleName!;
     }
 
     return titles.join(' - ');
