@@ -51,10 +51,16 @@ sealed class ChapterModel with _$ChapterModel {
       return table.titleName ?? 'Single Volume';
     }
 
-    final titles = [
+    if (table.titleName != null &&
+        table.titleName!.trim().isNotEmpty &&
+        table.titleName!.startsWith(table.title ?? '')) {
+      return table.titleName!;
+    }
+
+    final titles = {
       table.title,
       table.titleName,
-    ].whereType<String>().where((t) => t.trim().isNotEmpty);
+    }.whereType<String>().where((t) => t.trim().isNotEmpty);
 
     if (titles.isEmpty) {
       return switch (table.format) {
