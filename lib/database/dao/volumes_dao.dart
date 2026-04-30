@@ -64,11 +64,9 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     return query.watchSingleOrNull().map((row) => row?.read(pagesReadSum));
   }
 
-  /// Watch cover for volume [volumeId]. If no cover is present, returns null.
-  Stream<VolumeCover?> watchVolumeCover({required int volumeId}) {
-    return (select(
-      volumeCovers,
-    )..where((row) => row.volumeId.equals(volumeId))).watchSingleOrNull();
+  /// Get [SingleOrNullSelectable] cover for volume [volumeId]. If no cover is present, returns null.
+  SingleOrNullSelectable<VolumeCover?> volumeCover({required int volumeId}) {
+    return managers.volumeCovers.filter((f) => f.volumeId.id(volumeId));
   }
 
   /// Get all volume ids missing a cover
