@@ -18,3 +18,5 @@ targets:
           input_urls:
             - url: "https://raw.githubusercontent.com/Kareadita/Kavita/refs/tags/v0.9.0/openapi.json"
           output_folder: "lib/api"
+          exclude_paths:
+            - "api/Person/roles"
