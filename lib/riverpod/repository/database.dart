@@ -191,7 +191,6 @@ class ClearOperation extends _$ClearOperation {
 
     return ClearOperationState(
       status: syncing || downloading ? .busy : .idle,
-      type: .none,
     );
   }
 
@@ -214,7 +213,7 @@ class ClearOperation extends _$ClearOperation {
       }
       state = AsyncData(newState.copyWith(status: .reclaimingSpace));
       await ref.read(databaseProvider).defragment();
-      state = AsyncData(newState.copyWith(status: .idle, type: .none));
+      state = const AsyncData(ClearOperationState());
     } catch (e) {
       state = AsyncData(newState.copyWith(status: .error));
     }
