@@ -23,7 +23,7 @@ class DataManagementSettings extends ConsumerWidget {
           asyncValue: settings,
           data: (data) => Column(
             mainAxisSize: .min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             spacing: LayoutConstants.largePadding,
             children: [
               Text(
@@ -31,10 +31,10 @@ class DataManagementSettings extends ConsumerWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               BooleanOption(
-                title: 'Automatically Download Covers',
+                title: 'Download All Covers',
                 description:
-                    'If disabled, covers will only be downloaded together with chapters.\n'
-                    'Covers will still be fetched from the server if not downloaded and a connection is available.',
+                    'If disabled, covers will only be downloaded together with chapters. '
+                    'Covers will still be fetched from the server on demand when not downloaded and a connection is available.',
                 icon: LucideIcons.imageDownDir,
                 value: data.downloadCovers,
                 onChanged: (value) async {
@@ -57,7 +57,49 @@ class DataManagementSettings extends ConsumerWidget {
                       .setConcurrentDownloads(value.round());
                 },
               ),
-              const DatabaseSize(),
+              Wrap(
+                spacing: LayoutConstants.mediumPadding,
+                runSpacing: LayoutConstants.mediumPadding,
+                alignment: .center,
+                children: [
+                  DatabaseClearOperationButton(
+                    asyncValue: ref.watch(clearDownloadsProvider),
+                    startText: 'Clear Downloads',
+                    onStart: () async {
+                      await ref
+                          .read(clearDownloadsProvider.notifier)
+                          .clearDownloads();
+                    },
+                    startIcon: const Icon(Icons.file_download_off),
+                  ),
+                  DatabaseClearOperationButton(
+                    asyncValue: ref.watch(clearCoversProvider),
+                    startText: 'Clear Covers',
+                    onStart: () async {
+                      await ref
+                          .read(clearCoversProvider.notifier)
+                          .clearCovers();
+                    },
+                    startIcon: const Icon(LucideIcons.imageOff),
+                  ),
+                  DatabaseClearOperationButton(
+                    asyncValue: ref.watch(clearDatabaseProvider),
+                    startText: 'Clear Database',
+                    onStart: () async {
+                      await ref
+                          .read(clearDatabaseProvider.notifier)
+                          .clearDatabase();
+                    },
+                    startIcon: const Icon(LucideIcons.trash),
+                  ),
+                ],
+              ),
+              const Row(
+                mainAxisAlignment: .start,
+                children: [
+                  DatabaseSize(),
+                ],
+              ),
             ],
           ),
         ),
@@ -66,64 +108,70 @@ class DataManagementSettings extends ConsumerWidget {
   }
 }
 
-class DefragmentButton extends ConsumerWidget {
-  const DefragmentButton({
+class DatabaseClearOperationButton extends ConsumerWidget {
+  final AsyncValue<ClearOperationStatus> asyncValue;
+  final String startText;
+  final Icon? startIcon;
+  final VoidCallback onStart;
+
+  const DatabaseClearOperationButton({
     super.key,
+    required this.asyncValue,
+    required this.startText,
+    required this.onStart,
+    this.startIcon,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final defragStatus = ref.watch(databaseDefragmentationProvider);
     return Async(
-      asyncValue: defragStatus,
+      asyncValue: asyncValue,
       data: (status) {
         return switch (status) {
           .idle => FilledButton.icon(
-            onPressed: () async {
-              await ref
-                  .read(databaseDefragmentationProvider.notifier)
-                  .defragment();
+            onPressed: () {
+              onStart();
             },
-            icon: const Icon(LucideIcons.database),
-            label: const Text('Defragment Database'),
+            icon: startIcon,
+            label: Text(startText),
           ),
-          .busy => FilledButton.icon(
-            onPressed: null,
-            icon: const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+          .busy => Tooltip(
+            message: 'Database busy...',
+            triggerMode: .tap,
+            child: FilledButton.icon(
+              onPressed: null,
+              icon: const SizedBox.square(
+                dimension: LayoutConstants.smallIcon,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              label: Text(startText),
             ),
-            label: const Text('Database Busy...'),
           ),
           .inProgress => FilledButton.icon(
             onPressed: null,
-            icon: const SizedBox(
-              width: 16,
-              height: 16,
+            icon: const SizedBox.square(
+              dimension: LayoutConstants.smallIcon,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            label: const Text('Defragmenting...'),
+            label: const Text('Executing...'),
+          ),
+          .reclaimingSpace => FilledButton.icon(
+            onPressed: null,
+            icon: const SizedBox.square(
+              dimension: LayoutConstants.smallIcon,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            label: const Text('Reclaiming Space...'),
           ),
           .error => FilledButton.icon(
             onPressed: () async {
-              await ref
-                  .read(databaseDefragmentationProvider.notifier)
-                  .defragment();
+              onStart();
             },
             icon: Icon(
               LucideIcons.circleX,
               color: Theme.of(context).colorScheme.error,
             ),
             label: const Text('Retry'),
-          ),
-          .completed => FilledButton.icon(
-            onPressed: null,
-            icon: Icon(
-              LucideIcons.circleCheck,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            label: const Text('Completed'),
           ),
         };
       },

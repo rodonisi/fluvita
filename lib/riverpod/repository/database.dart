@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:kover/database/app_database.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+part 'database.freezed.dart';
 part 'database.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -19,8 +23,9 @@ AppDatabase database(Ref ref) {
 
 @riverpod
 Future<int> databaseSize(Ref ref) async {
-  ref.watch(databaseDefragmentationProvider);
+  ref.watch(clearOperationProvider);
   ref.watch(syncManagerProvider);
+  ref.watch(downloadManagerProvider);
 
   final applicationSubbportDir = await getApplicationSupportDirectory();
   final dbFile = File(
@@ -34,32 +39,155 @@ Future<int> databaseSize(Ref ref) async {
   }
 }
 
-enum DefragmentationStatus {
-  idle,
-  busy,
-  inProgress,
-  completed,
-  error,
+@riverpod
+class ClearDatabase extends _$ClearDatabase {
+  @override
+  Future<ClearOperationStatus> build() async {
+    final state = await ref.watch(clearOperationProvider.future);
+
+    if (state.type == .clearDatabase) {
+      return state.status;
+    }
+
+    if (state.status != .idle) {
+      return .busy;
+    }
+
+    return .idle;
+  }
+
+  Future<void> clearDatabase() async {
+    await ref
+        .read(clearOperationProvider.notifier)
+        .performOperation(
+          type: .clearDatabase,
+          operation: () async {
+            await ref.read(databaseProvider).clearDb();
+          },
+        );
+  }
 }
 
 @riverpod
-class DatabaseDefragmentation extends _$DatabaseDefragmentation {
+class ClearDownloads extends _$ClearDownloads {
   @override
-  Future<DefragmentationStatus> build() async {
+  Future<ClearOperationStatus> build() async {
+    final state = await ref.watch(clearOperationProvider.future);
+
+    if (state.type == .clearDownloads) {
+      return state.status;
+    }
+
+    if (state.status != .idle) {
+      return .busy;
+    }
+
+    return .idle;
+  }
+
+  Future<void> clearDownloads() async {
+    await ref
+        .read(clearOperationProvider.notifier)
+        .performOperation(
+          type: .clearDownloads,
+          operation: () async {
+            await ref.read(databaseProvider).clearDownloads();
+          },
+        );
+  }
+}
+
+@riverpod
+class ClearCovers extends _$ClearCovers {
+  @override
+  Future<ClearOperationStatus> build() async {
+    final state = await ref.watch(clearOperationProvider.future);
+
+    if (state.type == .clearCovers) {
+      return state.status;
+    }
+
+    if (state.status != .idle) {
+      return .busy;
+    }
+
+    return .idle;
+  }
+
+  Future<void> clearCovers() async {
+    await ref
+        .read(clearOperationProvider.notifier)
+        .performOperation(
+          type: .clearCovers,
+          operation: () async {
+            await ref.read(databaseProvider).clearCovers();
+          },
+        );
+  }
+}
+
+enum ClearOperationStatus {
+  idle,
+  busy,
+  inProgress,
+  reclaimingSpace,
+  error,
+}
+
+enum ClearOperationType {
+  none,
+  clearDatabase,
+  clearDownloads,
+  clearCovers,
+}
+
+@freezed
+sealed class ClearOperationState with _$ClearOperationState {
+  const factory ClearOperationState({
+    @Default(ClearOperationStatus.idle) ClearOperationStatus status,
+    @Default(ClearOperationType.none) ClearOperationType type,
+  }) = _ClearOperationState;
+}
+
+@riverpod
+class ClearOperation extends _$ClearOperation {
+  @override
+  Future<ClearOperationState> build() async {
     final syncing = ref.watch(
       syncManagerProvider.select((sync) => sync is SyncingState),
     );
-    return syncing ? .busy : .idle;
+    final downloading = ref.watch(
+      downloadManagerProvider.select(
+        (down) => down.hasValue && down.value!.downloadQueue.isNotEmpty,
+      ),
+    );
+
+    return ClearOperationState(
+      status: syncing || downloading ? .busy : .idle,
+      type: .none,
+    );
   }
 
-  Future<void> defragment() async {
-    state = const AsyncData(.inProgress);
+  Future<void> performOperation({
+    required ClearOperationType type,
+    required Future<void> Function() operation,
+  }) async {
+    final current = await future;
+    if (current.status != .idle) return;
+
+    final newState = ClearOperationState(
+      status: .inProgress,
+      type: type,
+    );
+
+    state = AsyncData(newState);
     try {
-      final db = ref.read(databaseProvider);
-      await db.defragment();
-      state = const AsyncData(.completed);
+      await operation();
+      state = AsyncData(newState.copyWith(status: .reclaimingSpace));
+      await ref.read(databaseProvider).defragment();
+      state = AsyncData(newState.copyWith(status: .idle, type: .none));
     } catch (e) {
-      state = const AsyncData(.error);
+      state = AsyncData(newState.copyWith(status: .error));
     }
   }
 }
