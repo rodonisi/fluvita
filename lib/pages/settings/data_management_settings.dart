@@ -114,7 +114,7 @@ class DataManagementSettings extends ConsumerWidget {
                                     TextButton(
                                       onPressed: () => Navigator.of(
                                         context,
-                                      ).pop(false), // Returns false
+                                      ).pop(false),
                                       child: const Text('Cancel'),
                                     ),
                                     FilledButton(
@@ -126,7 +126,7 @@ class DataManagementSettings extends ConsumerWidget {
                                       ),
                                       onPressed: () => Navigator.of(
                                         context,
-                                      ).pop(true), // Returns true
+                                      ).pop(true),
                                       child: const Text(
                                         'Delete',
                                       ),
