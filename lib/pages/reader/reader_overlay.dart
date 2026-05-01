@@ -35,6 +35,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final void Function()? onNextPage;
   final void Function()? onPreviousPage;
   final void Function(int page)? onJumpToPage;
+  final bool Function(int page)? isLastPage;
   final int seriesId;
   final int chapterId;
   final Widget child;
@@ -44,6 +45,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.onNextPage,
     this.onPreviousPage,
     this.onJumpToPage,
+    this.isLastPage,
     required this.chapterId,
     required this.seriesId,
     required this.child,
@@ -83,8 +85,8 @@ class ReaderOverlay extends HookConsumerWidget {
             (previous, next) {
               if (next <= 0 && prevChapter.value != null) {
                 showSnackbar.value = .previous;
-              } else if (next >= state.totalPages - 1 &&
-                  nextChapter.value != null) {
+              } else if (isLastPage?.call(next) ??
+                  next >= state.totalPages - 1 && nextChapter.value != null) {
                 showSnackbar.value = .next;
               } else {
                 showSnackbar.value = .none;

@@ -68,28 +68,31 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       ChoiceOption<ReaderMode>(
                         title: 'Reader Mode',
-                        icon: settings.readerMode == ReaderMode.vertical
+                        icon: settings.readerMode == .vertical
                             ? LucideIcons.moveVertical
                             : LucideIcons.moveHorizontal,
                         options: const [
                           ChoiceOptionEntry(
-                            value: ReaderMode.horizontal,
+                            value: .horizontal,
                             label: 'Horizontal',
                             icon: LucideIcons.moveHorizontal,
                           ),
                           ChoiceOptionEntry(
-                            value: ReaderMode.vertical,
+                            value: .vertical,
                             label: 'Vertical',
+                            icon: LucideIcons.moveVertical,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .twoPage,
+                            label: 'Two Page',
                             icon: LucideIcons.moveVertical,
                           ),
                         ],
                         value: settings.readerMode,
                         onChanged: (newValue) async {
-                          if (newValue != settings.readerMode) {
-                            await ref
-                                .read(provider.notifier)
-                                .toggleReaderMode();
-                          }
+                          await ref
+                              .read(provider.notifier)
+                              .setReaderMode(newValue);
                         },
                       ),
                       if (settings.readerMode == .horizontal) ...[

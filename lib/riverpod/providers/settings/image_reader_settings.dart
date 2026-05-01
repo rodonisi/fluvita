@@ -15,6 +15,7 @@ enum ImageScaleType {
 
 enum ReaderMode {
   horizontal,
+  twoPage,
   vertical,
 }
 
@@ -93,12 +94,12 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     );
   }
 
-  Future<void> toggleReaderMode() async {
+  Future<void> setReaderMode(ReaderMode mode) async {
     final current = await future;
 
     state = AsyncData(
       current.copyWith(
-        readerMode: current.readerMode == .horizontal ? .vertical : .horizontal,
+        readerMode: mode,
       ),
     );
   }
