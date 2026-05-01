@@ -21,8 +21,8 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
       asyncValue: ref.watch(provider),
       data: (settings) {
         return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: .min,
+          crossAxisAlignment: .start,
           children: [
             Flexible(
               child: SingleChildScrollView(
@@ -33,8 +33,8 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                     bottom: LayoutConstants.largePadding,
                   ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .start,
                     spacing: LayoutConstants.largePadding,
                     children: [
                       Text(
@@ -48,12 +48,12 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             : LucideIcons.chevronsLeft,
                         options: const [
                           ChoiceOptionEntry(
-                            value: ReadDirection.leftToRight,
+                            value: .leftToRight,
                             label: 'Left to Right',
                             icon: LucideIcons.chevronsRight,
                           ),
                           ChoiceOptionEntry(
-                            value: ReadDirection.rightToLeft,
+                            value: .rightToLeft,
                             label: 'Right to Left',
                             icon: LucideIcons.chevronsLeft,
                           ),
@@ -68,9 +68,9 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ChoiceOption<ReaderMode>(
                         title: 'Reader Mode',
                         icon: switch (settings.readerMode) {
-                          ReaderMode.horizontal => LucideIcons.moveHorizontal,
-                          ReaderMode.vertical => LucideIcons.moveVertical,
-                          ReaderMode.spread => LucideIcons.columns2,
+                          .horizontal => LucideIcons.moveHorizontal,
+                          .vertical => LucideIcons.moveVertical,
+                          .spread => LucideIcons.columns2,
                         },
                         options: const [
                           ChoiceOptionEntry(
@@ -99,17 +99,17 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       if (settings.readerMode == .horizontal) ...[
                         ChoiceOption<ImageScaleType>(
                           title: 'Fit Direction',
-                          icon: settings.scaleType == ImageScaleType.fitWidth
+                          icon: settings.scaleType == .fitWidth
                               ? LucideIcons.chevronsLeftRight
                               : LucideIcons.chevronsUpDown,
                           options: const [
                             ChoiceOptionEntry(
-                              value: ImageScaleType.fitWidth,
+                              value: .fitWidth,
                               label: 'Fit Width',
                               icon: LucideIcons.chevronsLeftRight,
                             ),
                             ChoiceOptionEntry(
-                              value: ImageScaleType.fitHeight,
+                              value: .fitHeight,
                               label: 'Fit Height',
                               icon: LucideIcons.chevronsUpDown,
                             ),

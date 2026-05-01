@@ -63,7 +63,7 @@ class ImageReader extends ConsumerWidget {
               chapterId: chapterId,
             ),
             _ => throw UnimplementedError(
-              'Reader mode ${settings.readerMode} is not implemented',
+              'Reader mode ${settings.readerMode} not supported here',
             ),
           },
         );
