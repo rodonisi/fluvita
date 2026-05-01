@@ -25,6 +25,9 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
+    // keep alive
+    ref.watch(navProvider);
+
     return ReaderOverlay(
       chapterId: chapterId,
       seriesId: seriesId,
@@ -64,106 +67,92 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = usePageController();
     final navProvider = imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
     );
 
+    ref.listen(navProvider, (prev, next) {
+      next.whenData((next) {
+        if (controller.hasClients &&
+            controller.page?.round() != next.currentSpread) {
+          final isSequential =
+              prev != null &&
+              prev.hasValue &&
+              (next.currentSpread - prev.value!.currentSpread).abs() == 1;
+
+          isSequential
+              ? controller.animateToPage(
+                  next.currentSpread,
+                  duration: 200.ms,
+                  curve: Curves.easeInOut,
+                )
+              : controller.jumpToPage(next.currentSpread);
+        }
+      });
+    });
+
     return Async(
       asyncValue: ref.watch(
-        spreadsProvider(seriesId: seriesId, chapterId: chapterId),
+        imageReaderSettingsProvider(seriesId: seriesId),
       ),
-      data: (spreads) {
+      data: (settings) {
         return Async(
           asyncValue: ref.watch(
-            imageReaderSettingsProvider(seriesId: seriesId),
+            spreadsProvider(seriesId: seriesId, chapterId: chapterId),
           ),
-          data: (settings) {
-            return Async(
-              asyncValue: ref.watch(navProvider),
-              data: (navState) {
-                return HookConsumer(
-                  builder: (context, ref, _) {
-                    final controller = usePageController(
-                      initialPage: navState.currentSpread,
+          data: (spreads) {
+            return PageView.builder(
+              controller: controller,
+              allowImplicitScrolling: true,
+              scrollDirection: Axis.horizontal,
+              reverse: settings.readDirection == .rightToLeft,
+              itemCount: spreads.spreads.length,
+              pageSnapping: true,
+              onPageChanged: (spreadIndex) {
+                ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
+              },
+              itemBuilder: (context, spreadIndex) {
+                final spread = spreads.spreads[spreadIndex];
+
+                return Row(
+                  textDirection: settings.readDirection == .rightToLeft
+                      ? .rtl
+                      : .ltr,
+                  children: spread.map((page) {
+                    Alignment alignment;
+
+                    if (spread.length == 1) {
+                      alignment = .center;
+                    } else if (settings.readDirection == .rightToLeft) {
+                      alignment = page == spread.first
+                          ? .centerLeft
+                          : .centerRight;
+                    } else {
+                      alignment = page == spread.first
+                          ? .centerRight
+                          : .centerLeft;
+                    }
+
+                    return Expanded(
+                      child: Async(
+                        asyncValue: ref.watch(
+                          imagePageProvider(
+                            chapterId: chapterId,
+                            page: page,
+                          ),
+                        ),
+                        data: (data) {
+                          return Image.memory(
+                            data.data,
+                            fit: .contain,
+                            alignment: alignment,
+                          );
+                        },
+                      ),
                     );
-                    ref.listen(navProvider, (prev, next) {
-                      next.whenData((next) {
-                        if (controller.hasClients &&
-                            controller.page?.round() != next.currentSpread) {
-                          final isSequential =
-                              prev != null &&
-                              prev.hasValue &&
-                              (next.currentSpread - prev.value!.currentSpread)
-                                      .abs() ==
-                                  1;
-
-                          isSequential
-                              ? controller.animateToPage(
-                                  next.currentSpread,
-                                  duration: 200.ms,
-                                  curve: Curves.easeInOut,
-                                )
-                              : controller.jumpToPage(next.currentSpread);
-                        }
-                      });
-                    });
-                    return PageView.builder(
-                      controller: controller,
-                      allowImplicitScrolling: true,
-                      scrollDirection: Axis.horizontal,
-                      reverse: settings.readDirection == .rightToLeft,
-                      itemCount: spreads.spreads.length,
-                      pageSnapping: true,
-                      onPageChanged: (spreadIndex) {
-                        ref
-                            .read(navProvider.notifier)
-                            .jumpToSpread(spreadIndex);
-                      },
-                      itemBuilder: (context, spreadIndex) {
-                        final spread = spreads.spreads[spreadIndex];
-
-                        return Row(
-                          textDirection: settings.readDirection == .rightToLeft
-                              ? .rtl
-                              : .ltr,
-                          children: spread.map((page) {
-                            Alignment alignment;
-
-                            if (spread.length == 1) {
-                              alignment = .center;
-                            } else if (settings.readDirection == .rightToLeft) {
-                              alignment = page == spread.first
-                                  ? .centerLeft
-                                  : .centerRight;
-                            } else {
-                              alignment = page == spread.first
-                                  ? .centerRight
-                                  : .centerLeft;
-                            }
-
-                            return Expanded(
-                              child: Async(
-                                asyncValue: ref.watch(
-                                  imagePageProvider(
-                                    chapterId: chapterId,
-                                    page: page,
-                                  ),
-                                ),
-                                data: (data) {
-                                  return Image.memory(
-                                    data.data,
-                                    fit: .contain,
-                                    alignment: alignment,
-                                  );
-                                },
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    );
-                  },
+                  }).toList(),
                 );
               },
             );
