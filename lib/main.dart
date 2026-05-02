@@ -4,6 +4,7 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/sync/background.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/breakpoints.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,17 +23,19 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
-    return Async(
-      asyncValue: theme,
-      data: (theme) => MaterialApp.router(
-        title: 'Kover',
-        debugShowCheckedModeBanner: false,
-        theme: theme.lightTheme,
-        darkTheme: theme.darkTheme,
-        themeMode: theme.mode,
-        routerConfig: ref.watch(routerProvider),
+    return BreakpointsWatcher(
+      child: Async(
+        asyncValue: theme,
+        data: (theme) => MaterialApp.router(
+          title: 'Kover',
+          debugShowCheckedModeBanner: false,
+          theme: theme.lightTheme,
+          darkTheme: theme.darkTheme,
+          themeMode: theme.mode,
+          routerConfig: ref.watch(routerProvider),
+        ),
+        loading: () => const SizedBox.shrink(),
       ),
-      loading: () => const SizedBox.shrink(),
     );
   }
 }

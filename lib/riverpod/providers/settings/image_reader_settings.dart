@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/models/read_direction.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -76,6 +77,14 @@ class ImageReaderSettings extends _$ImageReaderSettings {
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
     final defaults = await ref.watch(defaultImageReaderSettingsProvider.future);
+    ref.listen(breakpointsProvider, (prev, next) {
+      if (next == .compact && state.value?.readerMode == .spread) {
+        state = AsyncData(
+          state.value!.copyWith(readerMode: .horizontal),
+        );
+      }
+    });
+
     return state.value ?? defaults;
   }
 
