@@ -1,6 +1,3 @@
-breaking-change:
-  - head-branch: ["^feat!"]
-
 feature:
   - head-branch: ["^feat"]
 
