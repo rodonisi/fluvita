@@ -1,0 +1,14 @@
+breaking-change:
+  - head-branch: ["^feat!"]
+
+feature:
+  - head-branch: ["^feat"]
+
+fix:
+  - head-branch: ["^fix"]
+
+chore:
+  - head-branch: ["^chore"]
+
+ci:
+  - head-branch: ["^ci"]
