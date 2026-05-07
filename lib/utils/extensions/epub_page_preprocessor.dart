@@ -73,7 +73,7 @@ extension EpubPagePreprocessor on DocumentFragment {
 
   static void _applyScrollIds(DocumentFragment root) {
     void walk(Element el) {
-      el.attributes[HtmlConstants.scrollIdAttribute] = el.scrollId;
+      el.attributes[HtmlConstants.scrollIdAttribute] = el.xpath();
       for (final child in el.children) {
         walk(child);
       }
