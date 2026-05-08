@@ -59,7 +59,7 @@ class ReaderControls extends HookConsumerWidget {
                   ReaderSettingsButton(
                     child: EpubReaderSettingsBottomSheet(seriesId: seriesId),
                   ),
-                if (format == .archive)
+                if (format == .archive || format == .image)
                   ReaderSettingsButton(
                     child: ImageReaderSettingsBottomSheet(seriesId: seriesId),
                   ),

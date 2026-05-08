@@ -94,7 +94,7 @@ class DownloadRepository {
         .epub => pageContentConverter.toSql(
           await _bookClient.getPageContent(chapterId: chapterId, page: page),
         ),
-        .archive => await _bookClient.getImagePage(
+        .archive || .image => await _bookClient.getImagePage(
           chapterId: chapterId,
           page: page,
         ),

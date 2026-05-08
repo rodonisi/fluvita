@@ -61,7 +61,7 @@ sealed class ChapterModel with _$ChapterModel {
     if (titles.isEmpty) {
       return switch (table.format) {
         .epub => 'Book ${table.minNumber.toInt()}',
-        .image || .archive => 'Chapter ${table.minNumber.toInt()}',
+        .archive || .image => 'Chapter ${table.minNumber.toInt()}',
         _ => 'Untitled',
       };
     }

@@ -135,7 +135,7 @@ Future<ReadDirection> readDirection(
     .epub => (await ref.watch(
       epubReaderSettingsProvider(seriesId: seriesId).future,
     )).readDirection,
-    .archive => (await ref.watch(
+    .archive || .image => (await ref.watch(
       imageReaderSettingsProvider(seriesId: seriesId).future,
     )).readDirection,
     _ => .rightToLeft,

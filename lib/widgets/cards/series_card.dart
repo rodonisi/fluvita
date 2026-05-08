@@ -79,6 +79,7 @@ class SeriesCard extends HookConsumerWidget {
             switch (series.format) {
               .epub => LucideIcons.bookText,
               .archive => LucideIcons.fileArchive,
+              .image => LucideIcons.images,
               .pdf => LucideIcons.fileText,
               _ => LucideIcons.fileQuestionMark,
             },
