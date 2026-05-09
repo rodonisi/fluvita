@@ -44,7 +44,7 @@ class EpubReflow extends _$EpubReflow {
   // first build and cleared as soon as we reach a Display state, so that
   // subsequent page-turn rebuilds never re-trigger a seek.
   String? _resumeScrollId;
-  late NodeCursor _cursor;
+  late ReflowCursor _cursor;
 
   @override
   Future<EpubReflowState> build({
@@ -90,11 +90,7 @@ class EpubReflow extends _$EpubReflow {
       log.d('loaded font family ${family.key}');
     }
 
-    _cursor = NodeCursor(
-      root:
-          pageContent.root.nodes.firstWhere((node) => node is Element)
-              as Element,
-    );
+    _cursor = ElementCursor(root: pageContent.root.children.first);
 
     return EpubReflowState(
       page: pageContent,
@@ -109,12 +105,13 @@ class EpubReflow extends _$EpubReflow {
     try {
       _processingRender = true;
 
-      final next = _cursor.next();
+      final next = _cursor.addNext();
 
       if (next == null) {
         final newSubpages = [
           ...current.subpages,
-          ?current.buffer,
+          if (current.buffer != null && current.buffer!.hasVisibleNodes)
+            ?current.buffer,
         ];
 
         if (newSubpages.isEmpty) {

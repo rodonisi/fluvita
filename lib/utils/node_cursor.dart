@@ -1,110 +1,148 @@
 import 'package:html/dom.dart';
 
-/// Iterates through the children of the given node, filling a clone of the root every time the iterator is moved
-/// forward
-class NodeCursor {
-  static final _leafTags = {'p', 'img', 'svg'};
+sealed class ReflowCursor {
+  Node? addNext();
+  Node commitSplit();
+  bool splitChild();
+}
 
-  /// Shallow of the root provided during initialization
-  final Element root;
+class ElementCursor implements ReflowCursor {
+  static final _leafTags = {'img', 'svg'};
+  final Element _root;
+  int _lastSplit = 0;
+  int _index = -1; // Current child index
+  ReflowCursor? _childCursor;
+  bool _childYieldedResult = false;
 
-  /// Iterator over the children of the root provided during initialization
-  final Iterator<Node> iterator;
+  ElementCursor({required Element root}) : _root = root.clone(true);
 
-  Node? reprocess;
+  bool get _exhausted => _root.nodes.isEmpty || _index >= _root.nodes.length;
 
-  /// Recursive child cursor if a child requires splitting
-  NodeCursor? childCursor;
+  @override
+  Element? addNext() {
+    if (_exhausted) return null;
 
-  bool get exhausted => _exhausted;
-
-  bool _exhausted = false;
-
-  bool get _isLeaf =>
-      root.localName != null && _leafTags.contains(root.localName);
-
-  NodeCursor({
-    required Element root,
-  }) : root = root.clone(false),
-       iterator = root.nodes.iterator;
-
-  /// Moves the iterator forward and adds the element to the root node. Returns the root node as filled so far.
-  Node? next() {
-    if (_exhausted || _isLeaf) {
-      return null;
-    }
-
-    final childNode = childCursor?.next();
-    if (childNode != null) {
-      if (root.children.isEmpty) {
-        root.append(childNode);
-      } else {
-        root.children.last.replaceWith(childNode);
+    // If we are splitting a child, return the next partial child until it is exhausted
+    if (_childCursor != null) {
+      final partialChild = _childCursor!.addNext();
+      if (partialChild != null) {
+        _childYieldedResult = true;
+        return _assembleCurrent(partialChild);
       }
-      return root;
+      // Child exhausted — if it never yielded, return current node as-is before advancing
+      _childCursor = null;
+      if (!_childYieldedResult) {
+        _childYieldedResult = false;
+        return _assembleCurrent();
+      }
+      _childYieldedResult = false;
     }
 
-    childCursor = null;
+    // Move to the next child
+    _index++;
 
-    if (reprocess != null) {
-      root.append(reprocess!);
-      reprocess = null;
-      return root;
-    }
+    if (_exhausted) return null;
 
-    if (!iterator.moveNext()) {
-      _exhausted = true;
-      return null;
-    }
+    final current = _assembleCurrent();
 
-    root.append(iterator.current.clone(true));
-    return root;
+    return current;
   }
 
-  /// Return the root node up to and not including the current iterator position. The root children are cleared and the
-  /// next page is started.
-  Node commitSplit() {
-    final childSplit = childCursor?.commitSplit();
-
-    if (childSplit != null) {
-      // Partial content fit inside the child — keep it in this subpage.
-      root.children.last.replaceWith(childSplit);
-    } else if (root.children.length > 1) {
-      reprocess = root.children.removeLast();
-    }
-
-    final committed = root.clone(true);
-
-    root.children.clear();
-
-    return committed;
-  }
-
-  /// Tries to split the current cursor position. If a split happened already for this page, false is returned.
+  @override
   bool splitChild() {
-    if (_isLeaf || _exhausted) {
-      return false;
+    // Just passthrough if we are processing a child cursor
+    if (_childCursor != null) {
+      return _childCursor!.splitChild();
     }
 
-    if (childCursor != null) {
-      return childCursor!.splitChild();
+    // Can't split if we are exhausted
+    if (_exhausted) return false;
+
+    // Split the current child if possible
+    final current = _root.nodes[_index];
+    if (current is Text) {
+      _childCursor = TextCursor(textNode: current);
+      return true;
     }
-
-    final current = iterator.current;
-    if (_canSplit(current)) {
-      childCursor = NodeCursor(root: current as Element);
-
+    if (current is Element &&
+        current.localName != null &&
+        !_leafTags.contains(current.localName)) {
+      _childCursor = switch (current.localName) {
+        // 'p' => ParagraphCursor(root: current),
+        _ => ElementCursor(root: current),
+      };
       return true;
     }
 
     return false;
   }
 
-  static bool _canSplit(Node node) {
-    if (node is Element) {
-      return node.localName != null && !_leafTags.contains(node.localName);
+  @override
+  Element commitSplit() {
+    final Element result;
+
+    if (_childCursor != null) {
+      final childSplit = _childCursor!.commitSplit();
+      result = _assembleCurrent(childSplit);
+    } else {
+      if (_index > 0) _index--;
+      result = _assembleCurrent();
     }
 
-    return false;
+    _lastSplit = _index + 1;
+
+    return result;
+  }
+
+  Element _assembleCurrent([Node? partialChild]) {
+    final clone = _root.clone(false);
+
+    for (int i = _lastSplit; i < _index; i++) {
+      clone.append(_root.nodes[i].clone(true));
+    }
+
+    if (partialChild != null) {
+      clone.append(partialChild);
+    } else if (!_exhausted) {
+      clone.append(_root.nodes[_index].clone(true));
+    }
+
+    return clone;
+  }
+}
+
+class TextCursor implements ReflowCursor {
+  final List<String> _words;
+  int _index = -1;
+  int _lastSplit = 0;
+
+  TextCursor({required Text textNode})
+    : _words = textNode.data.split(RegExp(r'\s+'));
+
+  @override
+  Node? addNext() {
+    _index++;
+
+    if (_index >= _words.length) return null;
+
+    return _build();
+  }
+
+  @override
+  bool splitChild() => false;
+
+  @override
+  Node commitSplit() {
+    // Backtrack overflowing word
+    if (_index > 0) _index--;
+    final res = _build();
+
+    _lastSplit = _index + 1;
+
+    return res;
+  }
+
+  Text _build() {
+    return Text(_words.sublist(_lastSplit, _index + 1).join(' '));
   }
 }
