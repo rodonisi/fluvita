@@ -111,7 +111,7 @@ class EpubReflow extends _$EpubReflow {
         final newSubpages = [
           ...current.subpages,
           ?current.buffer,
-        ];
+        ].where((fragment) => fragment.hasVisibleNodes).toList();
 
         if (newSubpages.isEmpty) {
           log.d('no content to render, add empty page');
@@ -155,7 +155,10 @@ class EpubReflow extends _$EpubReflow {
       final newSubpageNode = _cursor.commitSplit();
 
       final fragment = DocumentFragment()..append(newSubpageNode);
-      final newSubpages = [...current.subpages, fragment];
+      final newSubpages = [
+        ...current.subpages,
+        if (fragment.hasVisibleNodes) fragment,
+      ];
       var newState = current.copyWith(
         subpages: newSubpages,
         buffer: null,
