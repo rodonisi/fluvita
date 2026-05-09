@@ -5,7 +5,7 @@ class ElementCursor {
 
   final Element _root;
   final Element _buffer;
-  final List<Node> _stack = [];
+  final List<Object> _stack = [];
   final List<Element> _targetStack = [];
   late Element _target;
 
@@ -22,18 +22,24 @@ class ElementCursor {
 
     final node = _stack.removeLast();
 
-    if (node is _PopMarker) {
-      _targetStack.removeLast();
-      _target = _targetStack.last;
-      return addNext(); // Get the actual next node
+    switch (node) {
+      case _PopMarker():
+        _targetStack.removeLast();
+        _target = _targetStack.last;
+        return addNext();
+      case _CommitBacktrack(:final innerNode):
+        _target.append(innerNode);
+        return addNext();
+      case Node _:
+        _target.append(node);
+        return _buffer;
+      default:
+        throw Exception('Unexpected stack item: $node');
     }
-
-    _target.append(node);
-    return _buffer;
   }
 
   Element commitSplit() {
-    _stack.add(_target.nodes.removeLast());
+    _stack.add(_CommitBacktrack(_target.nodes.removeLast()));
 
     final result = _buffer.clone(true);
 
@@ -54,7 +60,11 @@ class ElementCursor {
       return _splitTextNode(child);
     }
 
-    if (child is! Element || _leafTags.contains(child.localName)) return false;
+    if (child is! Element ||
+        _leafTags.contains(child.localName) ||
+        child.nodes.isEmpty) {
+      return false;
+    }
 
     final newTarget = child.clone(false);
     _target.nodes.last.replaceWith(newTarget);
@@ -92,6 +102,12 @@ class ElementCursor {
   }
 }
 
-class _PopMarker extends Text {
-  _PopMarker() : super('');
+/// Simple marker indicating we need to pop the target stack
+class _PopMarker {}
+
+/// Simple wrapper for a node was popped from the target following a split.
+/// A node can only be popped on commit once to avoid endless loops.
+class _CommitBacktrack {
+  final Node innerNode;
+  _CommitBacktrack(this.innerNode);
 }
