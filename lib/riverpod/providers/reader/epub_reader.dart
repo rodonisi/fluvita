@@ -110,7 +110,7 @@ class EpubReflow extends _$EpubReflow {
       if (next == null) {
         final newSubpages = [
           ...current.subpages,
-            ?current.buffer,
+          ?current.buffer,
         ];
 
         if (newSubpages.isEmpty) {
