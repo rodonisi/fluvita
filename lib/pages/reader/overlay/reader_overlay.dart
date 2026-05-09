@@ -139,9 +139,13 @@ class ReaderOverlay extends HookConsumerWidget {
                         Expanded(child: child),
                         if (state.series.format == .epub)
                           SubpageProgress(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          )
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                              )
+                              .animate(
+                                target: uiVisible.value ? 0.0 : 1.0,
+                              )
+                              .fadeIn(duration: 200.ms)
                         else
                           ReaderProgress(
                                 seriesId: seriesId,
@@ -292,7 +296,9 @@ class ReaderProgress extends ConsumerWidget {
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
     );
 
-    final progress = navState.currentPage / (navState.totalPages - 1);
+    final progress = navState.initialized
+        ? navState.currentPage / (navState.totalPages - 1)
+        : null;
 
     return LinearProgressIndicator(
       value: progress,
@@ -321,7 +327,7 @@ class SubpageProgress extends ConsumerWidget {
     );
 
     final subpageProgress = reader.whenOrNull(
-      data: (data) => (data.subpage + 0) / data.totalSubpages,
+      data: (data) => (data.subpage + 1) / data.totalSubpages,
     );
 
     final screenWidth = MediaQuery.sizeOf(context).width;

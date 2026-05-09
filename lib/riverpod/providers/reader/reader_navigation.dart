@@ -11,6 +11,7 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
     required int currentPage,
     required int totalPages,
     required bool fromObserver,
+    required bool initialized,
   }) = _ReaderNavigationState;
 }
 
@@ -36,6 +37,7 @@ class ReaderNavigation extends _$ReaderNavigation {
       currentPage: readerState.value?.initialPage ?? 0,
       totalPages: readerState.value?.totalPages ?? 0,
       fromObserver: false,
+      initialized: readerState.hasValue,
     );
   }
 
