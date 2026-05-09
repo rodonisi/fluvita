@@ -228,7 +228,6 @@ void main() {
       cursor.addNext(); // text 'sit aliqua'
       cursor.addNext(); // text 'sit aliqua labore'
       final firstCommit = cursor.commitSplit(); // text 'sit aliqua'
-      cursor.addNext(); // text 'labore'
       cursor.addNext(); // text 'labore incididunt'
       final second = cursor.addNext(); // p1
       final next = cursor.addNext(); // exhausted

@@ -29,7 +29,7 @@ class ElementCursor {
         return addNext();
       case _CommitBacktrack(:final innerNode):
         _target.append(innerNode);
-        return addNext();
+        return _stack.length > 1 ? addNext() : _buffer;
       case Node _:
         _target.append(node);
         return _buffer;
