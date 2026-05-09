@@ -63,6 +63,8 @@ class Reader extends _$Reader {
       seriesProvider(seriesId: seriesId).future,
     );
 
+    final initialPage = progress?.pageNum ?? 0;
+
     return ReaderState(
       libraryId: series.libraryId,
       series: series,
@@ -70,7 +72,7 @@ class Reader extends _$Reader {
       chapter: chapter,
       title: chapter.title,
       totalPages: chapter.pages,
-      initialPage: progress?.pageNum ?? 0,
+      initialPage: initialPage.clamp(0, chapter.pages - 1),
       bookScrollId: progress?.bookScrollId,
     );
   }
