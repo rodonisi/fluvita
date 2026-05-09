@@ -110,7 +110,6 @@ class EpubReflow extends _$EpubReflow {
       if (next == null) {
         final newSubpages = [
           ...current.subpages,
-          if (current.buffer != null && current.buffer!.hasVisibleNodes)
             ?current.buffer,
         ];
 
