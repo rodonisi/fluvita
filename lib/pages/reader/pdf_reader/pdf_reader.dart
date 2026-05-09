@@ -60,7 +60,7 @@ class PdfReader extends HookConsumerWidget {
       if (!controller.isReady || next.fromObserver) return;
 
       if (previous?.currentPage != next.currentPage) {
-        await controller.goToPage(pageNumber: next.currentPage);
+        await controller.goToPage(pageNumber: next.currentPage + 1);
       }
     });
 
@@ -93,7 +93,7 @@ class PdfReader extends HookConsumerWidget {
                 data.data,
                 controller: controller,
                 sourceName: chapterId.toString(),
-                initialPageNumber: readerState.initialPage,
+                initialPageNumber: readerState.initialPage + 1,
                 params: PdfViewerParams(
                   onViewerReady: (document, controller) async {
                     toc.value = await document.loadOutline();
@@ -104,7 +104,7 @@ class PdfReader extends HookConsumerWidget {
 
                     ref
                         .read(navProvider.notifier)
-                        .jumpToPage(page, fromObserver: true);
+                        .jumpToPage(page - 1, fromObserver: true);
                   },
                 ),
               );
