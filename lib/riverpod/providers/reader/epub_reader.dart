@@ -11,7 +11,7 @@ import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/utils/extensions/string.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
-import 'package:kover/utils/node_cursor.dart';
+import 'package:kover/utils/element_cursor.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'epub_reader.freezed.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
-import 'package:kover/utils/node_cursor.dart';
+import 'package:kover/utils/element_cursor.dart';
 
 void main() {
   group('ElementCursor', () {
