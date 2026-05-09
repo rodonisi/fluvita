@@ -44,7 +44,7 @@ class EpubReflow extends _$EpubReflow {
   // first build and cleared as soon as we reach a Display state, so that
   // subsequent page-turn rebuilds never re-trigger a seek.
   String? _resumeScrollId;
-  late ReflowCursor _cursor;
+  late ElementCursor _cursor;
 
   @override
   Future<EpubReflowState> build({

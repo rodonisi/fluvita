@@ -1,12 +1,6 @@
 import 'package:html/dom.dart';
 
-sealed class ReflowCursor {
-  Node? addNext();
-  Node commitSplit();
-  bool splitChild();
-}
-
-class ElementCursor implements ReflowCursor {
+class ElementCursor {
   static const Set<String> _leafTags = {'img', 'svg'};
 
   final Element _root;
@@ -23,7 +17,6 @@ class ElementCursor implements ReflowCursor {
     _target = _buffer;
   }
 
-  @override
   Element? addNext() {
     if (_stack.isEmpty) return null;
 
@@ -39,7 +32,6 @@ class ElementCursor implements ReflowCursor {
     return _buffer;
   }
 
-  @override
   Element commitSplit() {
     _stack.add(_target.nodes.removeLast());
 
@@ -55,7 +47,6 @@ class ElementCursor implements ReflowCursor {
     return result;
   }
 
-  @override
   bool splitChild() {
     final child = _target.nodes.last;
 
