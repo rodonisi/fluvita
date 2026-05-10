@@ -198,7 +198,7 @@ class PdfReader extends HookConsumerWidget {
   }
 }
 
-class _PdfExtraControls extends ConsumerWidget {
+class _PdfExtraControls extends StatelessWidget {
   const _PdfExtraControls({
     required this.controller,
     required this.defaultZoom,
@@ -208,7 +208,7 @@ class _PdfExtraControls extends ConsumerWidget {
   final ValueNotifier<double> defaultZoom;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: .end,
       spacing: LayoutConstants.mediumPadding,
