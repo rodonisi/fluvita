@@ -60,7 +60,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         onChanged: (newValue) async {
                           await ref
                               .read(provider.notifier)
-                              .toggleReadDirection();
+                              .setReadDirection(newValue);
                         },
                       ),
                       ChoiceOption(

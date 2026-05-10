@@ -56,15 +56,11 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     return state.value ?? defaults;
   }
 
-  Future<void> toggleReadDirection() async {
+  Future<void> setReadDirection(ReadDirection newDirection) async {
     final current = await future;
 
     state = AsyncData(
-      current.copyWith(
-        readDirection: current.readDirection == ReadDirection.leftToRight
-            ? ReadDirection.rightToLeft
-            : ReadDirection.leftToRight,
-      ),
+      current.copyWith(readDirection: newDirection),
     );
   }
 
