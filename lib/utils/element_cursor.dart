@@ -82,6 +82,24 @@ class ElementCursor {
   bool _splitTextNode(Text child) {
     final text = child.text;
 
+    // Split by sentences, keeping the delimiters and trailing whitespaces.
+    final sentencesReg = RegExp(r'[\s\S]+?[.!?]+(?:\s+|$)');
+
+    final sentences = sentencesReg
+        .allMatches(text)
+        .map((match) => match.group(0)!)
+        .toList();
+
+    if (sentences.length > 1) {
+      child.remove();
+
+      for (final sentence in sentences.reversed) {
+        _stack.add(Text(sentence));
+      }
+
+      return true;
+    }
+
     // Split by words, keeping the whitespace (Regex keeps the delimiters)
     // This captures words and the spaces following them.
     final words = text.split(RegExp(r'(?<=\s)'));
