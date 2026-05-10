@@ -412,12 +412,12 @@ class EpubNavigation extends _$EpubNavigation {
       ).future,
     );
 
-    if (reflow.status == .measuring &&
-        current.subpage >= reflow.subpages.length) {
+    if (reflow.status != .done && current.subpage >= reflow.subpages.length) {
       return;
     }
 
-    if (current.subpage < reflow.subpages.length - 1) {
+    if (current.subpage < reflow.subpages.length - 1 ||
+        reflow.status != .done) {
       await jumpToSubpage(current.subpage + 1);
     } else if (current.page < current.totalPages - 1) {
       await jumpToPage(current.page + 1);
