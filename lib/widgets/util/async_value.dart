@@ -33,6 +33,45 @@ class Async<T> extends StatelessWidget {
   }
 }
 
+class Async2<T1, T2> extends StatelessWidget {
+  final AsyncValue<T1> asyncValue1;
+  final AsyncValue<T2> asyncValue2;
+  final Widget Function(T1, T2) data;
+  final Widget Function()? loading;
+  final Widget Function(Object, StackTrace)? error;
+
+  const Async2({
+    super.key,
+    required this.asyncValue1,
+    required this.asyncValue2,
+    required this.data,
+    this.loading,
+    this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (asyncValue1.isLoading || asyncValue2.isLoading) {
+      return loading?.call() ??
+          const Center(child: CircularProgressIndicator());
+    } else if (asyncValue1.hasError) {
+      return error?.call(asyncValue1.error!, asyncValue1.stackTrace!) ??
+          _Error(
+            error: asyncValue1.error!,
+            stacktrace: asyncValue1.stackTrace!,
+          );
+    } else if (asyncValue2.hasError) {
+      return error?.call(asyncValue2.error!, asyncValue2.stackTrace!) ??
+          _Error(
+            error: asyncValue2.error!,
+            stacktrace: asyncValue2.stackTrace!,
+          );
+    }
+
+    return data(asyncValue1.value as T1, asyncValue2.value as T2);
+  }
+}
+
 class AsyncSliver<T> extends StatelessWidget {
   final AsyncValue<T> asyncValue;
   final Widget Function(T) data;

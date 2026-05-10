@@ -1,0 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+sealed class KoverIcons {
+  static const IconData verticalReader = LucideIcons.moveVertical;
+  static const IconData horizontalReader = LucideIcons.moveHorizontal;
+  static const IconData twoPageReader = LucideIcons.columns2;
+
+  static const IconData readingDirectionLTR = LucideIcons.chevronsRight;
+  static const IconData readingDirectionRTL = LucideIcons.chevronsLeft;
+
+  static const IconData save = LucideIcons.save;
+  static const IconData reset = LucideIcons.rotateCcw;
+}

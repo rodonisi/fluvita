@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_controls.dart';
 import 'package:kover/pages/reader/image_reader/image_reader_controls.dart';
 import 'package:kover/pages/reader/overlay/page_slider.dart';
+import 'package:kover/pages/reader/pdf_reader/pdf_reader_controls.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -62,6 +63,10 @@ class ReaderControls extends HookConsumerWidget {
                 if (format == .archive || format == .image)
                   ReaderSettingsButton(
                     child: ImageReaderSettingsBottomSheet(seriesId: seriesId),
+                  ),
+                if (format == .pdf)
+                  ReaderSettingsButton(
+                    child: PdfReaderSettingsBottomSheet(seriesId: seriesId),
                   ),
               ],
             ),
