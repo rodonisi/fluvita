@@ -32,47 +32,43 @@ class ReaderPage extends HookConsumerWidget {
           () => ref.read(syncManagerProvider.notifier).syncProgress(),
         );
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: Async(
-            asyncValue: ref.watch(provider),
-            data: (data) {
-              return switch (data.series.format) {
-                .archive || .image => ImageReader(
-                  seriesId: data.series.id,
-                  chapterId: data.chapter.id,
-                ),
-                .epub => EpubReader(
-                  seriesId: data.series.id,
-                  chapterId: data.chapter.id,
-                ),
-                .pdf => PdfReader(
-                  seriesId: data.series.id,
-                  chapterId: data.chapter.id,
-                ),
-                _ => Center(
-                  child: Column(
-                    mainAxisAlignment: .center,
-                    crossAxisAlignment: .center,
-                    spacing: LayoutConstants.mediumPadding,
-                    children: [
-                      Icon(
-                        LucideIcons.circleX,
-                        size: LayoutConstants.largeIcon,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      Text('Unsupported format: ${data.series.format}'),
-                      FilledButton(
-                        onPressed: () => context.pop(),
-                        child: const Text('Back'),
-                      ),
-                    ],
+      child: Async(
+        asyncValue: ref.watch(provider),
+        data: (data) {
+          return switch (data.series.format) {
+            .archive || .image => ImageReader(
+              seriesId: data.series.id,
+              chapterId: data.chapter.id,
+            ),
+            .epub => EpubReader(
+              seriesId: data.series.id,
+              chapterId: data.chapter.id,
+            ),
+            .pdf => PdfReader(
+              seriesId: data.series.id,
+              chapterId: data.chapter.id,
+            ),
+            _ => Center(
+              child: Column(
+                mainAxisAlignment: .center,
+                crossAxisAlignment: .center,
+                spacing: LayoutConstants.mediumPadding,
+                children: [
+                  Icon(
+                    LucideIcons.circleX,
+                    size: LayoutConstants.largeIcon,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                ),
-              };
-            },
-          ),
-        ),
+                  Text('Unsupported format: ${data.series.format}'),
+                  FilledButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Back'),
+                  ),
+                ],
+              ),
+            ),
+          };
+        },
       ),
     );
   }

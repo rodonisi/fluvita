@@ -23,56 +23,60 @@ class ReaderHeader extends ConsumerWidget {
         .watch(readerProvider(seriesId: seriesId, chapterId: chapterId))
         .value;
 
-    return Card.filled(
-      margin: LayoutConstants.mediumEdgeInsets,
-      child: Padding(
-        padding: LayoutConstants.mediumEdgeInsets,
-        child: Row(
-          mainAxisAlignment: .spaceBetween,
-          crossAxisAlignment: .center,
-          mainAxisSize: .min,
-          spacing: LayoutConstants.smallPadding,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-            Expanded(
-              child: Column(
-                mainAxisSize: .min,
-                children: [
-                  Text(
-                    reader?.chapter.title ?? '',
-                    textAlign: .center,
-                    overflow: .ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.headlineMedium,
-                  ),
-                  Text(
-                    reader?.series.name ?? '',
-                    textAlign: .center,
-                    overflow: .ellipsis,
-                    style:
-                        Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            if (hasDrawer || reader?.series.format == .epub)
+    return SafeArea(
+      child: Card.filled(
+        margin: LayoutConstants.mediumEdgeInsets,
+        child: Padding(
+          padding: LayoutConstants.mediumEdgeInsets,
+          child: Row(
+            mainAxisAlignment: .spaceBetween,
+            crossAxisAlignment: .center,
+            mainAxisSize: .min,
+            spacing: LayoutConstants.smallPadding,
+            children: [
               IconButton(
-                icon: const Icon(LucideIcons.tableOfContents),
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-              )
-            else
-              const SizedBox.square(
-                dimension: LayoutConstants.mediumIcon,
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
               ),
-          ],
+              Expanded(
+                child: Column(
+                  mainAxisSize: .min,
+                  children: [
+                    Text(
+                      reader?.chapter.title ?? '',
+                      textAlign: .center,
+                      overflow: .ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium,
+                    ),
+                    Text(
+                      reader?.series.name ?? '',
+                      textAlign: .center,
+                      overflow: .ellipsis,
+                      style:
+                          Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasDrawer || reader?.series.format == .epub)
+                IconButton(
+                  icon: const Icon(LucideIcons.tableOfContents),
+                  onPressed: () => Scaffold.of(context).openEndDrawer(),
+                )
+              else
+                const SizedBox.square(
+                  dimension: LayoutConstants.mediumIcon,
+                ),
+            ],
+          ),
         ),
       ),
     );

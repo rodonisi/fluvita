@@ -31,46 +31,48 @@ class ReaderControls extends HookConsumerWidget {
       ),
     );
 
-    return Card.filled(
-      margin: LayoutConstants.mediumEdgeInsets,
-      child: Padding(
-        padding: LayoutConstants.smallEdgeInsets,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: .end,
-          children: [
-            ?extraControls,
-            Row(
-              children: [
-                Expanded(
-                  child: PageSlider(
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                    onJumpToPage: (page) => ref
-                        .read(
-                          readerNavigationProvider(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          ).notifier,
-                        )
-                        .jumpToPage(page),
+    return SafeArea(
+      child: Card.filled(
+        margin: LayoutConstants.mediumEdgeInsets,
+        child: Padding(
+          padding: LayoutConstants.smallEdgeInsets,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: .end,
+            children: [
+              ?extraControls,
+              Row(
+                children: [
+                  Expanded(
+                    child: PageSlider(
+                      seriesId: seriesId,
+                      chapterId: chapterId,
+                      onJumpToPage: (page) => ref
+                          .read(
+                            readerNavigationProvider(
+                              seriesId: seriesId,
+                              chapterId: chapterId,
+                            ).notifier,
+                          )
+                          .jumpToPage(page),
+                    ),
                   ),
-                ),
-                if (format == .epub)
-                  ReaderSettingsButton(
-                    child: EpubReaderSettingsBottomSheet(seriesId: seriesId),
-                  ),
-                if (format == .archive || format == .image)
-                  ReaderSettingsButton(
-                    child: ImageReaderSettingsBottomSheet(seriesId: seriesId),
-                  ),
-                if (format == .pdf)
-                  ReaderSettingsButton(
-                    child: PdfReaderSettingsBottomSheet(seriesId: seriesId),
-                  ),
-              ],
-            ),
-          ],
+                  if (format == .epub)
+                    ReaderSettingsButton(
+                      child: EpubReaderSettingsBottomSheet(seriesId: seriesId),
+                    ),
+                  if (format == .archive || format == .image)
+                    ReaderSettingsButton(
+                      child: ImageReaderSettingsBottomSheet(seriesId: seriesId),
+                    ),
+                  if (format == .pdf)
+                    ReaderSettingsButton(
+                      child: PdfReaderSettingsBottomSheet(seriesId: seriesId),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

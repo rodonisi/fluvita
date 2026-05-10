@@ -379,27 +379,29 @@ class ChapterSnackbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card.filled(
-      margin: LayoutConstants.mediumEdgeInsets,
-      child: Padding(
-        padding: LayoutConstants.mediumEdgeInsets,
-        child: Row(
-          mainAxisAlignment: .spaceBetween,
-          spacing: LayoutConstants.smallPadding,
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                overflow: .ellipsis,
+    return SafeArea(
+      child: Card.filled(
+        margin: LayoutConstants.mediumEdgeInsets,
+        child: Padding(
+          padding: LayoutConstants.mediumEdgeInsets,
+          child: Row(
+            mainAxisAlignment: .spaceBetween,
+            spacing: LayoutConstants.smallPadding,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  overflow: .ellipsis,
+                ),
               ),
-            ),
-            if (onDismiss != null)
-              TextButton(onPressed: onDismiss, child: const Text('Dismiss')),
-            FilledButton(
-              onPressed: onNavigate,
-              child: const Text('Go'),
-            ),
-          ],
+              if (onDismiss != null)
+                TextButton(onPressed: onDismiss, child: const Text('Dismiss')),
+              FilledButton(
+                onPressed: onNavigate,
+                child: const Text('Go'),
+              ),
+            ],
+          ),
         ),
       ),
     );
