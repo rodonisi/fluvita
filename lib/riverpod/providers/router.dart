@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kover/pages/download_queue/download_queue_page.dart';
 import 'package:kover/pages/home/home_page.dart';
@@ -278,7 +279,14 @@ class ReaderRoute extends GoRouteData with $ReaderRoute {
   });
 
   @override
+  FutureOr<bool> onExit(BuildContext context, GoRouterState state) async {
+    await SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+    return true; // Allow exiting the route
+  }
+
+  @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
+    SystemChrome.setEnabledSystemUIMode(.immersive);
     return MaterialPage(
       key: state.pageKey,
       fullscreenDialog: true,
