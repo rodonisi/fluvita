@@ -54,6 +54,8 @@ class ElementCursor {
   }
 
   bool splitChild() {
+    if (_target.nodes.isEmpty) return false;
+
     final child = _target.nodes.last;
 
     if (child is Text) {
