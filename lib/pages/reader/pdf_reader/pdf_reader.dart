@@ -49,6 +49,7 @@ class PdfReader extends HookConsumerWidget {
     final controller = usePdfViewerController();
     final toc = useState<List<PdfOutlineNode>>([]);
     final defaultZoom = useState(1.0);
+    final lastUpdateFromProvider = useState(false);
 
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
@@ -65,6 +66,7 @@ class PdfReader extends HookConsumerWidget {
       if (!controller.isReady || next.fromObserver) return;
 
       if (previous?.currentPage != next.currentPage) {
+        lastUpdateFromProvider.value = true;
         await controller.goToPage(pageNumber: next.currentPage + 1);
       }
     });
@@ -120,9 +122,26 @@ class PdfReader extends HookConsumerWidget {
                   onPageChanged: (page) {
                     if (page == null) return;
 
+                    // Workaround for PdfViewer reporting 1-based page number
+                    // in layout order, but only some times. It seems jumpToPage
+                    // always goes by document order. The update from the provider
+                    // alwo fires an event with the same page, while the next ones
+                    // go back by layout order.
+                    final int navIndex;
+                    if (settings.readDirection == .rightToLeft &&
+                        settings.readerMode == .horizontal) {
+                      navIndex = lastUpdateFromProvider.value
+                          ? page - 1
+                          : (readerState.totalPages - page - 1);
+                    } else {
+                      navIndex = page - 1;
+                    }
+
                     ref
                         .read(navProvider.notifier)
-                        .jumpToPage(page - 1, fromObserver: true);
+                        .jumpToPage(navIndex, fromObserver: true);
+
+                    lastUpdateFromProvider.value = false;
                   },
                   layoutPages: switch (settings.readerMode) {
                     .vertical => null,
