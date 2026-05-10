@@ -2,34 +2,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
-import 'package:kover/utils/layout_constants.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pdf_reader_settings.freezed.dart';
 part 'pdf_reader_settings.g.dart';
-
-sealed class EpubReaderSettingsLimits {
-  static const double fontSizeMin = 8.0;
-  static const double fontSizeMax = 64.0;
-  static const double fontSizeStep = 1;
-
-  static const double marginSizeMin = LayoutConstants.smallerPadding;
-  static const double marginSizeMax = LayoutConstants.largestPadding;
-  static const double marginSizeStep = 4;
-
-  static const double lineHeightMin = 0.5;
-  static const double lineHeightMax = 5.0;
-  static const double lineHeightStep = 0.2;
-
-  static const double wordSpacingMin = -10.0;
-  static const double wordSpacingMax = 10.0;
-  static const double wordSpacingStep = 0.5;
-
-  static const double letterSpacingMin = -10.0;
-  static const double letterSpacingMax = 10.0;
-  static const double letterSpacingStep = 0.5;
-}
 
 enum PdfReaderMode {
   horizontal,
