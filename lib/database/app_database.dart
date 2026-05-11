@@ -22,6 +22,7 @@ import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -109,6 +110,17 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> vacuum() async {
     await customStatement('VACUUM');
+  }
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      beforeOpen: (details) async {
+        await (delete(
+          riverpodStorage,
+        )..where((tbl) => tbl.key.equals(Credentials.persistKey))).go();
+      },
+    );
   }
 
   static QueryExecutor _openConnection() {
