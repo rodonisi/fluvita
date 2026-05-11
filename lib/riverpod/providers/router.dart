@@ -281,12 +281,12 @@ class ReaderRoute extends GoRouteData with $ReaderRoute {
   @override
   FutureOr<bool> onExit(BuildContext context, GoRouterState state) async {
     await SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
-    return true; 
+    return true;
   }
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    SystemChrome.setEnabledSystemUIMode(.immersive);
+    SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
     return MaterialPage(
       key: state.pageKey,
       fullscreenDialog: true,
