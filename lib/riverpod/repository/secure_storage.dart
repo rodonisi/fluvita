@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -27,7 +26,7 @@ Storage<String, String> secureStorage(Ref ref) {
 }
 
 final class SecureStorageRepository extends Storage<String, String> {
-  final storage = FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   SecureStorageRepository();
 

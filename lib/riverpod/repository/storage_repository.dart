@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/repository/database.dart';
