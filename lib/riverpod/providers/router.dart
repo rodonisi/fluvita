@@ -281,7 +281,7 @@ class ReaderRoute extends GoRouteData with $ReaderRoute {
   @override
   FutureOr<bool> onExit(BuildContext context, GoRouterState state) async {
     await SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
-    return true; // Allow exiting the route
+    return true; 
   }
 
   @override
