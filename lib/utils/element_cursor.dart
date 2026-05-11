@@ -39,7 +39,9 @@ class ElementCursor {
   }
 
   Element commitSplit() {
-    _stack.add(_CommitBacktrack(_target.nodes.removeLast()));
+    if (_target.nodes.isNotEmpty) {
+      _stack.add(_CommitBacktrack(_target.nodes.removeLast()));
+    }
 
     final result = _buffer.clone(true);
 
