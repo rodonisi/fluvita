@@ -45,6 +45,7 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(0.0) double verticalReaderPadding,
     @Default(0.0) double spreadReaderGap,
     @Default(true) bool spreadCoverPage,
+    @Default(true) bool ignoreSafeAreas,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -164,6 +165,12 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
+  }
+
+  Future<void> setIgnoreSafeAreas(bool ignore) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(ignoreSafeAreas: ignore));
   }
 
   Future<void> setSpreadCoverPage(bool value) async {

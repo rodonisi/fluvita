@@ -252,34 +252,45 @@ class _VerticalContinuousReaderState
       },
     );
 
-    return SliverViewObserver(
-      controller: _observerController,
-      sliverContexts: () => [?_sliverContext],
-      onObserve: _handleObserve,
-      child: CustomScrollView(
-        controller: _scrollController,
-        cacheExtent: MediaQuery.of(context).size.height * 5,
-        scrollBehavior: ScrollConfiguration.of(context).copyWith(
-          scrollbars: false,
-        ),
-        slivers: [
-          AsyncSliver(
-            asyncValue: settings,
-            data: (settings) => SliverPadding(
-              padding: EdgeInsets.symmetric(
-                horizontal: settings.verticalReaderPadding,
-              ),
-              sliver: SliverList.separated(
-                addAutomaticKeepAlives: true,
-                itemCount: _totalPages,
-                itemBuilder: _buildItem,
-                separatorBuilder: (context, index) =>
-                    SizedBox(height: settings.verticalReaderGap),
-              ),
+    return Async(
+      asyncValue: settings,
+      data: (settings) {
+        final content = SliverViewObserver(
+          controller: _observerController,
+          sliverContexts: () => [?_sliverContext],
+          onObserve: _handleObserve,
+          child: CustomScrollView(
+            controller: _scrollController,
+            cacheExtent: MediaQuery.of(context).size.height * 5,
+            scrollBehavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false,
             ),
+            slivers: [
+              SliverSafeArea(
+                bottom: false,
+                sliver: SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: settings.verticalReaderPadding,
+                  ),
+                  sliver: SliverList.separated(
+                    addAutomaticKeepAlives: true,
+                    itemCount: _totalPages,
+                    itemBuilder: _buildItem,
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: settings.verticalReaderGap),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+
+        if (settings.ignoreSafeAreas) {
+          return content;
+        }
+
+        return SafeArea(child: content);
+      },
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
@@ -178,6 +179,14 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               .setSpreadCoverPage(newValue),
                         ),
                       ],
+                      BooleanOption(
+                        title: 'Ignore Safe Areas',
+                        icon: KoverIcons.safeArea,
+                        value: settings.ignoreSafeAreas,
+                        onChanged: (newValue) async => await ref
+                            .read(provider.notifier)
+                            .setIgnoreSafeAreas(newValue),
+                      ),
                     ],
                   ),
                 ),

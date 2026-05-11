@@ -109,7 +109,7 @@ class PdfReader extends HookConsumerWidget {
           child: Async(
             asyncValue: pdf,
             data: (data) {
-              return PdfViewer.data(
+              final content = PdfViewer.data(
                 data.data,
                 controller: controller,
                 sourceName: chapterId.toString(),
@@ -153,6 +153,12 @@ class PdfReader extends HookConsumerWidget {
                   },
                 ),
               );
+
+              if (settings.ignoreSafeAreas) {
+                return content;
+              }
+
+              return SafeArea(child: content);
             },
           ),
         );

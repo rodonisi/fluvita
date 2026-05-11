@@ -4,6 +4,7 @@ import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -87,6 +88,16 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                           await ref
                               .read(provider.notifier)
                               .setReaderMode(newValue);
+                        },
+                      ),
+                      BooleanOption(
+                        title: 'Ignore Safe Areas',
+                        icon: KoverIcons.safeArea,
+                        value: settings.ignoreSafeAreas,
+                        onChanged: (newValue) async {
+                          await ref
+                              .read(provider.notifier)
+                              .setIgnoreSafeAreas(newValue);
                         },
                       ),
                     ],

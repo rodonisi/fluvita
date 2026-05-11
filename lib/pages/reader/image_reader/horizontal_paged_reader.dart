@@ -20,8 +20,10 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
     final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
+
+    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
+    final reader = ref.watch(provider);
 
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
@@ -45,41 +47,44 @@ class HorizontalPagedReader extends HookConsumerWidget {
             : pageController.jumpToPage(next);
       }
     });
-    return Async(
-      asyncValue: ref.watch(provider),
-      data: (state) {
-        return Async(
-          asyncValue: settings,
-          data: (settings) => PageView.builder(
-            controller: pageController,
-            allowImplicitScrolling: true,
-            scrollDirection: .horizontal,
-            reverse: settings.readDirection == .rightToLeft,
-            itemCount: state.totalPages,
-            pageSnapping: true,
-            onPageChanged: (index) {
-              ref.read(navProvider.notifier).jumpToPage(index);
-            },
-            itemBuilder: (context, index) {
-              return Async(
-                asyncValue: ref.watch(
-                  imagePageProvider(
-                    chapterId: chapterId,
-                    page: index,
-                  ),
+
+    return Async2(
+      asyncValue1: reader,
+      asyncValue2: settings,
+      data: (reader, settings) {
+        final content = PageView.builder(
+          controller: pageController,
+          allowImplicitScrolling: true,
+          scrollDirection: .horizontal,
+          reverse: settings.readDirection == .rightToLeft,
+          itemCount: reader.totalPages,
+          pageSnapping: true,
+          onPageChanged: (index) {
+            ref.read(navProvider.notifier).jumpToPage(index);
+          },
+          itemBuilder: (context, index) {
+            return Async(
+              asyncValue: ref.watch(
+                imagePageProvider(
+                  chapterId: chapterId,
+                  page: index,
                 ),
-                data: (data) {
-                  return Image.memory(
-                    data.data,
-                    fit: settings.scaleType == .fitWidth
-                        ? .fitWidth
-                        : .fitHeight,
-                  );
-                },
-              );
-            },
-          ),
+              ),
+              data: (data) {
+                return Image.memory(
+                  data.data,
+                  fit: settings.scaleType == .fitWidth ? .fitWidth : .fitHeight,
+                );
+              },
+            );
+          },
         );
+
+        if (settings.ignoreSafeAreas) {
+          return content;
+        }
+
+        return SafeArea(child: content);
       },
     );
   }

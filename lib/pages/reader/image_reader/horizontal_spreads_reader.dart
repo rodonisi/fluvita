@@ -26,32 +26,54 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    ref.watch(spreadsProvider(seriesId: seriesId, chapterId: chapterId));
-    ref.watch(navProvider);
+    return ReaderOverlay(
+      chapterId: chapterId,
+      seriesId: seriesId,
+      onNextPage: () {
+        ref.read(navProvider.notifier).nextPage();
+      },
+      onPreviousPage: () {
+        ref.read(navProvider.notifier).previousPage();
+      },
+      onJumpToPage: (page) {
+        ref.read(navProvider.notifier).jumpToPage(page);
+      },
+      isLastPage: (page) =>
+          ref
+              .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
+              .value
+              ?.spreads
+              .last
+              .contains(page) ??
+          false,
+      child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
+    );
+  }
+}
 
-    return Async(
-      asyncValue: ref.watch(navProvider),
-      data: (navState) => ReaderOverlay(
-        chapterId: chapterId,
+class _SpreadsContent extends ConsumerWidget {
+  const _SpreadsContent({
+    required this.seriesId,
+    required this.chapterId,
+  });
+
+  final int seriesId;
+  final int chapterId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nav = ref.watch(
+      imageSpreadsReaderNavigationProvider(
         seriesId: seriesId,
-        onNextPage: () {
-          ref.read(navProvider.notifier).nextPage();
-        },
-        onPreviousPage: () {
-          ref.read(navProvider.notifier).previousPage();
-        },
-        onJumpToPage: (page) {
-          ref.read(navProvider.notifier).jumpToPage(page);
-        },
-        isLastPage: (page) =>
-            ref
-                .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
-                .value
-                ?.spreads
-                .last
-                .contains(page) ??
-            false,
-        child: Stack(
+        chapterId: chapterId,
+      ),
+    );
+    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
+    return Async2(
+      asyncValue1: nav,
+      asyncValue2: settings,
+      data: (navState, settings) {
+        final content = Stack(
           children: [
             Offstage(
               offstage: !navState.ready,
@@ -74,8 +96,16 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
               ),
             ],
           ],
-        ),
-      ),
+        );
+
+        if (settings.ignoreSafeAreas) {
+          return content;
+        }
+
+        return SafeArea(
+          child: content,
+        );
+      },
     );
   }
 }

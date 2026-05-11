@@ -19,6 +19,7 @@ sealed class PdfReaderSettingsState with _$PdfReaderSettingsState {
   const factory PdfReaderSettingsState({
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(PdfReaderMode.vertical) PdfReaderMode readerMode,
+    @Default(true) bool ignoreSafeAreas,
   }) = _PdfReaderSettingsState;
 
   factory PdfReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -69,6 +70,14 @@ class PdfReaderSettings extends _$PdfReaderSettings {
 
     state = AsyncData(
       current.copyWith(readerMode: newMode),
+    );
+  }
+
+  Future<void> setIgnoreSafeAreas(bool ignore) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(ignoreSafeAreas: ignore),
     );
   }
 
