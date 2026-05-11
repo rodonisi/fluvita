@@ -3,10 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>keychain-access-groups</key>
-  <array/>
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
-	<key>com.apple.security.network.client</key>
-	<true/>
+	<array/>
 </dict>
 </plist>
