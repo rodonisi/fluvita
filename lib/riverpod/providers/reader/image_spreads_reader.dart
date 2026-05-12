@@ -227,7 +227,7 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
       return;
     }
 
-    final spreadPage = spreadsState.spreads[spread].first;
+    final spreadPage = spreadsState.spreads[spread].last;
     ref.read(_readerNavigationProvider.notifier).jumpToPage(spreadPage);
     await ref
         .read(_readerProvider.notifier)
