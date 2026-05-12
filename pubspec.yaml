@@ -55,11 +55,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.7
   path: ^1.9.1
   pdfrx: ^2.3.2
-  # Pinned to 10.0.0 because 10.1.0 pulls in flutter_secure_storage_darwin 0.3.0,
-  # which uses CryptoKit APIs (SymmetricKey, AES.GCM) that require iOS 13.0+ but
-  # incorrectly guards them with an iOS 11.3 availability check. This causes Swift
-  # compiler errors when archiving for iOS. See upstream issue #1119.
-  flutter_secure_storage: 10.0.0
+  flutter_secure_storage: ^10.2.0
 
 dev_dependencies:
   flutter_test:
