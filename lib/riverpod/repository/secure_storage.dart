@@ -36,7 +36,17 @@ final class SecureStorageRepository extends Storage<String, String> {
   }
 
   @override
-  void deleteOutOfDate() {}
+  Future<void> deleteOutOfDate() async {
+    final entries = await storage.readAll();
+    final now = DateTime.timestamp();
+    for (final entry in entries.entries) {
+      final storageEntry = SecureStorageEntry.fromJson(jsonDecode(entry.value));
+      if (storageEntry.expireAt != null &&
+          storageEntry.expireAt!.isBefore(now)) {
+        await storage.delete(key: entry.key);
+      }
+    }
+  }
 
   @override
   FutureOr<PersistedData<String>?> read(String key) async {
