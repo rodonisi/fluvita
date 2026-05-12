@@ -116,9 +116,14 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
-        await (delete(
+        // Clear legacy credentials entry from database if present.
+        final rows = await (delete(
           riverpodStorage,
         )..where((tbl) => tbl.key.equals(Credentials.persistKey))).go();
+
+        if (rows > 0) {
+          await vacuum();
+        }
       },
     );
   }

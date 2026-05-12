@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/providers/client.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
+import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
@@ -28,8 +33,14 @@ void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     final db = AppDatabase();
     try {
-      final settings = await db.storageDao.getSettings();
-      if (settings == null) return false;
+      final storage = const FlutterSecureStorage();
+
+      final storageEntry = await storage.read(key: Credentials.persistKey);
+
+      if (storageEntry == null) return false;
+
+      final decoded = SecureStorageEntry.fromJson(jsonDecode(storageEntry));
+      final settings = CredentialsState.fromJson(jsonDecode(decoded.value));
 
       final apiKey = settings.apiKey!;
       final chopper = getChopperClient(Uri.parse(settings.url!), apiKey);
