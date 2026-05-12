@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_header.dart';
-import 'package:kover/pages/reader/toc_drawer.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
@@ -105,12 +104,7 @@ class ReaderOverlay extends HookConsumerWidget {
 
           return Scaffold(
             endDrawerEnableOpenDragGesture: true,
-            endDrawer:
-                endDrawer ??
-                TocDrawer(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                ),
+            endDrawer: endDrawer,
             body: FocusableActionDetector(
               autofocus: true,
               shortcuts: const {
