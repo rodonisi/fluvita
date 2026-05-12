@@ -108,12 +108,9 @@ class _VerticalContinuousReaderState
       chapterId: widget.chapterId,
     );
 
-    final currentPage = ref.read(navProvider).currentPage;
-    if (firstVisibleIndex != currentPage) {
-      ref
-          .read(navProvider.notifier)
-          .jumpToPage(firstVisibleIndex, fromObserver: true);
-    }
+    ref
+        .read(navProvider.notifier)
+        .jumpToPage(firstVisibleIndex, fromObserver: true);
   }
 
   Widget _buildItem(BuildContext context, int index) {
