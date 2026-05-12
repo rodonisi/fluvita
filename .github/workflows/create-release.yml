@@ -111,8 +111,21 @@ jobs:
         run: |
           BODY=$(gh release view ${{ needs.version.outputs.version }} --json body --jq '.body')
 
+          CLEAN_BODY=$(echo "$BODY" | perl -0777 -pe '
+            s/.*Full Changelog.*//gi;            # Remove "Full Changelog" line
+            s/\s+by\s+(@[\w-]+|in).*//gm;        # Remove "by @user" or "by in"
+            s/\s*\(#\d+\)//g;                    # Remove PR numbers
+            s/https?:\/\/\S+//g;                 # Remove URLs
+            s/^\s*[-*+]\s+/• /gm;                # Replace bullets
+            s/<[^>]*>//g;                        # Remove HTML
+            s/\[([^\]]+)\]\([^\)]+\)/$1/g;       # Strip Markdown links
+            s/[*_]{1,3}//g;                      # Strip bold/italic
+            s/^#+\s*//gm;                        # Remove header hashes
+            s/^\s+//s'                           # STRIP ALL LEADING WHITESPACE
+          )
+
           echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "$CLEAN_BODY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   promote-ios-public:
