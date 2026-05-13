@@ -115,6 +115,9 @@ class PdfReader extends HookConsumerWidget {
                 sourceName: chapterId.toString(),
                 initialPageNumber: readerState.initialPage + 1,
                 params: PdfViewerParams(
+                  textSelectionParams: const PdfTextSelectionParams(
+                    enabled: false,
+                  ),
                   onViewerReady: (document, controller) async {
                     toc.value = await document.loadOutline();
                     defaultZoom.value = controller.currentZoom;
