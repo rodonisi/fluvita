@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -23,6 +24,7 @@ class NavigatorContainer extends ConsumerWidget {
           bottom: LayoutConstants.mediumPadding,
         ),
         child: SafeArea(
+          bottom: !SafePlatform.isIOS, // iOS safe area is way too aggressive
           child: MediaQuery.removePadding(
             context: context,
             removeBottom: true,
