@@ -25,28 +25,34 @@ class ChoiceOption<T> extends StatelessWidget {
       title: title,
       description: description,
       icon: icon,
-      child: Row(
-        children: [
-          Expanded(
-            child: SegmentedButton(
-              segments: options
-                  .map(
-                    (option) => ButtonSegment<T>(
-                      value: option.value,
-                      label: Text(option.label),
-                      icon: option.icon != null ? Icon(option.icon) : null,
-                    ),
-                  )
-                  .toList(),
-              selected: {value},
-              onSelectionChanged: (Set<T> newSelection) {
-                if (newSelection.first != value) {
-                  onChanged?.call(newSelection.first);
-                }
-              },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: .horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: SegmentedButton(
+                segments: options
+                    .map(
+                      (option) => ButtonSegment<T>(
+                        value: option.value,
+                        label: Text(
+                          option.label,
+                        ),
+                        icon: option.icon != null ? Icon(option.icon) : null,
+                      ),
+                    )
+                    .toList(),
+                selected: {value},
+                onSelectionChanged: (Set<T> newSelection) {
+                  if (newSelection.first != value) {
+                    onChanged?.call(newSelection.first);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
