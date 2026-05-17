@@ -37,15 +37,11 @@ class EpubTocDrawer extends HookConsumerWidget {
         .watch(bookChaptersProvider(chapterId: chapterId))
         .whenData((chapters) {
           return chapters.map<Widget>((chapter) {
-            return Card.filled(
-              clipBehavior: .hardEdge,
-              margin: EdgeInsets.zero,
-              child: TocEntry(
-                seriesId: seriesId,
-                chapterId: chapterId,
-                chapter: chapter,
-                selectedKey: selectedKey.value,
-              ),
+            return TocEntry(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              chapter: chapter,
+              selectedKey: selectedKey.value,
             );
           }).toList();
         });
@@ -56,15 +52,22 @@ class EpubTocDrawer extends HookConsumerWidget {
         data: (entries) {
           return SingleChildScrollView(
             child: Padding(
-              padding: LayoutConstants.mediumEdgeInsets,
+              padding: const EdgeInsets.symmetric(
+                vertical: LayoutConstants.mediumPadding,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: LayoutConstants.smallPadding,
                 crossAxisAlignment: .start,
                 children: [
-                  Text(
-                    'Table of Contents',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: LayoutConstants.mediumPadding,
+                    ),
+                    child: Text(
+                      'Table of Contents',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
                   ...entries,
                 ],
