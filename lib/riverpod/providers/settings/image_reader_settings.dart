@@ -12,6 +12,7 @@ part 'image_reader_settings.g.dart';
 enum ImageScaleType {
   fitWidth,
   fitHeight,
+  contain,
 }
 
 enum ReaderMode {
@@ -97,12 +98,12 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     return state.value ?? defaults;
   }
 
-  Future<void> toggleScaleType() async {
+  Future<void> setScaleType(ImageScaleType type) async {
     final current = await future;
 
     state = AsyncData(
       current.copyWith(
-        scaleType: current.scaleType == .fitWidth ? .fitHeight : .fitWidth,
+        scaleType: type,
       ),
     );
   }

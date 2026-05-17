@@ -9,6 +9,10 @@ sealed class KoverIcons {
   static const IconData readingDirectionLTR = LucideIcons.chevronsRight;
   static const IconData readingDirectionRTL = LucideIcons.chevronsLeft;
 
+  static const IconData fitWidth = LucideIcons.chevronsLeftRight;
+  static const IconData fitHeight = LucideIcons.chevronsUpDown;
+  static const IconData fitContain = LucideIcons.fullscreen;
+
   static const IconData safeArea = LucideIcons.expand;
 
   static const IconData save = LucideIcons.save;

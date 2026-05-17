@@ -103,19 +103,26 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       if (settings.readerMode == .horizontal) ...[
                         ChoiceOption<ImageScaleType>(
                           title: 'Fit Direction',
-                          icon: settings.scaleType == .fitWidth
-                              ? LucideIcons.chevronsLeftRight
-                              : LucideIcons.chevronsUpDown,
+                          icon: switch (settings.scaleType) {
+                            .fitWidth => KoverIcons.fitWidth,
+                            .fitHeight => KoverIcons.fitHeight,
+                            .contain => KoverIcons.fitContain,
+                          },
                           options: const [
                             ChoiceOptionEntry(
                               value: .fitWidth,
-                              label: 'Fit Width',
-                              icon: LucideIcons.chevronsLeftRight,
+                              label: 'Width',
+                              icon: KoverIcons.fitWidth,
                             ),
                             ChoiceOptionEntry(
                               value: .fitHeight,
-                              label: 'Fit Height',
-                              icon: LucideIcons.chevronsUpDown,
+                              label: 'Height',
+                              icon: KoverIcons.fitHeight,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .contain,
+                              label: 'Contain',
+                              icon: KoverIcons.fitContain,
                             ),
                           ],
                           value: settings.scaleType,
@@ -123,7 +130,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             if (newValue != settings.scaleType) {
                               await ref
                                   .read(provider.notifier)
-                                  .toggleScaleType();
+                                  .setScaleType(newValue);
                             }
                           },
                         ),
