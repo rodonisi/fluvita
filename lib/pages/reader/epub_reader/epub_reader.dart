@@ -5,7 +5,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
-import 'package:kover/pages/reader/toc_drawer.dart';
+import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
@@ -49,7 +49,7 @@ class EpubReader extends HookConsumerWidget {
         onJumpToPage: (page) {
           ref.read(nav.notifier).jumpToPage(page);
         },
-        endDrawer: TocDrawer(
+        endDrawer: EpubTocDrawer(
           seriesId: seriesId,
           chapterId: chapterId,
         ),

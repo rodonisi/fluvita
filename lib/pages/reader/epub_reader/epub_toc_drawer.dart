@@ -6,10 +6,10 @@ import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
-class TocDrawer extends ConsumerWidget {
+class EpubTocDrawer extends ConsumerWidget {
   final int chapterId;
   final int seriesId;
-  const TocDrawer({
+  const EpubTocDrawer({
     super.key,
     required this.chapterId,
     required this.seriesId,
