@@ -54,7 +54,6 @@ class ImageReader extends ConsumerWidget {
           onJumpToPage: (page) {
             ref.read(navProvider.notifier).jumpToPage(page);
           },
-
           child: switch (settings.readerMode) {
             .horizontal => HorizontalPagedReader(
               seriesId: seriesId,
