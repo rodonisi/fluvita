@@ -67,7 +67,7 @@ class PdfTocDrawer extends HookConsumerWidget {
               ...list.indexed.map(
                 (entry) {
                   final (index, item) = entry;
-                  final selected = index == currentDestIndex;
+                  final selected = index == currentDestIndex + 1;
                   return ListTile(
                     key: index == currentDestIndex ? selectedKey.value : null,
                     onTap: () => controller.goToDest(item.node.dest),
