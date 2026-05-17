@@ -44,15 +44,22 @@ class PdfTocDrawer extends ConsumerWidget {
     return Drawer(
       child: SingleChildScrollView(
         child: Padding(
-          padding: LayoutConstants.mediumEdgeInsets,
+          padding: const EdgeInsets.symmetric(
+            vertical: LayoutConstants.mediumPadding,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: LayoutConstants.smallPadding,
             crossAxisAlignment: .start,
             children: [
-              Text(
-                'Table of Contents',
-                style: Theme.of(context).textTheme.headlineMedium,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                child: Text(
+                  'Table of Contents',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
               ...list.indexed.map(
                 (entry) {
@@ -61,11 +68,10 @@ class PdfTocDrawer extends ConsumerWidget {
                   return ListTile(
                     key: index == currentDestIndex ? key : null,
                     onTap: () => controller.goToDest(item.node.dest),
-                    contentPadding: 
-                         EdgeInsetsGeometry.only(
-                            left: item.level * LayoutConstants.largePadding,
-                            right: LayoutConstants.mediumPadding,
-                          ),
+                    contentPadding: EdgeInsetsGeometry.only(
+                      left: item.level + 1 * LayoutConstants.mediumPadding,
+                      right: LayoutConstants.mediumPadding,
+                    ),
                     selected: selected,
                     title: Text(
                       item.node.title,
