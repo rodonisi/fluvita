@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:pdfrx/pdfrx.dart';
 
-class PdfTocDrawer extends ConsumerWidget {
+class PdfTocDrawer extends HookConsumerWidget {
   final PdfViewerController controller;
   final List<PdfOutlineNode> toc;
   final int seriesId;
@@ -19,6 +20,9 @@ class PdfTocDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final selectedKey = useState(GlobalKey());
+    final hasScrolled = useState(false);
+
     final list = _getOutlineList(toc, 0).toList();
     final nav = ref.watch(
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
@@ -28,16 +32,15 @@ class PdfTocDrawer extends ConsumerWidget {
       (item) => (item.node.dest?.pageNumber ?? 0) <= nav.currentPage,
     );
 
-    final key = GlobalKey();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (key.currentContext != null) {
-        Scrollable.ensureVisible(
-          key.currentContext!,
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (selectedKey.value.currentContext != null && !hasScrolled.value) {
+        await Scrollable.ensureVisible(
+          selectedKey.value.currentContext!,
           alignment: 0.2,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
+        hasScrolled.value = true;
       }
     });
 
@@ -66,7 +69,7 @@ class PdfTocDrawer extends ConsumerWidget {
                   final (index, item) = entry;
                   final selected = index == currentDestIndex;
                   return ListTile(
-                    key: index == currentDestIndex ? key : null,
+                    key: index == currentDestIndex ? selectedKey.value : null,
                     onTap: () => controller.goToDest(item.node.dest),
                     contentPadding: EdgeInsetsGeometry.only(
                       left: item.level + 1 * LayoutConstants.mediumPadding,
