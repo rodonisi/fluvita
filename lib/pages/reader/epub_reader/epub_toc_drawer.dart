@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -6,10 +7,10 @@ import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
-class TocDrawer extends ConsumerWidget {
+class EpubTocDrawer extends HookConsumerWidget {
   final int chapterId;
   final int seriesId;
-  const TocDrawer({
+  const EpubTocDrawer({
     super.key,
     required this.chapterId,
     required this.seriesId,
@@ -17,18 +18,30 @@ class TocDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final selectedKey = useState(GlobalKey());
+    final hasScrolled = useState(false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (selectedKey.value.currentContext != null && !hasScrolled.value) {
+        await Scrollable.ensureVisible(
+          selectedKey.value.currentContext!,
+          alignment: 0.2,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        hasScrolled.value = true;
+      }
+    });
+
     final entries = ref
         .watch(bookChaptersProvider(chapterId: chapterId))
         .whenData((chapters) {
           return chapters.map<Widget>((chapter) {
-            return Card.filled(
-              clipBehavior: .hardEdge,
-              margin: EdgeInsets.zero,
-              child: TocEntry(
-                seriesId: seriesId,
-                chapterId: chapterId,
-                chapter: chapter,
-              ),
+            return TocEntry(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              chapter: chapter,
+              selectedKey: selectedKey.value,
             );
           }).toList();
         });
@@ -39,15 +52,22 @@ class TocDrawer extends ConsumerWidget {
         data: (entries) {
           return SingleChildScrollView(
             child: Padding(
-              padding: LayoutConstants.mediumEdgeInsets,
+              padding: const EdgeInsets.symmetric(
+                vertical: LayoutConstants.mediumPadding,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: LayoutConstants.smallPadding,
                 crossAxisAlignment: .start,
                 children: [
-                  Text(
-                    'Table of Contents',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: LayoutConstants.mediumPadding,
+                    ),
+                    child: Text(
+                      'Table of Contents',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
                   ...entries,
                 ],
@@ -65,11 +85,13 @@ class TocEntry extends ConsumerWidget {
   final int seriesId;
   final BookChapterModel chapter;
   final int depth;
+  final Key selectedKey;
   const TocEntry({
     super.key,
     required this.chapterId,
     required this.seriesId,
     required this.chapter,
+    required this.selectedKey,
     this.depth = 0,
   });
 
@@ -78,28 +100,18 @@ class TocEntry extends ConsumerWidget {
     final nav = ref.watch(
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
     );
-    final key = GlobalKey();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (nav.currentPage == chapter.page && key.currentContext != null) {
-        Scrollable.ensureVisible(
-          key.currentContext!,
-          alignment: 0.2,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
+    final isSelected = nav.currentPage == chapter.page;
 
     return Column(
       mainAxisSize: .min,
       children: [
         ListTile(
-          key: key,
-          selected: nav.currentPage == chapter.page,
+          key: isSelected ? selectedKey : null,
+          selected: isSelected,
           contentPadding: depth > 0
               ? EdgeInsetsGeometry.only(
-                  left: depth * LayoutConstants.largePadding,
+                  left: depth * LayoutConstants.mediumPadding,
                   right: LayoutConstants.mediumPadding,
                 )
               : null,
@@ -121,6 +133,7 @@ class TocEntry extends ConsumerWidget {
             seriesId: seriesId,
             chapter: child,
             depth: depth + 1,
+            selectedKey: selectedKey,
           ),
         ),
       ],
