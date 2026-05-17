@@ -47,6 +47,7 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(0.0) double spreadReaderGap,
     @Default(true) bool spreadCoverPage,
     @Default(true) bool ignoreSafeAreas,
+    @Default(true) bool showProgressBar,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -178,6 +179,12 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     final current = await future;
 
     state = AsyncData(current.copyWith(spreadCoverPage: value));
+  }
+
+  Future<void> setShowProgressBar(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(showProgressBar: value));
   }
 
   Future<void> reset() async {

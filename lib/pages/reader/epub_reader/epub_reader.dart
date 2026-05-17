@@ -28,77 +28,90 @@ class EpubReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    return ReaderOverlay(
-      seriesId: seriesId,
-      chapterId: chapterId,
-      onNextPage: () {
-        ref.read(nav.notifier).nextPage();
-      },
-      onPreviousPage: () {
-        ref.read(nav.notifier).previousPage();
-      },
-      onJumpToPage: (page) {
-        ref.read(nav.notifier).jumpToPage(page);
-      },
-      endDrawer: TocDrawer(
+    final showProgressBar = ref.watch(
+      epubReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select((s) => s.whenData((data) => data.showProgressBar)),
+    );
+
+    return Async(
+      asyncValue: showProgressBar,
+      data: (showProgressBar) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
-      ),
-      child: Async(
-        asyncValue: ref.watch(nav),
-        data: (navState) => HookConsumer(
-          builder: (context, ref, child) {
-            final controller = usePageController(
-              initialPage: navState.page,
-            );
+        showProgressBar: showProgressBar,
+        onNextPage: () {
+          ref.read(nav.notifier).nextPage();
+        },
+        onPreviousPage: () {
+          ref.read(nav.notifier).previousPage();
+        },
+        onJumpToPage: (page) {
+          ref.read(nav.notifier).jumpToPage(page);
+        },
+        endDrawer: TocDrawer(
+          seriesId: seriesId,
+          chapterId: chapterId,
+        ),
+        child: Async(
+          asyncValue: ref.watch(nav),
+          data: (navState) => HookConsumer(
+            builder: (context, ref, child) {
+              final controller = usePageController(
+                initialPage: navState.page,
+              );
 
-            ref.listen(nav.selectAsync((s) => s.page), (previous, next) async {
-              final previousPage = await previous;
-              final nextPage = await next;
+              ref.listen(nav.selectAsync((s) => s.page), (
+                previous,
+                next,
+              ) async {
+                final previousPage = await previous;
+                final nextPage = await next;
 
-              if (controller.hasClients &&
-                  controller.page?.round() != nextPage) {
-                final isSequential =
-                    previousPage != null &&
-                    (nextPage - previousPage).abs() == 1;
+                if (controller.hasClients &&
+                    controller.page?.round() != nextPage) {
+                  final isSequential =
+                      previousPage != null &&
+                      (nextPage - previousPage).abs() == 1;
 
-                isSequential
-                    ? controller.animateToPage(
-                        nextPage,
-                        duration: 200.ms,
-                        curve: Curves.easeInOut,
-                      )
-                    : controller.jumpToPage(nextPage);
-              }
-            });
+                  isSequential
+                      ? controller.animateToPage(
+                          nextPage,
+                          duration: 200.ms,
+                          curve: Curves.easeInOut,
+                        )
+                      : controller.jumpToPage(nextPage);
+                }
+              });
 
-            return Stack(
-              children: [
-                Positioned.fill(
-                  child: Offstage(
-                    offstage: !navState.ready,
-                    child: PageView.builder(
-                      controller: controller,
-                      itemCount: navState.totalPages,
-                      allowImplicitScrolling: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return _Page(
-                          seriesId: seriesId,
-                          chapterId: chapterId,
-                          page: index,
-                        );
-                      },
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: Offstage(
+                      offstage: !navState.ready,
+                      child: PageView.builder(
+                        controller: controller,
+                        itemCount: navState.totalPages,
+                        allowImplicitScrolling: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return _Page(
+                            seriesId: seriesId,
+                            chapterId: chapterId,
+                            page: index,
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                if (!navState.ready)
-                  const Positioned.fill(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-              ],
-            );
-          },
+                  if (!navState.ready)
+                    const Positioned.fill(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

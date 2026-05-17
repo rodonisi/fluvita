@@ -42,6 +42,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(0.0) double letterSpacing,
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(true) bool highlightResumePoint,
+    @Default(true) bool showProgressBar,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -161,6 +162,14 @@ class EpubReaderSettings extends _$EpubReaderSettings {
 
     state = AsyncData(
       current.copyWith(highlightResumePoint: value),
+    );
+  }
+
+  Future<void> setShowProgressBar(bool value) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(showProgressBar: value),
     );
   }
 

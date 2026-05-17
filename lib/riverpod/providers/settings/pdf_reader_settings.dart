@@ -20,6 +20,7 @@ sealed class PdfReaderSettingsState with _$PdfReaderSettingsState {
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(PdfReaderMode.vertical) PdfReaderMode readerMode,
     @Default(true) bool ignoreSafeAreas,
+    @Default(true) bool showProgressBar,
   }) = _PdfReaderSettingsState;
 
   factory PdfReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -78,6 +79,14 @@ class PdfReaderSettings extends _$PdfReaderSettings {
 
     state = AsyncData(
       current.copyWith(ignoreSafeAreas: ignore),
+    );
+  }
+
+  Future<void> setShowProgressBar(bool show) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(showProgressBar: show),
     );
   }
 

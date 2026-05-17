@@ -40,6 +40,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final Widget child;
   final Widget? endDrawer;
   final Widget? extraControls;
+  final bool showProgressBar;
 
   const ReaderOverlay({
     super.key,
@@ -49,6 +50,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.isLastPage,
     this.endDrawer,
     this.extraControls,
+    this.showProgressBar = true,
     required this.chapterId,
     required this.seriesId,
     required this.child,
@@ -131,7 +133,7 @@ class ReaderOverlay extends HookConsumerWidget {
                       mainAxisSize: .min,
                       children: [
                         Expanded(child: child),
-                        if (state.series.format == .epub)
+                        if (showProgressBar && state.series.format == .epub)
                           SubpageProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
@@ -140,7 +142,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                 target: uiVisible.value ? 0.0 : 1.0,
                               )
                               .fadeIn(duration: 200.ms)
-                        else
+                        else if (showProgressBar)
                           ReaderProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,

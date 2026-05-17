@@ -25,28 +25,37 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       seriesId: seriesId,
       chapterId: chapterId,
     );
+    final showProgressBar = ref.watch(
+      imageReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select((s) => s.whenData((settings) => settings.showProgressBar)),
+    );
 
-    return ReaderOverlay(
-      chapterId: chapterId,
-      seriesId: seriesId,
-      onNextPage: () {
-        ref.read(navProvider.notifier).nextPage();
-      },
-      onPreviousPage: () {
-        ref.read(navProvider.notifier).previousPage();
-      },
-      onJumpToPage: (page) {
-        ref.read(navProvider.notifier).jumpToPage(page);
-      },
-      isLastPage: (page) =>
-          ref
-              .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
-              .value
-              ?.spreads
-              .last
-              .contains(page) ??
-          false,
-      child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
+    return Async(
+      asyncValue: showProgressBar,
+      data: (showProgressBar) => ReaderOverlay(
+        chapterId: chapterId,
+        seriesId: seriesId,
+        showProgressBar: showProgressBar,
+        onNextPage: () {
+          ref.read(navProvider.notifier).nextPage();
+        },
+        onPreviousPage: () {
+          ref.read(navProvider.notifier).previousPage();
+        },
+        onJumpToPage: (page) {
+          ref.read(navProvider.notifier).jumpToPage(page);
+        },
+        isLastPage: (page) =>
+            ref
+                .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
+                .value
+                ?.spreads
+                .last
+                .contains(page) ??
+            false,
+        child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
+      ),
     );
   }
 }

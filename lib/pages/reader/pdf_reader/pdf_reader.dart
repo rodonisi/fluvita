@@ -78,6 +78,7 @@ class PdfReader extends HookConsumerWidget {
         return ReaderOverlay(
           chapterId: chapterId,
           seriesId: seriesId,
+          showProgressBar: settings.showProgressBar,
           onNextPage: () {
             if (settings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).nextPage();

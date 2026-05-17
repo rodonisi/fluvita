@@ -194,6 +194,14 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(provider.notifier)
                             .setIgnoreSafeAreas(newValue),
                       ),
+                      BooleanOption(
+                        title: 'Show Progress Bar',
+                        icon: KoverIcons.progressBar,
+                        value: settings.showProgressBar,
+                        onChanged: (newValue) async => await ref
+                            .read(provider.notifier)
+                            .setShowProgressBar(newValue),
+                      ),
                     ],
                   ),
                 ),
