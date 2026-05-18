@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -258,7 +259,7 @@ class _VerticalContinuousReaderState
           onObserve: _handleObserve,
           child: CustomScrollView(
             controller: _scrollController,
-            cacheExtent: MediaQuery.of(context).size.height * 5,
+            scrollCacheExtent: const ScrollCacheExtent.viewport(5),
             scrollBehavior: ScrollConfiguration.of(context).copyWith(
               scrollbars: false,
             ),
