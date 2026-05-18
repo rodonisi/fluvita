@@ -190,27 +190,63 @@ class ReaderRepository {
   }
 
   /// Mark [seriesId] as read. This will set the progress for all chapters
-  /// belonging to this series
+  /// belonging to this series. Also tries to push the change through the
+  /// respective API endpoint.
   Future<void> markSeriesRead(int seriesId) async {
     await _db.readerDao.markSeriesRead(seriesId, isRead: true);
+
+    try {
+      await _readerClient.markSeriesRead(seriesId);
+    } catch (e) {
+      log.e('Failed to mark series $seriesId as read', error: e);
+    }
   }
 
   /// Mark [seriesId] as unread. This will set the progress for all chapters
-  /// belonging to this series
+  /// belonging to this series. Also tries to push the change through the
+  /// respective API endpoint.
   Future<void> markSeriesUnread(int seriesId) async {
     await _db.readerDao.markSeriesRead(seriesId, isRead: false);
+
+    try {
+      await _readerClient.markSeriesUnread(seriesId);
+    } catch (e) {
+      log.e('Failed to mark series $seriesId as unread', error: e);
+    }
   }
 
   /// Mark [volumeId] as read. This will set the progress for all chapters
-  /// belonging to this volume
+  /// belonging to this volume. Also tries push the change through the
+  /// respective API endpoint
   Future<void> markVolumeRead(int volumeId) async {
     await _db.readerDao.markVolumeRead(volumeId, isRead: true);
+
+    try {
+      final volume = await _db.volumesDao.volume(volumeId).getSingle();
+      await _readerClient.markVolumeRead(
+        seriesId: volume.volume.seriesId,
+        volumeId: volumeId,
+      );
+    } catch (e) {
+      log.e('Failed to mark volume $volumeId as read', error: e);
+    }
   }
 
   /// Mark [volumeId] as unread. This will set the progress for all chapters
-  /// belonging to this volume
+  /// belonging to this volume. Also tries to push the change through the
+  /// respective API endpoint.
   Future<void> markVolumeUnread(int volumeId) async {
     await _db.readerDao.markVolumeRead(volumeId, isRead: false);
+
+    try {
+      final volume = await _db.volumesDao.volume(volumeId).getSingle();
+      await _readerClient.markVolumeUnread(
+        seriesId: volume.volume.seriesId,
+        volumeId: volumeId,
+      );
+    } catch (e) {
+      log.e('Failed to mark volume $volumeId as unread', error: e);
+    }
   }
 
   /// Mark [chapterId] as read.
