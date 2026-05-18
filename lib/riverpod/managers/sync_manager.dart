@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
-import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
