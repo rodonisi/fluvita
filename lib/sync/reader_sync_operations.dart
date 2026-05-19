@@ -34,4 +34,46 @@ class ReaderSyncOperations {
   Future<void> sendProgress(ReadingProgressData progress) async {
     await _client.apiReaderProgressPost(body: progress.toProgressDto());
   }
+
+  /// Mark entire series as read, without generating a reading session
+  Future<void> markSeriesRead(int seriesId) async {
+    await _client.apiReaderMarkReadPost(
+      body: MarkReadDto(seriesId: seriesId, generateReadingSession: false),
+    );
+  }
+
+  /// Mark entire series as unread, without generating a reading session
+  Future<void> markSeriesUnread(int seriesId) async {
+    await _client.apiReaderMarkUnreadPost(
+      body: MarkReadDto(seriesId: seriesId, generateReadingSession: false),
+    );
+  }
+
+  /// Mark entire volume as read, without generating a reading session
+  Future<void> markVolumeRead({
+    required int seriesId,
+    required int volumeId,
+  }) async {
+    await _client.apiReaderMarkVolumeReadPost(
+      body: MarkVolumeReadDto(
+        seriesId: seriesId,
+        volumeId: volumeId,
+        generateReadingSession: false,
+      ),
+    );
+  }
+
+  /// Mark entire volume as unread, without generating a reading session
+  Future<void> markVolumeUnread({
+    required int seriesId,
+    required int volumeId,
+  }) async {
+    await _client.apiReaderMarkVolumeUnreadPost(
+      body: MarkVolumeReadDto(
+        seriesId: seriesId,
+        volumeId: volumeId,
+        generateReadingSession: false,
+      ),
+    );
+  }
 }

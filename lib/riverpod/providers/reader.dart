@@ -1,5 +1,6 @@
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
+import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/repository/download_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
@@ -128,12 +129,18 @@ class MarkSeriesRead extends _$MarkSeriesRead {
 
   Future<void> markRead() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markSeriesRead(seriesId);
+    await syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markSeriesUnread(seriesId);
+    await syncManager.syncProgress();
   }
 }
 
@@ -144,12 +151,18 @@ class MarkVolumeRead extends _$MarkVolumeRead {
 
   Future<void> markRead() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markVolumeRead(volumeId);
+    await syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markVolumeUnread(volumeId);
+    await syncManager.syncProgress();
   }
 }
 
@@ -160,11 +173,17 @@ class MarkChapterRead extends _$MarkChapterRead {
 
   Future<void> markRead() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markChapterRead(chapterId);
+    await syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
     final repo = ref.read(readerRepositoryProvider);
+    final syncManager = ref.read(syncManagerProvider.notifier);
+
     await repo.markChapterUnread(chapterId);
+    await syncManager.syncProgress();
   }
 }
